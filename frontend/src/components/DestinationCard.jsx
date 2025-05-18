@@ -116,12 +116,6 @@ const DestinationCard = ({ destination, delay }) => {
 
         <div className="flex space-x-3">
           <button
-            onClick={() => setShowItinerary(true)}
-            className="flex-1 px-4 py-2 bg-[#232323] hover:bg-[#2a2a2a] text-[#f8f8f8] rounded-lg transition-colors"
-          >
-            View Itinerary
-          </button>
-          <button
             onClick={() =>
               window.open(
                 `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}`,
