@@ -1,13 +1,24 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { SidebarProvider } from "./components/Sidebar";
 import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
+import Explore from "./pages/Explore";
+import Auth from "./pages/Auth";
+import Itinerary from "./components/Itinerary";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
+    <SidebarProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/itenirary" element={<Itinerary />} />
       </Routes>
-    </BrowserRouter>
+      </Router>
+    </SidebarProvider>
   );
 }
 

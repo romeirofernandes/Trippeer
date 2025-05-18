@@ -10,14 +10,27 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
     "@splinetool/react-spline": "^4.0.0",
     "@tailwindcss/vite": "^4.1.7",
     "framer-motion": "^12.12.1",
     "lucide-react": "^0.511.0",
+=======
+    "@fontsource/inter": "^5.2.5",
+    "@fontsource/space-grotesk": "^5.2.7",
+    "@tailwindcss/vite": "^4.1.7",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "firebase": "^11.7.3",
+    "framer-motion": "^12.12.1",
+    "leaflet": "^1.9.4",
+    "leaflet-rotatedmarker": "^0.2.0",
+>>>>>>> bbb086b2c7554c1807aa6cca40ff317522dc6b53
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.0",
     "react-type-animation": "^3.2.0",
     "tailwindcss": "^4.1.7",
