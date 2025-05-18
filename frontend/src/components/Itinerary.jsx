@@ -1526,19 +1526,24 @@ const Itinerary = () => {
         )}
 
         {/* Weather Section */}
-        {source && destination && (
+        {itinerary && source && destination && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <WeatherFind location={destination} />
+            <WeatherFind 
+              source={source} 
+              destination={destination}
+              showAfterGeneration={true}
+              weatherInfo={weatherInfo}
+            />
           </motion.div>
         )}
 
         {/* Currency Section */}
-        {source && destination && (
+        {itinerary && source && destination && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

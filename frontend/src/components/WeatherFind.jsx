@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb } from 'react-icons/fa';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 
-const WeatherFind = ({ source, destination }) => {
+const WeatherFind = ({ source, destination, showAfterGeneration = false, weatherInfo = null }) => {
   const [sourceWeather, setSourceWeather] = useState(null);
   const [destinationWeather, setDestinationWeather] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,38 @@ const WeatherFind = ({ source, destination }) => {
 
       } catch (err) {
         console.error('Error fetching weather data:', err);
-        setError('Failed to fetch weather information. Please check your location names.');
+        
+        // If we have weatherInfo from parent, use it to create mock data
+        if (weatherInfo) {
+          const mockSourceData = createMockWeatherData(source, weatherInfo);
+          const mockDestData = createMockWeatherData(destination, weatherInfo);
+          
+          setSourceWeather(mockSourceData);
+          setDestinationWeather(mockDestData);
+          
+          // Generate basic insights and suggestions
+          setSuggestions([
+            `Pack for ${weatherInfo.condition || 'variable'} weather in ${destination}.`,
+            `Temperatures around ${weatherInfo.temperature || '20'}°C at your destination.`,
+            "Check local weather forecasts regularly during your stay.",
+            "Pack layers to adjust to changing temperatures.",
+            "Bring sun protection regardless of temperature."
+          ]);
+          
+          setWeatherInsights({
+            summary: `Weather in ${destination} is currently ${weatherInfo.condition || 'variable'} with temperatures around ${weatherInfo.temperature || '20'}°C.`,
+            keyDifferences: [
+              "Temperature variation between locations",
+              "Weather conditions may differ",
+              "Humidity levels may vary"
+            ],
+            recommendation: "Pack versatile clothing appropriate for the forecasted conditions."
+          });
+          
+          setError(null);
+        } else {
+          setError('Failed to fetch weather information. Please check your location names.');
+        }
       } finally {
         setLoading(false);
       }
@@ -55,6 +86,39 @@ const WeatherFind = ({ source, destination }) => {
 
     fetchWeather();
   }, [source, destination]);
+
+  // Helper function to create mock weather data if API fails but we have basic info
+  const createMockWeatherData = (locationName, basicInfo) => {
+    return {
+      location: {
+        name: locationName,
+        country: locationName.split(',').pop()?.trim() || "Unknown Country",
+      },
+      current: {
+        temp_c: basicInfo?.temperature || 20,
+        condition: {
+          text: basicInfo?.condition || "Partly cloudy"
+        },
+        humidity: basicInfo?.humidity || 65,
+        wind_kph: 10,
+        feelslike_c: basicInfo?.temperature || 20,
+        precip_mm: 0
+      },
+      forecast: {
+        forecastday: Array(7).fill(null).map((_, i) => ({
+          date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+          day: {
+            maxtemp_c: (basicInfo?.temperature || 20) + 3,
+            mintemp_c: (basicInfo?.temperature || 20) - 3,
+            condition: {
+              text: basicInfo?.condition || "Partly cloudy"
+            },
+            daily_chance_of_rain: 20
+          }
+        }))
+      }
+    };
+  };
 
   useEffect(() => {
     // Make weather data available to parent components through a global variable for access
@@ -327,6 +391,11 @@ const WeatherFind = ({ source, destination }) => {
     const date = new Date(dateStr);
     return days[date.getDay()];
   };
+
+  // If showing only after generation is required and we don't have an itinerary yet
+  if (showAfterGeneration && !weatherInfo) {
+    return null; // Don't render anything until travel plan is generated
+  }
 
   if (!source || !destination) {
     return (
