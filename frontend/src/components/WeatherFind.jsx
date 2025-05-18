@@ -4,6 +4,7 @@ import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTempera
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 
 const WeatherFind = ({ source, destination, showAfterGeneration = false, weatherInfo = null }) => {
+  console.log("WeatherFind component rendered with source:", source, "and destination:", destination);
   const [sourceWeather, setSourceWeather] = useState(null);
   const [destinationWeather, setDestinationWeather] = useState(null);
   const [loading, setLoading] = useState(true);

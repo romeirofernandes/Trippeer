@@ -19,6 +19,8 @@ import { auth, onAuthStateChanged } from '../firebase.config';
 import debounce from 'lodash.debounce';
 import CurrencyConverter from './CurrencyConverter';
 import WeatherFind from './WeatherFind';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 const Itinerary = () => {
   // Add this state variable at the top with other state declarations
   
@@ -881,45 +883,75 @@ const handleAdjustTimes = (dayIndex, direction) => {
   };
 
   // Function to download itinerary as PDF (simplified to text for this demo)
-  const downloadItinerary = () => {
-    if (!itinerary) return;
+const downloadItinerary = () => {
+  if (!itinerary) return;
 
-    // Create text content
-    let content = `TRAVEL ITINERARY: ${source} to ${destination}\n`;
-    content += `Duration: ${days} days | Travelers: ${travelers}\n`;
-    content += `Flight Time: ${itinerary.flightTime} hours | Distance: ${itinerary.distance} km\n\n`;
+  let content = `TRAVEL ITINERARY: ${source} to ${destination}\n`;
+  content += `Duration: ${days} days | Travelers: ${travelers}\n`;
+  content += `Flight Time: ${itinerary.flightTime} hours | Distance: ${itinerary.distance} km\n\n`;
 
-    // Add day by day information
-    itinerary.days.forEach(day => {
-      content += `DAY ${day.day}\n`;
-      day.activities.forEach((activity, i) => {
-        content += `Activity ${i+1}: ${activity}\n`;
-      });
-      content += `Accommodation: ${day.accommodation.name} - ${day.accommodation.description}\n\n`;
+  itinerary.days.forEach(day => {
+    content += `DAY ${day.day}\n`;
+    day.activities.forEach((activity, i) => {
+      content += `${activity.time}: ${activity.description}\n`;
     });
+    content += '\n';
+  });
 
-    // Add travel tips
+  if (itinerary.travelTips) {
     content += "TRAVEL TIPS:\n";
     itinerary.travelTips.forEach((tip, i) => {
       content += `- ${tip}\n`;
     });
+  }
 
-    // Create a blob and trigger download
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${destination}-itinerary.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
+  // Download as .txt
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${destination}-itinerary.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
   // Function to share itinerary (simplified mock)
   const shareItinerary = () => {
-    alert(`Share feature activated! In a real app, this would open sharing options to email or social media.`);
-  };
+  if (!itinerary) return;
+
+  // Prepare a simple text version
+  let content = `TRAVEL ITINERARY: ${source} to ${destination}\n`;
+  content += `Duration: ${days} days | Travelers: ${travelers}\n`;
+  content += `Flight Time: ${itinerary.flightTime} hours | Distance: ${itinerary.distance} km\n\n`;
+
+  itinerary.days.forEach(day => {
+    content += `DAY ${day.day}\n`;
+    day.activities.forEach((activity, i) => {
+      content += `${activity.time}: ${activity.description}\n`;
+    });
+    content += '\n';
+  });
+
+  if (itinerary.travelTips) {
+    content += "TRAVEL TIPS:\n";
+    itinerary.travelTips.forEach((tip, i) => {
+      content += `- ${tip}\n`;
+    });
+  }
+
+  // WhatsApp share
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(content)}`;
+  // Email share
+  const emailUrl = `mailto:?subject=My Travel Itinerary: ${source} to ${destination}&body=${encodeURIComponent(content)}`;
+
+  // Show options (simple prompt)
+  if (window.confirm("Share via WhatsApp? Click Cancel to share via Email.")) {
+    window.open(whatsappUrl, '_blank');
+  } else {
+    window.open(emailUrl, '_blank');
+  }
+};
 
   // Get weather icon based on condition
   const getWeatherIcon = (condition) => {
