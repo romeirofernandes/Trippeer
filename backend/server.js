@@ -20,7 +20,10 @@ mongoose
 
 // Routes
 const userRoutes = require('./routes/userRoutes');
+const tripRoutes = require('./routes/tripRoutes');
+
 app.use('/api/users', userRoutes);
+app.use('/api/trips', tripRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running');

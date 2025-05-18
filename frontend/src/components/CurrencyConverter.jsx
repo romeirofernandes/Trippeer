@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaExchangeAlt, FaSpinner, FaGlobe, FaInfoCircle, FaArrowRight } from 'react-icons/fa';
+import { FaExchangeAlt, FaSpinner, FaGlobe, FaInfoCircle, FaArrowRight, FaLightbulb, FaMapMarkerAlt } from 'react-icons/fa';
 
 const CurrencyConverter = ({ source, destination }) => {
   const [countriesInfo, setCountriesInfo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [travelTips, setTravelTips] = useState([]);
+  const [locationDetails, setLocationDetails] = useState({ source: null, destination: null });
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // Get API key from environment variables
-  const API_KEY = import.meta.env.VITE_EXCHANGE_RATE_API_KEY; 
+  const EXCHANGE_API_KEY = import.meta.env.VITE_EXCHANGE_RATE_API_KEY; 
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   // Common currency codes and their information as fallback
   const commonCurrencies = {
@@ -39,54 +43,54 @@ const CurrencyConverter = ({ source, destination }) => {
     AED: { USD: 0.27, EUR: 0.25, GBP: 0.22, JPY: 42.72, CAD: 0.37, AUD: 0.41, CNY: 1.97, INR: 22.65, SGD: 0.37, QAR: 0.99 },
     QAR: { USD: 0.27, EUR: 0.26, GBP: 0.22, JPY: 43.08, CAD: 0.38, AUD: 0.42, CNY: 1.99, INR: 22.83, SGD: 0.37, AED: 1.01 }
   };
-  console.log()
-  // Find countries and currencies between source and destination
+  
+  // Detect countries and find location details first
   useEffect(() => {
-    const findCountriesAndCurrencies = async () => {
+    const detectLocations = async () => {
       if (!source || !destination) {
         setLoading(false);
         return;
       }
 
-      setLoading(true);
+      setDetailsLoading(true);
+      
       try {
-        const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-        
-        if (!API_KEY) {
-          console.error('Missing Gemini API key in environment variables');
-          setError('API key not configured');
-          setLoading(false);
+        if (!GEMINI_API_KEY) {
+          console.error('Missing Gemini API key');
+          setDetailsLoading(false);
+          // Continue with the currency lookup without location detection
           return;
         }
 
-        const prompt = `A traveler is going from ${source} to ${destination}. Identify the most logical country for the source location and the destination location. Then find one major country that might be passed through or visited on this route. For each of these 3 countries, find their currency code, currency name, and currency symbol.
-        
-        Return ONLY a JSON array with this format, without any additional text or explanation:
-        [
-          {
-            "country": "Country name for source",
+        const prompt = `Identify the most likely country for each of these locations: "${source}" and "${destination}".
+
+        For each location, please provide:
+        1. The full country name
+        2. The ISO 3-letter country code
+        3. The local currency code (ISO 4217)
+        4. The currency name
+        5. The currency symbol
+
+        Return ONLY a JSON object like this (no other text):
+        {
+          "source": {
+            "country": "country name",
+            "countryCode": "3-letter code",
             "currencyCode": "3-letter code",
-            "currencyName": "Full currency name",
-            "currencySymbol": "Symbol"
+            "currencyName": "full name",
+            "currencySymbol": "symbol"
           },
-          {
-            "country": "Country name for intermediate",
+          "destination": {
+            "country": "country name",
+            "countryCode": "3-letter code",
             "currencyCode": "3-letter code",
-            "currencyName": "Full currency name",
-            "currencySymbol": "Symbol"
-          },
-          {
-            "country": "Country name for destination",
-            "currencyCode": "3-letter code",
-            "currencyName": "Full currency name",
-            "currencySymbol": "Symbol"
+            "currencyName": "full name",
+            "currencySymbol": "symbol"
           }
-        ]
-        
-        Make sure all currency codes match standard ISO 4217 three-letter codes (e.g., USD, EUR, GBP, JPY).`;
+        }`;
 
         const response = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
           {
             contents: [
               {
@@ -111,14 +115,251 @@ const CurrencyConverter = ({ source, destination }) => {
         const textContent = response.data.candidates[0].content.parts[0].text;
         
         // Clean up the response and extract JSON
-        const jsonMatch = textContent.match(/\[[\s\S]*\]/) || textContent.match(/\{[\s\S]*\}/);
-        const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
+        const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : textContent;
         
         // Parse the JSON
-        const countriesData = JSON.parse(jsonStr);
+        const locationData = JSON.parse(jsonStr);
+        setLocationDetails(locationData);
+        
+        // Also generate some money/finance related travel tips for these locations
+        generateCurrencyTips(locationData);
+
+      } catch (err) {
+        console.error('Error detecting locations:', err);
+      } finally {
+        setDetailsLoading(false);
+      }
+    };
+
+    detectLocations();
+  }, [source, destination]);
+
+  // Generate currency and money tips based on the locations
+  const generateCurrencyTips = async (locationData) => {
+    if (!GEMINI_API_KEY || !locationData.source || !locationData.destination) {
+      return;
+    }
+
+    try {
+      const prompt = `You are a financial travel expert. Provide 5 practical tips about money, currency, and payments for a traveler going from ${locationData.source.country} to ${locationData.destination.country}.
+      
+      The traveler will be converting from ${locationData.source.currencyCode} (${locationData.source.currencyName}) to ${locationData.destination.currencyCode} (${locationData.destination.currencyName}).
+      
+      Focus on:
+      1. Exchange rate considerations
+      2. Common payment methods in the destination country
+      3. Tips for getting the best exchange rates
+      4. Any scams or issues to watch out for
+      5. Banking or ATM advice in the destination
+      
+      Format the response as a JSON array of strings, with each tip under 120 characters:
+      ["Tip 1", "Tip 2", "Tip 3", "Tip 4", "Tip 5"]`;
+
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json"
+          }
+        }
+      );
+
+      // Parse the response
+      const textContent = response.data.candidates[0].content.parts[0].text;
+      
+      // Find JSON content
+      const jsonMatch = textContent.match(/\[[\s\S]*\]/) || 
+                        textContent.match(/\{[\s\S]*\}/);
+      const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
+      
+      // Parse the JSON
+      const tipsData = JSON.parse(jsonStr);
+      setTravelTips(tipsData);
+    } catch (err) {
+      console.error('Error generating currency tips:', err);
+      setTravelTips([
+        "Compare exchange rates at banks, ATMs, and exchange bureaus for the best deal.",
+        "Inform your bank about travel plans to avoid card blocks on foreign transactions.",
+        "Carry small amounts of local currency for immediate expenses upon arrival.",
+        "Use credit cards with no foreign transaction fees when possible.",
+        "Keep receipts from currency exchanges in case of disputes."
+      ]);
+    }
+  };
+
+  // Find countries and currencies between source and destination
+  useEffect(() => {
+    const findCountriesAndCurrencies = async () => {
+      if (!source || !destination) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Now use the detected location details if available
+        const data = [];
+        
+        if (locationDetails.source) {
+          data.push({
+            country: locationDetails.source.country,
+            currencyCode: locationDetails.source.currencyCode,
+            currencyName: locationDetails.source.currencyName,
+            currencySymbol: locationDetails.source.currencySymbol
+          });
+        }
+        
+        // Add a third (intermediate) country and currency if available from the API
+        // Start with location detection API
+        if (GEMINI_API_KEY) {
+          try {
+            const prompt = `Based on a journey from ${source} to ${destination}, identify one major country that might be passed through or visited as an intermediate point. 
+            
+            For this intermediate location, provide:
+            1. The full country name
+            2. The ISO 3-letter country code
+            3. The local currency code (ISO 4217)
+            4. The currency name
+            5. The currency symbol
+            
+            Return ONLY a JSON object like this (no other text):
+            {
+              "intermediate": {
+                "country": "country name",
+                "countryCode": "3-letter code",
+                "currencyCode": "3-letter code",
+                "currencyName": "full name",
+                "currencySymbol": "symbol"
+              }
+            }`;
+            
+            const response = await axios.post(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+              {
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: prompt
+                      }
+                    ]
+                  }
+                ],
+                generationConfig: {
+                  temperature: 0.2,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 1024,
+                  responseMimeType: "application/json"
+                }
+              }
+            );
+            
+            const textContent = response.data.candidates[0].content.parts[0].text;
+            const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+            const jsonStr = jsonMatch ? jsonMatch[0] : textContent;
+            const intermediateData = JSON.parse(jsonStr);
+            
+            if (intermediateData.intermediate) {
+              data.push({
+                country: intermediateData.intermediate.country,
+                currencyCode: intermediateData.intermediate.currencyCode,
+                currencyName: intermediateData.intermediate.currencyName,
+                currencySymbol: intermediateData.intermediate.currencySymbol
+              });
+            }
+          } catch (err) {
+            console.error('Error finding intermediate country:', err);
+          }
+        }
+        
+        if (locationDetails.destination) {
+          data.push({
+            country: locationDetails.destination.country,
+            currencyCode: locationDetails.destination.currencyCode,
+            currencyName: locationDetails.destination.currencyName,
+            currencySymbol: locationDetails.destination.currencySymbol
+          });
+        }
+        
+        // If we don't have any data yet, use the original method
+        if (data.length === 0) {
+          const fallbackPrompt = `A traveler is going from ${source} to ${destination}. Identify the most logical country for the source location and the destination location. Then find one major country that might be passed through or visited on this route. For each of these 3 countries, find their currency code, currency name, and currency symbol.
+          
+          Return ONLY a JSON array with this format, without any additional text or explanation:
+          [
+            {
+              "country": "Country name for source",
+              "currencyCode": "3-letter code",
+              "currencyName": "Full currency name",
+              "currencySymbol": "Symbol"
+            },
+            {
+              "country": "Country name for intermediate",
+              "currencyCode": "3-letter code",
+              "currencyName": "Full currency name",
+              "currencySymbol": "Symbol"
+            },
+            {
+              "country": "Country name for destination",
+              "currencyCode": "3-letter code",
+              "currencyName": "Full currency name",
+              "currencySymbol": "Symbol"
+            }
+          ]
+          
+          Make sure all currency codes match standard ISO 4217 three-letter codes (e.g., USD, EUR, GBP, JPY).`;
+
+          const response = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: fallbackPrompt
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 1024,
+                responseMimeType: "application/json"
+              }
+            }
+          );
+
+          // Parse the response
+          const textContent = response.data.candidates[0].content.parts[0].text;
+          
+          // Extract JSON
+          const jsonMatch = textContent.match(/\[[\s\S]*\]/) || textContent.match(/\{[\s\S]*\}/);
+          const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
+          
+          // Parse the JSON
+          const countriesData = JSON.parse(jsonStr);
+          data.push(...countriesData);
+        }
         
         // Validate and clean up currency codes (ensure they're valid ISO 4217 codes)
-        const validatedCountriesData = countriesData.map(country => {
+        const validatedCountriesData = data.map(country => {
           const currencyCode = country.currencyCode.toUpperCase();
           // Check if this currency exists in our common currencies fallback
           if (commonCurrencies[currencyCode]) {
@@ -136,7 +377,7 @@ const CurrencyConverter = ({ source, destination }) => {
         // to get all exchange rates with USD as base
         try {
           const ratesResponse = await fetch(
-            `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`
+            `https://v6.exchangerate-api.com/v6/${EXCHANGE_API_KEY}/latest/USD`
           );
           
           if (!ratesResponse.ok) {
@@ -230,7 +471,6 @@ const CurrencyConverter = ({ source, destination }) => {
           });
           
           setCountriesInfo(countriesWithFallbackRates);
-
         }
       } catch (err) {
         console.error('Error finding countries and currencies:', err);
@@ -267,7 +507,36 @@ const CurrencyConverter = ({ source, destination }) => {
     };
 
     findCountriesAndCurrencies();
-  }, [source, destination]);
+  }, [source, destination, locationDetails]);
+
+  useEffect(() => {
+    // Make currency data available to parent components
+    if (countriesInfo && countriesInfo.length > 0) {
+      // Get source and destination currencies
+      const sourceCurrency = countriesInfo[0];
+      const destCurrency = countriesInfo.length > 1 ? 
+        countriesInfo[countriesInfo.length - 1] : null;
+        
+      // Create a formatted object with currency data
+      window.tripCurrencyData = {
+        sourceInfo: {
+          code: sourceCurrency.currencyCode,
+          name: sourceCurrency.currencyName,
+          symbol: sourceCurrency.currencySymbol,
+          country: sourceCurrency.country
+        },
+        destinationInfo: destCurrency ? {
+          code: destCurrency.currencyCode,
+          name: destCurrency.currencyName,
+          symbol: destCurrency.currencySymbol,
+          country: destCurrency.country
+        } : null,
+        exchangeRate: destCurrency && sourceCurrency.exchangeRates && 
+                     sourceCurrency.exchangeRates[destCurrency.currencyCode] ?
+                     sourceCurrency.exchangeRates[destCurrency.currencyCode] : 1.0
+      };
+    }
+  }, [countriesInfo]);
 
   // Rest of the component remains unchanged
   if (!source || !destination) {
@@ -307,6 +576,52 @@ const CurrencyConverter = ({ source, destination }) => {
       </div>
     );
   }
+
+  // Location details section - show what we detected
+  const locationDetailsSection = locationDetails.source && locationDetails.destination ? (
+    <div className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4">
+      <h3 className="text-md font-medium text-gray-700 mb-2 flex items-center">
+        <FaMapMarkerAlt className="mr-2 text-indigo-600" /> Detected Locations
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-3 rounded-md shadow-sm">
+          <div className="text-sm font-medium text-gray-500">Source Location</div>
+          <div className="font-medium text-gray-800">{locationDetails.source.country}</div>
+          <div className="text-xs text-gray-500">
+            {locationDetails.source.currencyName} ({locationDetails.source.currencyCode})
+          </div>
+        </div>
+        
+        <div className="bg-white p-3 rounded-md shadow-sm">
+          <div className="text-sm font-medium text-gray-500">Destination Location</div>
+          <div className="font-medium text-gray-800">{locationDetails.destination.country}</div>
+          <div className="text-xs text-gray-500">
+            {locationDetails.destination.currencyName} ({locationDetails.destination.currencyCode})
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  // Travel tips section
+  const travelTipsSection = travelTips.length > 0 ? (
+    <div className="mb-6 bg-blue-50 rounded-lg p-4">
+      <h3 className="text-md font-medium text-blue-800 mb-3 flex items-center">
+        <FaLightbulb className="mr-2 text-yellow-500" /> Currency & Money Tips
+      </h3>
+      <ul className="space-y-2">
+        {travelTips.map((tip, i) => (
+          <li key={i} className="flex items-start">
+            <div className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 mr-3">
+              <span className="text-xs font-medium text-blue-600">{i + 1}</span>
+            </div>
+            <span className="text-gray-700 text-sm">{tip}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
 
   // Create conversion table for all currency pairs
   const conversionTable = countriesInfo.map((fromCountry, i) => {
@@ -415,6 +730,9 @@ const CurrencyConverter = ({ source, destination }) => {
         </div>
       )}
       
+      {/* Show the detected locations */}
+      {locationDetailsSection}
+      
       <div className="mb-6">
         <h3 className="text-md font-medium text-gray-700 mb-2">Currencies on your route</h3>
         <div className="flex flex-wrap gap-3">
@@ -428,6 +746,9 @@ const CurrencyConverter = ({ source, destination }) => {
         </div>
       </div>
       
+      {/* Show travel tips */}
+      {travelTipsSection}
+      
       {/* Quick conversion between the first two currencies */}
       {quickConversionCards}
       
@@ -436,7 +757,7 @@ const CurrencyConverter = ({ source, destination }) => {
       
       <div className="mt-4 text-xs text-gray-500 flex items-center">
         <FaGlobe className="mr-1" /> 
-        <span>Exchange rates provided by ExchangeRate API</span>
+        <span>Exchange rates provided by ExchangeRate API • Locations detected automatically</span>
       </div>
     </div>
   );
