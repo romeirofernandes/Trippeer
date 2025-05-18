@@ -89,7 +89,7 @@ const TripCard = ({ trip, onDelete, onView }) => {
   );
 };
 
-const TripHistory = () => {
+const TripHistory = ({ limit }) => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -193,31 +193,22 @@ const TripHistory = () => {
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Your Saved Trips</h2>
-        <Link 
-          to="/itinerary" 
-          className="inline-flex items-center px-4 py-2 rounded-md text-black"
-          style={{ backgroundColor: '#9cadce' }}
-        >
-          <FaPlane className="mr-2" /> Plan New Trip
-        </Link>
-      </div>
-      
-      <div className="mb-6 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FaSearch className="text-gray-400" />
+      {(!limit) && (
+        <div className="mb-6 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FaSearch className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-4 py-2 rounded-lg text-white"
+            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+            placeholder="Search by source or destination"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-4 py-2 rounded-lg text-white"
-          style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-          placeholder="Search by source or destination"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      
+      )}
+
       {filteredTrips.length === 0 ? (
         <div className="text-center py-12">
           <FaPlane className="text-6xl mx-auto mb-4 opacity-30 text-white" />
@@ -232,14 +223,16 @@ const TripHistory = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrips.map((trip) => (
-            <TripCard
-              key={trip._id}
-              trip={trip}
-              onDelete={handleDeleteTrip}
-              onView={handleViewTrip}
-            />
-          ))}
+          {filteredTrips
+            .slice(0, limit ? limit : filteredTrips.length)
+            .map((trip) => (
+              <TripCard
+                key={trip._id}
+                trip={trip}
+                onDelete={handleDeleteTrip}
+                onView={handleViewTrip}
+              />
+            ))}
         </div>
       )}
     </div>
