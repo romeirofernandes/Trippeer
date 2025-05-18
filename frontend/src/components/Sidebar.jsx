@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
-import { FaRoute, FaCompass } from "react-icons/fa";
+import { FaRoute, FaCompass, FaTachometerAlt, FaHistory } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { auth, signOut } from "../firebase.config";
@@ -33,6 +33,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const navLinks = [
+    { title: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt size={20} /> },
     { title: "Plan Trip", path: "/plan", icon: <FaRoute size={20} /> },
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
   ];
