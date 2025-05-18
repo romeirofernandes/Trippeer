@@ -5,7 +5,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import ReverseTravelPlanner from "./pages/ReverseTravelPlanner";
 import Auth from "./pages/Auth";
-import Itinerary from "./components/Itinerary";
+import Plan from "./pages/Plan";
 import TripDetail from "./pages/TripDetail";
 
 function App() {
@@ -24,7 +24,10 @@ function App() {
               </TravelProvider>
             }
           />
+          <Route path="/plan" element={<Plan />} />
+          <Route path="/trip/:id" element={<TripDetail />} />
           <Route path="/plan" element={<Itinerary />} />
+          <Route path="/trip/:tripId" element={<TripDetail />} />
         </Routes>
       </Router>
     </SidebarProvider>
