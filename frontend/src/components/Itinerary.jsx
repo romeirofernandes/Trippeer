@@ -5,12 +5,13 @@ import {
   FaPlane, FaCalendarAlt, FaMapMarkerAlt, FaSpinner, 
   FaClock, FaSuitcase, FaUtensils, FaUmbrellaBeach, 
   FaInfoCircle, FaDownload, FaShare, FaUser, FaSun,
-  FaExchangeAlt, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas
+  FaExchangeAlt, FaCloudSun, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas
 } from 'react-icons/fa';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
 import CurrencyConverter from './CurrencyConverter';
+import WeatherFind from './WeatherFind';
 
 const Itinerary = () => {
   const [source, setSource] = useState('');
@@ -22,6 +23,7 @@ const Itinerary = () => {
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState(null);
   const [error, setError] = useState(null);
+  const [currentTab, setCurrentTab] = useState('details'); // 'details', 'map', 'itinerary', 'currency', 'weather'
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [currency, setCurrency] = useState(null);
   const [hasGeneratedItinerary, setHasGeneratedItinerary] = useState(false);
@@ -507,10 +509,8 @@ const Itinerary = () => {
       setItinerary(generatedItinerary);
       setHasGeneratedItinerary(true);
       
-      // Scroll to map section after itinerary is generated
-      setTimeout(() => {
-        scrollToMap();
-      }, 500);
+      // Switch to map tab
+      setCurrentTab('map');
       
     } catch (err) {
       console.error('Error:', err);
@@ -609,7 +609,7 @@ const Itinerary = () => {
           style={{ backgroundColor: '#111111', borderColor: '#9cadce', borderWidth: '1px' }}
         >
           {/* Tab Navigation */}
-          <div className="flex border-b" style={{ borderColor: '#9cadce' }}>
+          <div className="flex overflow-x-auto border-b" style={{ borderColor: '#9cadce' }}>
             <motion.button
               whileHover={{ backgroundColor: 'rgba(156, 173, 206, 0.1)' }}
               className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm sm:text-base ${
@@ -645,6 +645,17 @@ const Itinerary = () => {
             >
               Itinerary
             </motion.button>
+            <button
+              className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm sm:text-base ${
+                currentTab === 'weather'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setCurrentTab('weather')}
+              disabled={!source || !destination}
+            >
+              <FaCloudSun className="inline-block mr-1" /> Weather
+            </button>
             <motion.button
               whileHover={{ backgroundColor: 'rgba(156, 173, 206, 0.1)' }}
               className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm sm:text-base ${
@@ -663,232 +674,234 @@ const Itinerary = () => {
           <div className="p-6">
             {/* Trip Details Tab */}
             {currentTab === 'details' && (
+              {/* Trip Details Tab */}
+            {currentTab === 'details' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Trip Form */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Plan Your Adventure</h2>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="source" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                          Starting From
-                        </label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-                          </div>
-                          <input
-                            type="text"
-                            id="source"
-                            value={source}
-                            onChange={(e) => setSource(e.target.value)}
-                            className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                            placeholder="New York, Tokyo..."
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="destination" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                          Destination
-                        </label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-                          </div>
-                          <input
-                            type="text"
-                            id="destination"
-                            value={destination}
-                            onChange={(e) => setDestination(e.target.value)}
-                            className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                            placeholder="Paris, Bangkok..."
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="days" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                          Trip Duration (Days)
-                        </label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaCalendarAlt style={{ color: '#9cadce' }} />
-                          </div>
-                          <input
-                            type="number"
-                            id="days"
-                            min="1"
-                            max="30"
-                            value={days}
-                            onChange={(e) => setDays(parseInt(e.target.value))}
-                            className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="travelers" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                          Number of Travelers
-                        </label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaUser style={{ color: '#9cadce' }} />
-                          </div>
-                          <input
-                            type="number"
-                            id="travelers"
-                            min="1"
-                            max="20"
-                            value={travelers}
-                            onChange={(e) => setTravelers(parseInt(e.target.value))}
-                            className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Budget Level</label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                          <input
-                            type="radio"
-                            id="budget-low"
-                            name="budget"
-                            className="sr-only"
-                            checked={budget === 'low'}
-                            onChange={() => setBudget('low')}
-                          />
-                          <label
-                            htmlFor="budget-low"
-                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                              budget === 'low'
-                                ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                                : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                            }`}
-                          >
-                            <span className="block text-sm font-medium">Economy</span>
-                            <span className="block text-xs mt-1">$ Budget-friendly</span>
+                  {/* Trip Form */}
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Plan Your Adventure</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="source" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+                            Starting From
                           </label>
-                        </motion.div>
-                        
-                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                          <input
-                            type="radio"
-                            id="budget-medium"
-                            name="budget"
-                            className="sr-only"
-                            checked={budget === 'medium'}
-                            onChange={() => setBudget('medium')}
-                          />
-                          <label
-                            htmlFor="budget-medium"
-                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                              budget === 'medium'
-                                ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                                : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                            }`}
-                          >
-                            <span className="block text-sm font-medium">Standard</span>
-                            <span className="block text-xs mt-1">$$ Mid-range</span>
-                          </label>
-                        </motion.div>
-                        
-                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                          <input
-                            type="radio"
-                            id="budget-high"
-                            name="budget"
-                            className="sr-only"
-                            checked={budget === 'high'}
-                            onChange={() => setBudget('high')}
-                          />
-                          <label
-                            htmlFor="budget-high"
-                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                              budget === 'high'
-                                ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                                : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                            }`}
-                          >
-                            <span className="block text-sm font-medium">Luxury</span>
-                            <span className="block text-xs mt-1">$$$ Premium</span>
-                          </label>
-                        </motion.div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Travel Interests</label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {interestOptions.map((option) => (
-                          <motion.div key={option.value} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FaMapMarkerAlt style={{ color: '#9cadce' }} />
+                            </div>
                             <input
-                              type="checkbox"
-                              id={`interest-${option.value}`}
+                              type="text"
+                              id="source"
+                              value={source}
+                              onChange={(e) => setSource(e.target.value)}
+                              className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
+                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+                              placeholder="New York, Tokyo..."
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="destination" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+                            Destination
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FaMapMarkerAlt style={{ color: '#9cadce' }} />
+                            </div>
+                            <input
+                              type="text"
+                              id="destination"
+                              value={destination}
+                              onChange={(e) => setDestination(e.target.value)}
+                              className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
+                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+                              placeholder="Paris, Bangkok..."
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="days" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+                            Trip Duration (Days)
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FaCalendarAlt style={{ color: '#9cadce' }} />
+                            </div>
+                            <input
+                              type="number"
+                              id="days"
+                              min="1"
+                              max="30"
+                              value={days}
+                              onChange={(e) => setDays(parseInt(e.target.value))}
+                              className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
+                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="travelers" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+                            Number of Travelers
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <FaUser style={{ color: '#9cadce' }} />
+                            </div>
+                            <input
+                              type="number"
+                              id="travelers"
+                              min="1"
+                              max="20"
+                              value={travelers}
+                              onChange={(e) => setTravelers(parseInt(e.target.value))}
+                              className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
+                            style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Budget Level</label>
+                        <div className="grid grid-cols-3 gap-3">
+                          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                            <input
+                              type="radio"
+                              id="budget-low"
+                              name="budget"
                               className="sr-only"
-                              checked={interests.includes(option.value)}
-                              onChange={() => toggleInterest(option.value)}
+                              checked={budget === 'low'}
+                              onChange={() => setBudget('low')}
                             />
                             <label
-                              htmlFor={`interest-${option.value}`}
-                              className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg ${
-                                interests.includes(option.value)
-                                  ? 'bg-[#1a1a1a] text-[#9cadce] border-2 border-[#9cadce]'
-                                  : 'border border-gray-600 text-gray-300 hover:border-[#9cadce]'
+                              htmlFor="budget-low"
+                              className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                                budget === 'low'
+                                  ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+                                  : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
                               }`}
                             >
-                              {option.label}
+                              <span className="block text-sm font-medium">Economy</span>
+                              <span className="block text-xs mt-1">$ Budget-friendly</span>
                             </label>
                           </motion.div>
-                        ))}
+                          
+                          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                            <input
+                              type="radio"
+                              id="budget-medium"
+                              name="budget"
+                              className="sr-only"
+                              checked={budget === 'medium'}
+                              onChange={() => setBudget('medium')}
+                            />
+                            <label
+                              htmlFor="budget-medium"
+                              className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                                budget === 'medium'
+                                ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+                                  : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
+                              }`}
+                            >
+                              <span className="block text-sm font-medium">Standard</span>
+                              <span className="block text-xs mt-1">$$ Mid-range</span>
+                            </label>
+                          </motion.div>
+                          
+                          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                            <input
+                              type="radio"
+                              id="budget-high"
+                              name="budget"
+                              className="sr-only"
+                              checked={budget === 'high'}
+                              onChange={() => setBudget('high')}
+                            />
+                            <label
+                              htmlFor="budget-high"
+                              className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                                budget === 'high'
+                                  ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+                                  : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
+                              }`}
+                            >
+                              <span className="block text-sm font-medium">Luxury</span>
+                              <span className="block text-xs mt-1">$$$ Premium</span>
+                            </label>
+                          </motion.div>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex justify-center">
-                      <motion.button
-                        type="submit"
-                        disabled={loading || !source || !destination}
-                        className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm font-medium ${
-                          loading || !source || !destination
-                            ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                            : 'bg-[#9cadce] hover:bg-opacity-80 text-black'
-                        }`}
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Travel Interests</label>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {interestOptions.map((option) => (
+                            <motion.div key={option.value} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                              <input
+                                type="checkbox"
+                                id={`interest-${option.value}`}
+                                className="sr-only"
+                                checked={interests.includes(option.value)}
+                                onChange={() => toggleInterest(option.value)}
+                              />
+                              <label
+                                htmlFor={`interest-${option.value}`}
+                                className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg ${
+                                  interests.includes(option.value)
+                                    ? 'bg-[#1a1a1a] text-[#9cadce] border-2 border-[#9cadce]'
+                                    : 'border border-gray-600 text-gray-300 hover:border-[#9cadce]'
+                                }`}
+                              >
+                                {option.label}
+                              </label>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <motion.button
+                          type="submit"
+                          disabled={loading || !source || !destination}
+                          className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm font-medium ${
+                            loading || !source || !destination
+                              ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                              : 'bg-[#9cadce] hover:bg-opacity-80 text-black'
+                          }`}
                         whileHover={!loading && source && destination ? { scale: 1.02 } : {}}
                         whileTap={!loading && source && destination ? { scale: 0.98 } : {}}
-                      >
-                        {loading ? (
-                          <>
-                            <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
-                          </>
-                        ) : (
-                          'Create Travel Plan'
-                        )}
-                      </motion.button>
-                    </div>
+                        >
+                          {loading ? (
+                            <>
+                              <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
+                            </>
+                          ) : (
+                            'Create Travel Plan'
+                          )}
+                        </motion.button>
+                      </div>
 
-                    {error && (
-                      <motion.div 
+                      {error && (
+                        <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mt-4 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg border border-red-700"
                       >
-                        <p className="flex items-center">
-                          <FaInfoCircle className="mr-2" /> {error}
-                        </p>
-                      </motion.div>
-                    )}
-                  </form>
-                </div>
+                          <p className="flex items-center">
+                            <FaInfoCircle className="mr-2" /> {error}
+                          </p>
+                        </motion.div>
+                      )}
+                    </form>
+                  </div>
 
                 {/* Travel Tips and Info */}
                 <div>
