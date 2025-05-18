@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Plan from "./pages/Plan";
 import TripDetail from "./pages/TripDetail";
 import TripHistoryPage from "./pages/TripHistoryPage";
+import { TripCollection } from "./components/TripCollection";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/trip/:tripId" element={<TripDetail />} />
           <Route path="/itinerary" element={<Plan />} />
           <Route path="/trip-history" element={<TripHistoryPage />} />
+          <Route path="/trips" element={<TripCollection />} />
         </Routes>
       </Router>
     </SidebarProvider>
