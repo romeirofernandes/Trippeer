@@ -1,8 +1,15 @@
 import React, { useState, createContext, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
-import { FaRoute, FaCompass, FaTachometerAlt, FaHistory,FaSuitcase } from "react-icons/fa";
+import {
+  FaRoute,
+  FaCompass,
+  FaTachometerAlt,
+  FaHistory,
+  FaSuitcase,
+} from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
+import { HiOutlineLocationMarker } from "react-icons/hi";
 import { motion } from "framer-motion";
 import { auth, signOut } from "../firebase.config";
 import { toast } from "react-hot-toast";
@@ -27,18 +34,26 @@ export const SidebarProvider = ({ children }) => {
   );
 };
 
-
 const Sidebar = () => {
   const { isOpen, setIsOpen } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
 
   const navLinks = [
-    { title: "Trippeer", path: "/"},
-    { title: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt size={20} /> },
+    { title: "Trippeer", path: "/" },
+    {
+      title: "Dashboard",
+      path: "/dashboard",
+      icon: <FaTachometerAlt size={20} />,
+    },
     { title: "Plan Trip", path: "/plan", icon: <FaRoute size={20} /> },
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
     { title: "Trips", path: "/trips", icon: <FaSuitcase size={20} /> },
+    {
+      title: "Mumbai Drift",
+      path: "/mumbai-drift",
+      icon: <HiOutlineLocationMarker size={20} />,
+    },
   ];
 
   // Add logout handler function

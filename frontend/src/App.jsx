@@ -9,6 +9,7 @@ import Plan from "./pages/Plan";
 import TripDetail from "./pages/TripDetail";
 import TripHistoryPage from "./pages/TripHistoryPage";
 import { TripCollection } from "./components/TripCollection";
+import MumbaiDrift from "./components/MumbaiDrift";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/itinerary" element={<Plan />} />
           <Route path="/trip-history" element={<TripHistoryPage />} />
           <Route path="/trips" element={<TripCollection />} />
+          <Route path="/mumbai-drift" element={<MumbaiDrift />} />
         </Routes>
       </Router>
     </SidebarProvider>
