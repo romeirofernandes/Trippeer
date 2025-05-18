@@ -5,11 +5,12 @@ import {
   FaPlane, FaCalendarAlt, FaMapMarkerAlt, FaSpinner,
   FaClock, FaSuitcase, FaUtensils, FaUmbrellaBeach,
   FaInfoCircle, FaDownload, FaShare, FaUser, FaSun,
-  FaExchangeAlt, FaCloudSun, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas
+  FaExchangeAlt, FaCloudSun, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas, FaSave, FaCheck
 } from 'react-icons/fa';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
+import { auth, onAuthStateChanged } from '../firebase.config';
 import debounce from 'lodash.debounce';
 
 const Itinerary = () => {
@@ -35,6 +36,9 @@ const [sourceValid, setSourceValid] = useState(false);
 const [destinationValid, setDestinationValid] = useState(false);
 const [isSourceFocused, setIsSourceFocused] = useState(false);
 const [isDestinationFocused, setIsDestinationFocused] = useState(false);
+  const [user, setUser] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(null);
+  const [saveError, setSaveError] = useState(null);
 
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -246,6 +250,15 @@ const handleSelectLocation = (location, isSource) => {
         animationRef.current = null;
       }
     };
+  }, []);
+
+  // Get the current user when the component loads
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    
+    return () => unsubscribe();
   }, []);
 
   // Function to get coordinates from location name
@@ -733,6 +746,8 @@ const handleAdjustTimes = (dayIndex, direction) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSaveSuccess(null);
+    setSaveError(null);
 
     try {
       // Update map with source and destination
@@ -751,12 +766,111 @@ const handleAdjustTimes = (dayIndex, direction) => {
 
       setItinerary(generatedItinerary);
       setHasGeneratedItinerary(true);
+      
+      // Save the trip data to database if user is logged in
+      if (user) {
+        await saveTrip(generatedItinerary);
+      }
 
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to generate itinerary. Please check your inputs and try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Save trip to database
+  const saveTrip = async (generatedItinerary) => {
+    try {
+      let weatherInfo = {
+        sourceWeather: window.tripWeatherData?.sourceWeather || {
+          temperature: 20,
+          condition: "Unknown",
+          humidity: 50
+        },
+        destinationWeather: window.tripWeatherData?.destinationWeather || {
+          temperature: 25,
+          condition: "Unknown",
+          humidity: 60
+        },
+        tempDiff: window.tripWeatherData?.tempDiff || 5
+      };
+      
+      let currencyInfo = {
+        sourceInfo: window.tripCurrencyData?.sourceInfo || {
+          code: "USD",
+          name: "US Dollar",
+          symbol: "$"
+        },
+        destinationInfo: window.tripCurrencyData?.destinationInfo || {
+          code: "EUR", 
+          name: "Euro",
+          symbol: "€"
+        },
+        exchangeRate: window.tripCurrencyData?.exchangeRate || 0.92
+      };
+      
+      // If we don't have the window data, use our existing state data
+      if (!window.tripWeatherData && weatherInfo) {
+        weatherInfo = {
+          sourceWeather: {
+            temperature: weatherInfo.temperature || 20,
+            condition: weatherInfo.condition || "Unknown",
+            humidity: weatherInfo.humidity || 50
+          },
+          destinationWeather: {
+            temperature: weatherInfo.temperature || 25,
+            condition: weatherInfo.condition || "Unknown", 
+            humidity: weatherInfo.humidity || 60
+          },
+          tempDiff: 5 // Default difference
+        };
+      }
+      
+      if (!window.tripCurrencyData && currency) {
+        currencyInfo = {
+          sourceInfo: {
+            code: "USD",
+            name: "US Dollar", 
+            symbol: "$"
+          },
+          destinationInfo: {
+            code: currency.code || "EUR",
+            name: currency.name || "Euro",
+            symbol: currency.symbol || "€"
+          },
+          exchangeRate: currency.exchangeRate || 0.92
+        };
+      }
+
+      // Prepare the data to be saved
+      const tripData = {
+        firebaseUID: user.uid,
+        source,
+        destination,
+        days,
+        travelers,
+        budget,
+        interests,
+        itinerary: generatedItinerary,
+        weatherInfo: weatherInfo,
+        currencyInfo: currencyInfo
+      };
+
+      // Save to backend
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/trips`,
+        tripData
+      );
+
+      setSaveSuccess('Trip saved successfully to your dashboard!');
+      
+      // You can show a notification or update UI to indicate successful save
+      console.log('Trip saved:', response.data);
+    } catch (error) {
+      console.error('Error saving trip:', error);
+      setSaveError('Failed to save trip to your dashboard. Please try again.');
     }
   };
 
@@ -950,6 +1064,64 @@ const handleAdjustTimes = (dayIndex, direction) => {
         )}
       </div>
     );
+  };
+
+  // Add a save button to the itinerary section
+  const renderSaveButton = () => {
+    if (!user) {
+      return (
+        <div className="text-sm text-gray-500 mt-2">
+          <span className="flex items-center">
+            <FaInfoCircle className="mr-1" /> Sign in to save this itinerary to your dashboard
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <motion.button
+        onClick={() => saveTrip(itinerary)}
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+        style={{ backgroundColor: '#9cadce' }}  // In a real app, this would open sharing options to email or social media.
+        whileHover={{ scale: 1.05 }}          // For this example, we'll use a mock exchange rate
+        whileTap={{ scale: 0.95 }}
+      >
+        <FaSave className="mr-2" /> Save to Dashboard
+      </motion.button>
+    );
+  };
+
+  // Add success or error message displays for saving
+  const renderSaveStatus = () => {
+    if (saveSuccess) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 p-2 bg-green-50 text-green-700 rounded-md border border-green-200 text-sm"
+        >
+          <p className="flex items-center">
+            <FaCheck className="mr-1" /> {saveSuccess}
+          </p>
+        </motion.div>
+      );
+    }
+
+    if (saveError) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 p-2 bg-red-50 text-red-700 rounded-md border border-red-200 text-sm"
+        >
+          <p className="flex items-center">
+            <FaInfoCircle className="mr-1" /> {saveError}
+          </p>
+        </motion.div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -1157,7 +1329,7 @@ const handleAdjustTimes = (dayIndex, direction) => {
                         htmlFor="budget-medium"
                         className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
                           budget === 'medium'
-                          ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+                            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
                             : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
                         }`}
                       >
@@ -1533,6 +1705,8 @@ const handleAdjustTimes = (dayIndex, direction) => {
                 {source} to {destination} Itinerary
               </h2>
               <div className="flex space-x-2">
+                {/* Add the save button here */}
+                {renderSaveButton()}
                 <motion.button
                   onClick={downloadItinerary}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black"
@@ -1553,6 +1727,8 @@ const handleAdjustTimes = (dayIndex, direction) => {
                 </motion.button>
               </div>
             </motion.div>
+            {/* Display save status */}
+            {renderSaveStatus()}
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1766,19 +1942,24 @@ const handleAdjustTimes = (dayIndex, direction) => {
         )}
 
         {/* Weather Section */}
-        {source && destination && (
+        {itinerary && source && destination && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <WeatherFind location={destination} />
+            <WeatherFind 
+              source={source} 
+              destination={destination}
+              showAfterGeneration={true}
+              weatherInfo={weatherInfo}
+            />
           </motion.div>
         )}
 
         {/* Currency Section */}
-        {source && destination && (
+        {itinerary && source && destination && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

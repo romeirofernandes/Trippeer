@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb } from 'react-icons/fa';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 
-const WeatherFind = ({ source, destination }) => {
+const WeatherFind = ({ source, destination, showAfterGeneration = false, weatherInfo = null }) => {
   const [sourceWeather, setSourceWeather] = useState(null);
   const [destinationWeather, setDestinationWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
+  const [weatherInsights, setWeatherInsights] = useState(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   // Get API keys from environment variables
   const API_KEY = import.meta.env.VITE_WEATHER_API_KEY; 
@@ -39,10 +41,44 @@ const WeatherFind = ({ source, destination }) => {
 
         // Generate AI suggestions based on weather data
         await generateSuggestions(sourceResponse.data, destResponse.data);
+        
+        // Generate detailed weather insights using Gemini
+        await generateWeatherInsights(sourceResponse.data, destResponse.data);
 
       } catch (err) {
         console.error('Error fetching weather data:', err);
-        setError('Failed to fetch weather information. Please check your location names.');
+        
+        // If we have weatherInfo from parent, use it to create mock data
+        if (weatherInfo) {
+          const mockSourceData = createMockWeatherData(source, weatherInfo);
+          const mockDestData = createMockWeatherData(destination, weatherInfo);
+          
+          setSourceWeather(mockSourceData);
+          setDestinationWeather(mockDestData);
+          
+          // Generate basic insights and suggestions
+          setSuggestions([
+            `Pack for ${weatherInfo.condition || 'variable'} weather in ${destination}.`,
+            `Temperatures around ${weatherInfo.temperature || '20'}°C at your destination.`,
+            "Check local weather forecasts regularly during your stay.",
+            "Pack layers to adjust to changing temperatures.",
+            "Bring sun protection regardless of temperature."
+          ]);
+          
+          setWeatherInsights({
+            summary: `Weather in ${destination} is currently ${weatherInfo.condition || 'variable'} with temperatures around ${weatherInfo.temperature || '20'}°C.`,
+            keyDifferences: [
+              "Temperature variation between locations",
+              "Weather conditions may differ",
+              "Humidity levels may vary"
+            ],
+            recommendation: "Pack versatile clothing appropriate for the forecasted conditions."
+          });
+          
+          setError(null);
+        } else {
+          setError('Failed to fetch weather information. Please check your location names.');
+        }
       } finally {
         setLoading(false);
       }
@@ -50,6 +86,190 @@ const WeatherFind = ({ source, destination }) => {
 
     fetchWeather();
   }, [source, destination]);
+
+  // Helper function to create mock weather data if API fails but we have basic info
+  const createMockWeatherData = (locationName, basicInfo) => {
+    return {
+      location: {
+        name: locationName,
+        country: locationName.split(',').pop()?.trim() || "Unknown Country",
+      },
+      current: {
+        temp_c: basicInfo?.temperature || 20,
+        condition: {
+          text: basicInfo?.condition || "Partly cloudy"
+        },
+        humidity: basicInfo?.humidity || 65,
+        wind_kph: 10,
+        feelslike_c: basicInfo?.temperature || 20,
+        precip_mm: 0
+      },
+      forecast: {
+        forecastday: Array(7).fill(null).map((_, i) => ({
+          date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+          day: {
+            maxtemp_c: (basicInfo?.temperature || 20) + 3,
+            mintemp_c: (basicInfo?.temperature || 20) - 3,
+            condition: {
+              text: basicInfo?.condition || "Partly cloudy"
+            },
+            daily_chance_of_rain: 20
+          }
+        }))
+      }
+    };
+  };
+
+  useEffect(() => {
+    // Make weather data available to parent components through a global variable for access
+    if (sourceWeather && destinationWeather) {
+      // Calculate temperature difference
+      const tempDiff = (destinationWeather.current.temp_c - sourceWeather.current.temp_c).toFixed(1);
+      
+      // Create an object with formatted weather data
+      window.tripWeatherData = {
+        sourceWeather: {
+          temperature: sourceWeather.current.temp_c,
+          condition: sourceWeather.current.condition.text,
+          humidity: sourceWeather.current.humidity,
+          windSpeed: sourceWeather.current.wind_kph
+        },
+        destinationWeather: {
+          temperature: destinationWeather.current.temp_c,
+          condition: destinationWeather.current.condition.text,
+          humidity: destinationWeather.current.humidity,
+          windSpeed: destinationWeather.current.wind_kph,
+          forecast: destinationWeather.forecast.forecastday.map(day => ({
+            date: day.date,
+            maxTemp: day.day.maxtemp_c,
+            minTemp: day.day.mintemp_c,
+            condition: day.day.condition.text,
+            chanceOfRain: day.day.daily_chance_of_rain
+          }))
+        },
+        tempDiff: tempDiff
+      };
+    }
+  }, [sourceWeather, destinationWeather]);
+
+  // Function to generate detailed weather insights comparing the two locations
+  const generateWeatherInsights = async (sourceData, destData) => {
+    if (!GEMINI_API_KEY) {
+      console.error('Missing Gemini API key');
+      setWeatherInsights({
+        summary: "Weather information is available, but detailed insights require an API key.",
+        keyDifferences: ["Temperature variation", "Weather conditions", "Humidity levels"],
+        recommendation: "Check the forecast details above to prepare for your trip."
+      });
+      return;
+    }
+
+    setInsightsLoading(true);
+
+    try {
+      const sourceTempC = sourceData.current.temp_c;
+      const destTempC = destData.current.temp_c;
+      const tempDiff = Math.abs(sourceTempC - destTempC).toFixed(1);
+      const isDestWarmer = destTempC > sourceTempC;
+      
+      const sourceCondition = sourceData.current.condition.text;
+      const destCondition = destData.current.condition.text;
+      
+      const sourceLocation = `${sourceData.location.name}, ${sourceData.location.country}`;
+      const destLocation = `${destData.location.name}, ${destData.location.country}`;
+      
+      const destForecast = destData.forecast.forecastday.map(day => ({
+        date: day.date,
+        condition: day.day.condition.text,
+        maxTemp: day.day.maxtemp_c,
+        minTemp: day.day.mintemp_c,
+        chanceOfRain: day.day.daily_chance_of_rain
+      }));
+
+      const prompt = `You are a climate and travel expert. Analyze the following weather data for a traveler going from ${sourceLocation} to ${destLocation}.
+      
+      SOURCE LOCATION (${sourceLocation}):
+      - Current temperature: ${sourceTempC}°C
+      - Current weather condition: ${sourceCondition}
+      - Humidity: ${sourceData.current.humidity}%
+      - Wind speed: ${sourceData.current.wind_kph} km/h
+      
+      DESTINATION LOCATION (${destLocation}):
+      - Current temperature: ${destTempC}°C 
+      - Current weather condition: ${destCondition}
+      - Humidity: ${destData.current.humidity}%
+      - Wind speed: ${destData.current.wind_kph} km/h
+      
+      TEMPERATURE DIFFERENCE:
+      - The destination is ${tempDiff}°C ${isDestWarmer ? 'warmer' : 'cooler'} than the source
+      
+      DESTINATION 7-DAY FORECAST:
+      ${JSON.stringify(destForecast, null, 2)}
+      
+      Based on this data, provide a concise weather analysis in JSON format with these fields:
+      1. "summary": A 1-2 sentence overview of the key weather difference the traveler will experience
+      2. "keyDifferences": Array of 3-4 specific climate factors that differ between locations
+      3. "recommendation": A practical recommendation for the traveler based on the weather differences
+      4. "phenomena": Any notable weather phenomena to be aware of at the destination
+      
+      Keep each field concise and directly relevant to the traveler's experience.`;
+
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json"
+          }
+        }
+      );
+
+      // Parse the response
+      try {
+        const textContent = response.data.candidates[0].content.parts[0].text;
+        
+        // Find JSON content
+        const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : textContent;
+        
+        // Parse the JSON
+        const insightsData = JSON.parse(jsonStr);
+        setWeatherInsights(insightsData);
+      } catch (parseError) {
+        console.error('Error parsing weather insights:', parseError);
+        setWeatherInsights({
+          summary: `When traveling from ${sourceLocation} to ${destLocation}, you'll experience a temperature difference of ${tempDiff}°C (${isDestWarmer ? 'warmer' : 'cooler'}).`,
+          keyDifferences: [
+            `Temperature (${sourceTempC}°C vs ${destTempC}°C)`,
+            `Weather conditions (${sourceCondition} vs ${destCondition})`, 
+            `Humidity (${sourceData.current.humidity}% vs ${destData.current.humidity}%)`
+          ],
+          recommendation: "Check the detailed forecast and pack accordingly for your trip."
+        });
+      }
+    } catch (err) {
+      console.error('Error generating weather insights:', err);
+      setWeatherInsights({
+        summary: `The weather in ${destination} differs from ${source}. Check the forecast for details.`,
+        keyDifferences: ["Temperature", "Weather conditions", "Precipitation chances"],
+        recommendation: "Pack for the specific conditions shown in the forecast above."
+      });
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
 
   // Function to generate AI-powered suggestions based on weather differences
   const generateSuggestions = async (sourceData, destData) => {
@@ -171,6 +391,11 @@ const WeatherFind = ({ source, destination }) => {
     const date = new Date(dateStr);
     return days[date.getDay()];
   };
+
+  // If showing only after generation is required and we don't have an itinerary yet
+  if (showAfterGeneration && !weatherInfo) {
+    return null; // Don't render anything until travel plan is generated
+  }
 
   if (!source || !destination) {
     return (
@@ -328,6 +553,52 @@ const WeatherFind = ({ source, destination }) => {
           </div>
         </div>
       </div>
+      
+      {/* AI-powered Weather Insights */}
+      {weatherInsights && (
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-5 mb-6 shadow-inner">
+          <h3 className="font-medium text-indigo-900 mb-3 flex items-center">
+            <FaLightbulb className="mr-2 text-yellow-500" /> Smart Weather Analysis
+          </h3>
+          
+          {insightsLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <FaSpinner className="animate-spin text-indigo-500 mr-2" />
+              <span>Generating insights...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-gray-700">{weatherInsights.summary}</p>
+              
+              <div>
+                <h4 className="text-sm font-medium text-indigo-700 mb-1">Key Weather Differences:</h4>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {weatherInsights.keyDifferences.map((diff, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center mr-2">
+                        <span className="text-xs font-medium text-indigo-600">{index + 1}</span>
+                      </div>
+                      <span className="text-gray-600 text-sm">{diff}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="bg-white p-3 rounded-md border border-indigo-100">
+                <h4 className="text-sm font-medium text-indigo-700 mb-1">Recommendation:</h4>
+                <p className="text-gray-600 text-sm">{weatherInsights.recommendation}</p>
+              </div>
+              
+              {weatherInsights.phenomena && (
+                <div className="bg-yellow-50 p-3 rounded-md border border-yellow-100">
+                  <h4 className="text-sm font-medium text-yellow-700 mb-1">Notable Weather Phenomena:</h4>
+                  <p className="text-gray-600 text-sm">{weatherInsights.phenomena}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       
       {/* Destination Forecast */}
       {destinationWeather && (

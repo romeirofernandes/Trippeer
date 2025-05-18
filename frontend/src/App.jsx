@@ -1,10 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "./components/Sidebar";
+import { TravelProvider } from "./context/TravelContext";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
+import ReverseTravelPlanner from "./pages/ReverseTravelPlanner";
 import Auth from "./pages/Auth";
-import Explore from "./pages/Explore";
 import Itinerary from "./components/Itinerary";
+import TripDetail from "./pages/TripDetail";
 
 function App() {
   return (
@@ -14,8 +16,15 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/itinerary" element={<Itinerary />} /> {/* Fixed the typo in the path */}
+          <Route
+            path="/explore"
+            element={
+              <TravelProvider>
+                <ReverseTravelPlanner />
+              </TravelProvider>
+            }
+          />
+          <Route path="/plan" element={<Itinerary />} />
         </Routes>
       </Router>
     </SidebarProvider>
