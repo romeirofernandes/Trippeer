@@ -11,6 +11,7 @@ import {
 import { FaGoogle, FaRegEnvelope, FaUser } from "react-icons/fa";
 import { IoKeyOutline } from "react-icons/io5";
 import axios from "axios";
+import { motion } from 'framer-motion';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -102,6 +103,8 @@ const Auth = () => {
       navigate("/dashboard");
     } catch (error) {
       let errorMessage = "Authentication failed";
+      
+      // Handle Firebase auth errors
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "Email already in use. Try logging in instead.";
@@ -118,20 +121,25 @@ const Auth = () => {
         case "auth/weak-password":
           errorMessage = "Password should be at least 6 characters";
           break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Please check your connection.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many attempts. Try again later.";
+          break;
         default:
-          errorMessage = error.message;
+          errorMessage = error.message || "Authentication failed";
       }
-
+      
       setError(errorMessage);
-
-      // Sign out if there was an error (either with Firebase or backend)
-      try {
-        await auth.signOut();
-      } catch (signOutError) {
-        console.error(
-          "Error signing out after authentication failure:",
-          signOutError
-        );
+      
+      // Only sign out for registration errors - not login errors
+      if (!isLogin && userCredential?.user) {
+        try {
+          await auth.signOut();
+        } catch (signOutError) {
+          console.error("Error signing out after failed registration:", signOutError);
+        }
       }
     } finally {
       setLoading(false);
@@ -182,7 +190,12 @@ const Auth = () => {
           )}
 
           {/* Google Sign In */}
-          <div className="mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-6"
+          >
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -194,7 +207,7 @@ const Auth = () => {
                 →
               </span>
             </button>
-          </div>
+          </motion.div>
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -248,7 +261,7 @@ const Auth = () => {
             </div>
 
             <div>
-              <button
+              <motion.button
                 type="submit"
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 rounded-lg text-[#f8f8f8] bg-[#9cadce] hover:bg-[#8b9dbd] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9cadce] transition-all duration-200 disabled:opacity-50"
@@ -282,9 +295,21 @@ const Auth = () => {
                 ) : (
                   "Create Account"
                 )}
-              </button>
+              </motion.button>
             </div>
           </form>
+          
+          <div className="mt-6 text-center text-sm">
+            <span className="text-gray-400">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+            </span>
+            <button
+              onClick={handleToggle}
+              className="text-[#9cadce] hover:text-white focus:outline-none transition-colors"
+            >
+              {isLogin ? "Sign up" : "Sign in"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
