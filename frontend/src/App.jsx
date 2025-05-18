@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "./components/Sidebar";
+import { TravelProvider } from "./context/TravelContext";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
-import Explore from "./pages/Explore";
+import ReverseTravelPlanner from "./pages/ReverseTravelPlanner";
 import Auth from "./pages/Auth";
 import Itinerary from "./components/Itinerary";
 
@@ -14,9 +15,16 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/itenirary" element={<Itinerary />} />
-      </Routes>
+          <Route
+            path="/explore"
+            element={
+              <TravelProvider>
+                <ReverseTravelPlanner />
+              </TravelProvider>
+            }
+          />
+          <Route path="/itinerary" element={<Itinerary />} />
+        </Routes>
       </Router>
     </SidebarProvider>
   );
