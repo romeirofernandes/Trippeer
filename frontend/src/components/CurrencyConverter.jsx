@@ -1,763 +1,286 @@
 import { useState, useEffect } from 'react';
+import { FaExchangeAlt, FaSpinner, FaInfoCircle, FaArrowRight, FaLightbulb, FaMapMarkerAlt } from 'react-icons/fa';
 import axios from 'axios';
-import { FaExchangeAlt, FaSpinner, FaGlobe, FaInfoCircle, FaArrowRight, FaLightbulb, FaMapMarkerAlt } from 'react-icons/fa';
 
 const CurrencyConverter = ({ source, destination }) => {
-  const [countriesInfo, setCountriesInfo] = useState([]);
+  console.log("CurrencyConverter component rendered with source:", source, "and destination:", destination);
+  const [currencies, setCurrencies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [travelTips, setTravelTips] = useState([]);
-  const [locationDetails, setLocationDetails] = useState({ source: null, destination: null });
-  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // Get API key from environment variables
-  const EXCHANGE_API_KEY = import.meta.env.VITE_EXCHANGE_RATE_API_KEY; 
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-  // Common currency codes and their information as fallback
-  const commonCurrencies = {
-    USD: { code: 'USD', name: 'US Dollar', symbol: '$', country: 'United States' },
-    EUR: { code: 'EUR', name: 'Euro', symbol: '€', country: 'Europe' },
-    GBP: { code: 'GBP', name: 'British Pound', symbol: '£', country: 'United Kingdom' },
-    JPY: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', country: 'Japan' },
-    CAD: { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', country: 'Canada' },
-    AUD: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', country: 'Australia' },
-    CNY: { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', country: 'China' },
-    INR: { code: 'INR', name: 'Indian Rupee', symbol: '₹', country: 'India' },
-    SGD: { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', country: 'Singapore' },
-    AED: { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', country: 'United Arab Emirates' },
-    QAR: { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', country: 'Qatar' },
-  };
-
-  // Hardcoded estimated exchange rates (approximate as of May 2024)
-  const estimatedRates = {
-    USD: { EUR: 0.93, GBP: 0.79, JPY: 156.80, CAD: 1.37, AUD: 1.52, CNY: 7.23, INR: 83.12, SGD: 1.35, AED: 3.67, QAR: 3.64 },
-    EUR: { USD: 1.07, GBP: 0.85, JPY: 168.23, CAD: 1.47, AUD: 1.63, CNY: 7.75, INR: 89.21, SGD: 1.45, AED: 3.94, QAR: 3.90 },
-    GBP: { USD: 1.26, EUR: 1.18, JPY: 198.48, CAD: 1.74, AUD: 1.93, CNY: 9.15, INR: 105.21, SGD: 1.71, AED: 4.65, QAR: 4.61 },
-    JPY: { USD: 0.0064, EUR: 0.0059, GBP: 0.0050, CAD: 0.0087, AUD: 0.0097, CNY: 0.046, INR: 0.53, SGD: 0.0086, AED: 0.023, QAR: 0.023 },
-    CAD: { USD: 0.73, EUR: 0.68, GBP: 0.58, JPY: 114.45, AUD: 1.11, CNY: 5.27, INR: 60.67, SGD: 0.98, AED: 2.68, QAR: 2.66 },
-    AUD: { USD: 0.66, EUR: 0.61, GBP: 0.52, JPY: 103.16, CAD: 0.90, CNY: 4.75, INR: 54.69, SGD: 0.89, AED: 2.42, QAR: 2.40 },
-    CNY: { USD: 0.14, EUR: 0.13, GBP: 0.11, JPY: 21.69, CAD: 0.19, AUD: 0.21, INR: 11.50, SGD: 0.19, AED: 0.51, QAR: 0.50 },
-    INR: { USD: 0.012, EUR: 0.011, GBP: 0.0095, JPY: 1.89, CAD: 0.016, AUD: 0.018, CNY: 0.087, SGD: 0.016, AED: 0.044, QAR: 0.044 },
-    SGD: { USD: 0.74, EUR: 0.69, GBP: 0.58, JPY: 116.15, CAD: 1.02, AUD: 1.13, CNY: 5.35, INR: 61.57, AED: 2.72, QAR: 2.70 },
-    AED: { USD: 0.27, EUR: 0.25, GBP: 0.22, JPY: 42.72, CAD: 0.37, AUD: 0.41, CNY: 1.97, INR: 22.65, SGD: 0.37, QAR: 0.99 },
-    QAR: { USD: 0.27, EUR: 0.26, GBP: 0.22, JPY: 43.08, CAD: 0.38, AUD: 0.42, CNY: 1.99, INR: 22.83, SGD: 0.37, AED: 1.01 }
-  };
-  
-  // Detect countries and find location details first
   useEffect(() => {
-    const detectLocations = async () => {
+    const fetchCurrencyData = async () => {
+
+      
+      // Add console logs to debug
+      console.log(`Fetching currency data for: ${source} → ${destination}`);
+      console.log(`%c[CURRENCY] Fetching data for: ${source} → ${destination}`, 'background: #9cadce; color: black; padding: 2px 5px; border-radius: 2px;');
+  console.log(`%c[CURRENCY] API Key available: ${!!GEMINI_API_KEY}`, 'background: #9cadce; color: black; padding: 2px 5px; border-radius: 2px;');
       if (!source || !destination) {
         setLoading(false);
         return;
       }
 
-      setDetailsLoading(true);
-      
       try {
-        if (!GEMINI_API_KEY) {
-          console.error('Missing Gemini API key');
-          setDetailsLoading(false);
-          // Continue with the currency lookup without location detection
-          return;
-        }
-
-        const prompt = `Identify the most likely country for each of these locations: "${source}" and "${destination}".
-
-        For each location, please provide:
-        1. The full country name
-        2. The ISO 3-letter country code
-        3. The local currency code (ISO 4217)
-        4. The currency name
-        5. The currency symbol
-
-        Return ONLY a JSON object like this (no other text):
+        // Simple prompt to get currency info for both locations
+        const prompt = `Give me currency information for a traveler going from "${source}" to "${destination}".
+        
+        Return ONLY a JSON object without any additional text:
         {
-          "source": {
-            "country": "country name",
-            "countryCode": "3-letter code",
-            "currencyCode": "3-letter code",
-            "currencyName": "full name",
-            "currencySymbol": "symbol"
-          },
-          "destination": {
-            "country": "country name",
-            "countryCode": "3-letter code",
-            "currencyCode": "3-letter code",
-            "currencyName": "full name",
-            "currencySymbol": "symbol"
-          }
+          "currencies": [
+            {
+              "country": "${source}",
+              "currencyCode": "three-letter code",
+              "currencyName": "full currency name",
+              "currencySymbol": "symbol"
+            },
+            {
+              "country": "${destination}", 
+              "currencyCode": "three-letter code",
+              "currencyName": "full currency name",
+              "currencySymbol": "symbol"
+            }
+          ],
+          "exchangeRate": "approximate exchange rate as number",
+          "tips": [
+            "tip 1 about currency exchange",
+            "tip 2 about payment methods",
+            "tip 3 about money safety",
+            "tip 4 about banking/ATMs",
+            "tip 5 about local customs"
+          ]
         }`;
-
+        
+        // Call the Gemini API
         const response = await axios.post(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
           {
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt
-                  }
-                ]
-              }
-            ],
+            contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.2,
-              topK: 40,
-              topP: 0.95,
               maxOutputTokens: 1024,
               responseMimeType: "application/json"
             }
           }
         );
-
+        
+        // Debug the response
+        console.log("API response received");
+        
         // Parse the response
         const textContent = response.data.candidates[0].content.parts[0].text;
         
-        // Clean up the response and extract JSON
+        // Clean up the response to extract just the JSON part
         const jsonMatch = textContent.match(/\{[\s\S]*\}/);
         const jsonStr = jsonMatch ? jsonMatch[0] : textContent;
         
-        // Parse the JSON
-        const locationData = JSON.parse(jsonStr);
-        setLocationDetails(locationData);
+        // Parse JSON
+        const data = JSON.parse(jsonStr);
+        console.log("Parsed currency data:", data);
         
-        // Also generate some money/finance related travel tips for these locations
-        generateCurrencyTips(locationData);
-
+        // Set the data in state
+        setCurrencies(data.currencies || []);
+        setTravelTips(data.tips || []);
+        
+        // Make currency data available to parent components
+        if (data.currencies && data.currencies.length >= 2) {
+          window.tripCurrencyData = {
+            sourceInfo: {
+              code: data.currencies[0].currencyCode,
+              name: data.currencies[0].currencyName,
+              symbol: data.currencies[0].currencySymbol,
+              country: data.currencies[0].country
+            },
+            destinationInfo: {
+              code: data.currencies[1].currencyCode,
+              name: data.currencies[1].currencyName,
+              symbol: data.currencies[1].currencySymbol,
+              country: data.currencies[1].country
+            },
+            exchangeRate: data.exchangeRate || 1.0
+          };
+          
+          console.log("Currency data saved for trip:", window.tripCurrencyData);
+        }
+        
+        setLoading(false);
       } catch (err) {
-        console.error('Error detecting locations:', err);
-      } finally {
-        setDetailsLoading(false);
-      }
-    };
-
-    detectLocations();
-  }, [source, destination]);
-
-  // Generate currency and money tips based on the locations
-  const generateCurrencyTips = async (locationData) => {
-    if (!GEMINI_API_KEY || !locationData.source || !locationData.destination) {
-      return;
-    }
-
-    try {
-      const prompt = `You are a financial travel expert. Provide 5 practical tips about money, currency, and payments for a traveler going from ${locationData.source.country} to ${locationData.destination.country}.
-      
-      The traveler will be converting from ${locationData.source.currencyCode} (${locationData.source.currencyName}) to ${locationData.destination.currencyCode} (${locationData.destination.currencyName}).
-      
-      Focus on:
-      1. Exchange rate considerations
-      2. Common payment methods in the destination country
-      3. Tips for getting the best exchange rates
-      4. Any scams or issues to watch out for
-      5. Banking or ATM advice in the destination
-      
-      Format the response as a JSON array of strings, with each tip under 120 characters:
-      ["Tip 1", "Tip 2", "Tip 3", "Tip 4", "Tip 5"]`;
-
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          contents: [
+        console.error('Error fetching currency information:', err);
+        setError('Could not load currency information. Please try again later.');
+        
+        // Fallback data
+        const fallbackData = {
+          currencies: [
             {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
+              country: source,
+              currencyCode: "USD",
+              currencyName: "US Dollar",
+              currencySymbol: "$"
+            },
+            {
+              country: destination,
+              currencyCode: "EUR",
+              currencyName: "Euro",
+              currencySymbol: "€"
             }
           ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-            responseMimeType: "application/json"
-          }
-        }
-      );
-
-      // Parse the response
-      const textContent = response.data.candidates[0].content.parts[0].text;
-      
-      // Find JSON content
-      const jsonMatch = textContent.match(/\[[\s\S]*\]/) || 
-                        textContent.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
-      
-      // Parse the JSON
-      const tipsData = JSON.parse(jsonStr);
-      setTravelTips(tipsData);
-    } catch (err) {
-      console.error('Error generating currency tips:', err);
-      setTravelTips([
-        "Compare exchange rates at banks, ATMs, and exchange bureaus for the best deal.",
-        "Inform your bank about travel plans to avoid card blocks on foreign transactions.",
-        "Carry small amounts of local currency for immediate expenses upon arrival.",
-        "Use credit cards with no foreign transaction fees when possible.",
-        "Keep receipts from currency exchanges in case of disputes."
-      ]);
-    }
-  };
-
-  // Find countries and currencies between source and destination
-  useEffect(() => {
-    const findCountriesAndCurrencies = async () => {
-      if (!source || !destination) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        // Now use the detected location details if available
-        const data = [];
-        
-        if (locationDetails.source) {
-          data.push({
-            country: locationDetails.source.country,
-            currencyCode: locationDetails.source.currencyCode,
-            currencyName: locationDetails.source.currencyName,
-            currencySymbol: locationDetails.source.currencySymbol
-          });
-        }
-        
-        // Add a third (intermediate) country and currency if available from the API
-        // Start with location detection API
-        if (GEMINI_API_KEY) {
-          try {
-            const prompt = `Based on a journey from ${source} to ${destination}, identify one major country that might be passed through or visited as an intermediate point. 
-            
-            For this intermediate location, provide:
-            1. The full country name
-            2. The ISO 3-letter country code
-            3. The local currency code (ISO 4217)
-            4. The currency name
-            5. The currency symbol
-            
-            Return ONLY a JSON object like this (no other text):
-            {
-              "intermediate": {
-                "country": "country name",
-                "countryCode": "3-letter code",
-                "currencyCode": "3-letter code",
-                "currencyName": "full name",
-                "currencySymbol": "symbol"
-              }
-            }`;
-            
-            const response = await axios.post(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-              {
-                contents: [
-                  {
-                    parts: [
-                      {
-                        text: prompt
-                      }
-                    ]
-                  }
-                ],
-                generationConfig: {
-                  temperature: 0.2,
-                  topK: 40,
-                  topP: 0.95,
-                  maxOutputTokens: 1024,
-                  responseMimeType: "application/json"
-                }
-              }
-            );
-            
-            const textContent = response.data.candidates[0].content.parts[0].text;
-            const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-            const jsonStr = jsonMatch ? jsonMatch[0] : textContent;
-            const intermediateData = JSON.parse(jsonStr);
-            
-            if (intermediateData.intermediate) {
-              data.push({
-                country: intermediateData.intermediate.country,
-                currencyCode: intermediateData.intermediate.currencyCode,
-                currencyName: intermediateData.intermediate.currencyName,
-                currencySymbol: intermediateData.intermediate.currencySymbol
-              });
-            }
-          } catch (err) {
-            console.error('Error finding intermediate country:', err);
-          }
-        }
-        
-        if (locationDetails.destination) {
-          data.push({
-            country: locationDetails.destination.country,
-            currencyCode: locationDetails.destination.currencyCode,
-            currencyName: locationDetails.destination.currencyName,
-            currencySymbol: locationDetails.destination.currencySymbol
-          });
-        }
-        
-        // If we don't have any data yet, use the original method
-        if (data.length === 0) {
-          const fallbackPrompt = `A traveler is going from ${source} to ${destination}. Identify the most logical country for the source location and the destination location. Then find one major country that might be passed through or visited on this route. For each of these 3 countries, find their currency code, currency name, and currency symbol.
-          
-          Return ONLY a JSON array with this format, without any additional text or explanation:
-          [
-            {
-              "country": "Country name for source",
-              "currencyCode": "3-letter code",
-              "currencyName": "Full currency name",
-              "currencySymbol": "Symbol"
-            },
-            {
-              "country": "Country name for intermediate",
-              "currencyCode": "3-letter code",
-              "currencyName": "Full currency name",
-              "currencySymbol": "Symbol"
-            },
-            {
-              "country": "Country name for destination",
-              "currencyCode": "3-letter code",
-              "currencyName": "Full currency name",
-              "currencySymbol": "Symbol"
-            }
+          exchangeRate: 0.93,
+          tips: [
+            "Compare exchange rates at banks, ATMs, and exchange bureaus for the best deal.",
+            "Inform your bank about travel plans to avoid card blocks on foreign transactions.",
+            "Carry small amounts of local currency for immediate expenses upon arrival.",
+            "Use credit cards with no foreign transaction fees when possible.",
+            "Keep receipts from currency exchanges in case of disputes."
           ]
-          
-          Make sure all currency codes match standard ISO 4217 three-letter codes (e.g., USD, EUR, GBP, JPY).`;
-
-          const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-            {
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: fallbackPrompt
-                    }
-                  ]
-                }
-              ],
-              generationConfig: {
-                temperature: 0.2,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 1024,
-                responseMimeType: "application/json"
-              }
-            }
-          );
-
-          // Parse the response
-          const textContent = response.data.candidates[0].content.parts[0].text;
-          
-          // Extract JSON
-          const jsonMatch = textContent.match(/\[[\s\S]*\]/) || textContent.match(/\{[\s\S]*\}/);
-          const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
-          
-          // Parse the JSON
-          const countriesData = JSON.parse(jsonStr);
-          data.push(...countriesData);
-        }
+        };
         
-        // Validate and clean up currency codes (ensure they're valid ISO 4217 codes)
-        const validatedCountriesData = data.map(country => {
-          const currencyCode = country.currencyCode.toUpperCase();
-          // Check if this currency exists in our common currencies fallback
-          if (commonCurrencies[currencyCode]) {
-            return {
-              country: country.country,
-              currencyCode,
-              currencyName: commonCurrencies[currencyCode].name || country.currencyName,
-              currencySymbol: commonCurrencies[currencyCode].symbol || country.currencySymbol
-            };
-          }
-          return country;
-        });
-
-        // Instead of fetching rates for each currency individually, use the standard endpoint
-        // to get all exchange rates with USD as base
-        try {
-          const ratesResponse = await fetch(
-            `https://v6.exchangerate-api.com/v6/${EXCHANGE_API_KEY}/latest/USD`
-          );
-          
-          if (!ratesResponse.ok) {
-            throw new Error(`API responded with status: ${ratesResponse.status}`);
-          }
-          
-          const ratesData = await ratesResponse.json();
-          
-          if (ratesData.result === 'success') {
-            const allRates = ratesData.conversion_rates;
-            
-            // Add exchange rates to each country
-            const countriesWithRates = validatedCountriesData.map(country => {
-              // Calculate conversions between all pairs using USD as intermediary
-              const exchangeRates = {};
-              
-              validatedCountriesData.forEach(targetCountry => {
-                const sourceCurrency = country.currencyCode;
-                const targetCurrency = targetCountry.currencyCode;
-                
-                // Skip same currency
-                if (sourceCurrency === targetCurrency) {
-                  exchangeRates[targetCurrency] = 1;
-                  return;
-                }
-                
-                // Calculate cross-rate if both currencies are available
-                if (allRates[sourceCurrency] && allRates[targetCurrency]) {
-                  // USD/Source = allRates[sourceCurrency]
-                  // USD/Target = allRates[targetCurrency]
-                  // Target/Source = (USD/Source) / (USD/Target)
-                  const rate = allRates[targetCurrency] / allRates[sourceCurrency];
-                  exchangeRates[targetCurrency] = rate;
-                } else {
-                  // Use hardcoded estimated rates for missing currencies
-                  if (estimatedRates[sourceCurrency] && estimatedRates[sourceCurrency][targetCurrency]) {
-                    exchangeRates[targetCurrency] = estimatedRates[sourceCurrency][targetCurrency];
-                  } else if (estimatedRates[targetCurrency] && estimatedRates[targetCurrency][sourceCurrency]) {
-                    // Inverse the rate if we have the opposite direction
-                    exchangeRates[targetCurrency] = 1 / estimatedRates[targetCurrency][sourceCurrency];
-                  } else {
-                    // Fallback to a reasonable estimate if no direct mapping exists
-                    exchangeRates[targetCurrency] = 1.5; // Generic fallback rate
-                  }
-                }
-              });
-              
-              return {
-                ...country,
-                exchangeRates
-              };
-            });
-            
-            setCountriesInfo(countriesWithRates);
-            setError('');
-          } else {
-            throw new Error(`API error: ${ratesData['error-type'] || 'Unknown error'}`);
-          }
-        } catch (ratesError) {
-          console.error('Exchange rate API error:', ratesError);
-          
-          // Fallback: Generate mock exchange rates
-          const countriesWithFallbackRates = validatedCountriesData.map(country => {
-            const exchangeRates = {};
-            
-            validatedCountriesData.forEach(targetCountry => {
-              const sourceCurrency = country.currencyCode;
-              const targetCurrency = targetCountry.currencyCode;
-              
-              // Skip same currency
-              if (sourceCurrency === targetCurrency) {
-                exchangeRates[targetCurrency] = 1;
-              } else {
-                // Use hardcoded estimated rates
-                if (estimatedRates[sourceCurrency] && estimatedRates[sourceCurrency][targetCurrency]) {
-                  exchangeRates[targetCurrency] = estimatedRates[sourceCurrency][targetCurrency];
-                } else if (estimatedRates[targetCurrency] && estimatedRates[targetCurrency][sourceCurrency]) {
-                  // Inverse the rate if we have the opposite direction
-                  exchangeRates[targetCurrency] = 1 / estimatedRates[targetCurrency][sourceCurrency];
-                } else {
-                  // Fallback to a reasonable estimate if no direct mapping exists
-                  exchangeRates[targetCurrency] = 1.5; // Generic fallback rate
-                }
-              }
-            });
-            
-            return {
-              ...country,
-              exchangeRates
-            };
-          });
-          
-          setCountriesInfo(countriesWithFallbackRates);
-        }
-      } catch (err) {
-        console.error('Error finding countries and currencies:', err);
-        setError('Failed to find countries and currencies');
+        setCurrencies(fallbackData.currencies);
+        setTravelTips(fallbackData.tips);
         
-        // Provide fallback data
-        const fallbackCountries = [
-          {
-            country: source,
-            currencyCode: 'USD',
-            currencyName: 'US Dollar',
-            currencySymbol: '$',
-            exchangeRates: { EUR: 0.92, GBP: 0.79 }
+        // Also set global data for parent components
+        window.tripCurrencyData = {
+          sourceInfo: {
+            code: fallbackData.currencies[0].currencyCode,
+            name: fallbackData.currencies[0].currencyName,
+            symbol: fallbackData.currencies[0].currencySymbol,
+            country: fallbackData.currencies[0].country
           },
-          {
-            country: 'Intermediate Country',
-            currencyCode: 'EUR',
-            currencyName: 'Euro',
-            currencySymbol: '€',
-            exchangeRates: { USD: 1.09, GBP: 0.86 }
+          destinationInfo: {
+            code: fallbackData.currencies[1].currencyCode,
+            name: fallbackData.currencies[1].currencyName,
+            symbol: fallbackData.currencies[1].currencySymbol,
+            country: fallbackData.currencies[1].country
           },
-          {
-            country: destination,
-            currencyCode: 'GBP',
-            currencyName: 'British Pound',
-            currencySymbol: '£',
-            exchangeRates: { USD: 1.27, EUR: 1.16 }
-          }
-        ];
+          exchangeRate: fallbackData.exchangeRate
+        };
         
-        setCountriesInfo(fallbackCountries);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    findCountriesAndCurrencies();
-  }, [source, destination, locationDetails]);
+    fetchCurrencyData();
+  }, [source, destination]);
 
-  useEffect(() => {
-    // Make currency data available to parent components
-    if (countriesInfo && countriesInfo.length > 0) {
-      // Get source and destination currencies
-      const sourceCurrency = countriesInfo[0];
-      const destCurrency = countriesInfo.length > 1 ? 
-        countriesInfo[countriesInfo.length - 1] : null;
-        
-      // Create a formatted object with currency data
-      window.tripCurrencyData = {
-        sourceInfo: {
-          code: sourceCurrency.currencyCode,
-          name: sourceCurrency.currencyName,
-          symbol: sourceCurrency.currencySymbol,
-          country: sourceCurrency.country
-        },
-        destinationInfo: destCurrency ? {
-          code: destCurrency.currencyCode,
-          name: destCurrency.currencyName,
-          symbol: destCurrency.currencySymbol,
-          country: destCurrency.country
-        } : null,
-        exchangeRate: destCurrency && sourceCurrency.exchangeRates && 
-                     sourceCurrency.exchangeRates[destCurrency.currencyCode] ?
-                     sourceCurrency.exchangeRates[destCurrency.currencyCode] : 1.0
-      };
-    }
-  }, [countriesInfo]);
-
-  // Rest of the component remains unchanged
   if (!source || !destination) {
     return (
-      <div className="bg-indigo-50 p-6 rounded-lg text-center">
-        <FaInfoCircle className="text-indigo-500 text-2xl mx-auto mb-2" />
-        <p className="text-indigo-800">Please set your source and destination to use the currency converter.</p>
+      <div className="bg-[#1a1a1a] p-6 rounded-lg text-center">
+        <FaInfoCircle className="text-[#9cadce] text-2xl mx-auto mb-2" />
+        <p className="text-white">Please set your source and destination to use the currency converter.</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <FaExchangeAlt className="mr-2 text-indigo-600" /> Currency Converter
+      <div className="bg-[#1a1a1a] rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <FaExchangeAlt className="mr-2 text-[#9cadce]" /> Currency Converter
         </h2>
         <div className="flex flex-col items-center justify-center py-12">
-          <FaSpinner className="animate-spin text-3xl text-indigo-500 mb-4" />
-          <p className="text-gray-600">Fetching currency information...</p>
+          <FaSpinner className="animate-spin text-3xl text-[#9cadce] mb-4" />
+          <p className="text-gray-400">Fetching currency information...</p>
         </div>
       </div>
     );
   }
 
-  if (countriesInfo.length === 0) {
+  if (currencies.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <FaExchangeAlt className="mr-2 text-indigo-600" /> Currency Converter
+      <div className="bg-[#1a1a1a] rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <FaExchangeAlt className="mr-2 text-[#9cadce]" /> Currency Converter
         </h2>
-        <div className="bg-red-50 p-4 rounded-md text-red-700">
+        <div className="bg-red-900 bg-opacity-30 p-4 rounded-md text-red-400">
           <p className="flex items-center">
-            <FaInfoCircle className="mr-2" /> {error || 'Failed to load currency information. Please try again later.'}
+            <FaInfoCircle className="mr-2" /> {error || 'Failed to load currency information.'}
           </p>
         </div>
       </div>
     );
   }
+  
+  // Extract source and destination currencies
+  const sourceCurrency = currencies[0];
+  const destCurrency = currencies[1];
+  
+  // Get exchange rate (fallback to 1 if not available)
+  const exchangeRate = window.tripCurrencyData?.exchangeRate || 1.0;
 
-  // Location details section - show what we detected
-  const locationDetailsSection = locationDetails.source && locationDetails.destination ? (
-    <div className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4">
-      <h3 className="text-md font-medium text-gray-700 mb-2 flex items-center">
-        <FaMapMarkerAlt className="mr-2 text-indigo-600" /> Detected Locations
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-3 rounded-md shadow-sm">
-          <div className="text-sm font-medium text-gray-500">Source Location</div>
-          <div className="font-medium text-gray-800">{locationDetails.source.country}</div>
-          <div className="text-xs text-gray-500">
-            {locationDetails.source.currencyName} ({locationDetails.source.currencyCode})
-          </div>
-        </div>
-        
-        <div className="bg-white p-3 rounded-md shadow-sm">
-          <div className="text-sm font-medium text-gray-500">Destination Location</div>
-          <div className="font-medium text-gray-800">{locationDetails.destination.country}</div>
-          <div className="text-xs text-gray-500">
-            {locationDetails.destination.currencyName} ({locationDetails.destination.currencyCode})
-          </div>
-        </div>
-      </div>
-    </div>
-  ) : null;
-
-  // Travel tips section
-  const travelTipsSection = travelTips.length > 0 ? (
-    <div className="mb-6 bg-blue-50 rounded-lg p-4">
-      <h3 className="text-md font-medium text-blue-800 mb-3 flex items-center">
-        <FaLightbulb className="mr-2 text-yellow-500" /> Currency & Money Tips
-      </h3>
-      <ul className="space-y-2">
-        {travelTips.map((tip, i) => (
-          <li key={i} className="flex items-start">
-            <div className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 mr-3">
-              <span className="text-xs font-medium text-blue-600">{i + 1}</span>
-            </div>
-            <span className="text-gray-700 text-sm">{tip}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  ) : null;
-
-  // Create conversion table for all currency pairs
-  const conversionTable = countriesInfo.map((fromCountry, i) => {
-    return (
-      <div key={i} className="mb-8">
-        <h3 className="text-lg font-medium text-gray-800 mb-3">{fromCountry.country} ({fromCountry.currencyCode})</h3>
-        <div className="bg-indigo-50 rounded-lg p-4">
-          <table className="min-w-full">
-            <thead>
-              <tr>
-                <th className="text-left font-medium text-gray-500 text-sm">Convert to</th>
-                <th className="text-right font-medium text-gray-500 text-sm">Rate</th>
-                <th className="text-right font-medium text-gray-500 text-sm">1 Unit Equals</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {countriesInfo.filter(c => c.currencyCode !== fromCountry.currencyCode).map((toCountry, j) => {
-                // Calculate conversion rate if exchange rates are available
-                let conversionRate = "N/A";
-                let equivalentValue = "N/A";
-                
-                if (fromCountry.exchangeRates && toCountry.currencyCode in fromCountry.exchangeRates) {
-                  conversionRate = fromCountry.exchangeRates[toCountry.currencyCode].toFixed(4);
-                  equivalentValue = `${conversionRate} ${toCountry.currencySymbol}`;
-                }
-                
-                return (
-                  <tr key={j}>
-                    <td className="py-2">
-                      <div className="flex items-center">
-                        <span className="font-medium">{toCountry.currencyCode}</span>
-                        <span className="ml-2 text-gray-500">- {toCountry.currencyName}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">{toCountry.country}</div>
-                    </td>
-                    <td className="py-2 text-right">{conversionRate}</td>
-                    <td className="py-2 text-right font-medium">
-                      1 {fromCountry.currencySymbol} = {equivalentValue}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  });
-
-  // Quick conversion cards - show common amounts
-  const quickConversionCards = countriesInfo.length >= 2 ? (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-      {countriesInfo.slice(0, 2).map((country, i) => {
-        const otherCountry = i === 0 ? countriesInfo[1] : countriesInfo[0];
-        const conversionRate = country.exchangeRates && 
-                              otherCountry.currencyCode in country.exchangeRates ? 
-                              country.exchangeRates[otherCountry.currencyCode] : null;
-        
-        if (!conversionRate) return null;
-        
-        const amounts = [10, 50, 100, 500, 1000];
-        
-        return (
-          <div key={i} className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <span className="font-bold">{country.currencyCode}</span>
-                <span className="text-xs text-gray-500 ml-1">({country.country})</span>
-              </div>
-              <FaArrowRight className="text-indigo-500" />
-              <div>
-                <span className="font-bold">{otherCountry.currencyCode}</span>
-                <span className="text-xs text-gray-500 ml-1">({otherCountry.country})</span>
-              </div>
-            </div>
-            
-            <table className="min-w-full">
-              <tbody>
-                {amounts.map(amount => (
-                  <tr key={amount} className="border-t border-gray-100">
-                    <td className="py-1 text-left">{amount} {country.currencySymbol}</td>
-                    <td className="py-1 text-right font-medium">
-                      {(amount * conversionRate).toFixed(2)} {otherCountry.currencySymbol}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
-      })}
-    </div>
-  ) : null;
+  // Sample amounts to convert
+  const amounts = [10, 50, 100, 500, 1000];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-        <FaExchangeAlt className="mr-2 text-indigo-600" /> Currency Converter
+    <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6 border border-[#9cadce] border-opacity-20">
+      <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+        <FaExchangeAlt className="mr-2 text-[#9cadce]" /> Currency Converter
       </h2>
       
-      {error && (
-        <div className="mb-4 p-3 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200">
-          <p className="flex items-center">
-            <FaInfoCircle className="mr-2" /> {error}
-          </p>
-        </div>
-      )}
-      
-      {/* Show the detected locations */}
-      {locationDetailsSection}
-      
+      {/* Currency Information */}
       <div className="mb-6">
-        <h3 className="text-md font-medium text-gray-700 mb-2">Currencies on your route</h3>
+        <h3 className="text-md font-medium text-[#9cadce] mb-2">Currencies on your route</h3>
         <div className="flex flex-wrap gap-3">
-          {countriesInfo.map((country, i) => (
-            <div key={i} className="bg-indigo-50 px-3 py-2 rounded-lg flex items-center">
-              <span className="font-medium text-indigo-800">{country.country}</span>
-              <span className="mx-2 text-gray-400">|</span>
-              <span className="font-medium text-indigo-600">{country.currencySymbol} {country.currencyCode}</span>
+          {currencies.map((currency, i) => (
+            <div key={i} className="bg-[#252525] px-3 py-2 rounded-lg flex items-center">
+              <span className="font-medium text-white">{currency.country}</span>
+              <span className="mx-2 text-gray-500">|</span>
+              <span className="font-medium text-[#9cadce]">{currency.currencySymbol} {currency.currencyCode}</span>
             </div>
           ))}
         </div>
       </div>
       
-      {/* Show travel tips */}
-      {travelTipsSection}
+      {/* Quick Conversion Table */}
+      <div className="mb-6">
+        <h3 className="text-md font-medium text-[#9cadce] mb-2">Quick Conversion</h3>
+        <div className="bg-[#252525] rounded-lg p-4">
+          <div className="flex items-center justify-center mb-3">
+            <div className="text-white">{sourceCurrency.currencyCode}</div>
+            <FaArrowRight className="text-[#9cadce] mx-4" />
+            <div className="text-white">{destCurrency.currencyCode}</div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            {amounts.map((amount) => (
+              <div key={amount} className="bg-[#1a1a1a] p-2 rounded flex justify-between">
+                <span className="text-gray-400">
+                  {amount} {sourceCurrency.currencySymbol}
+                </span>
+                <span className="text-white font-medium">
+                  {(amount * exchangeRate).toFixed(2)} {destCurrency.currencySymbol}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       
-      {/* Quick conversion between the first two currencies */}
-      {quickConversionCards}
+      {/* Travel Tips */}
+      {travelTips.length > 0 && (
+        <div className="mb-4">
+          <h3 className="flex items-center text-md font-medium text-[#9cadce] mb-2">
+            <FaLightbulb className="mr-2 text-yellow-500" /> Currency & Money Tips
+          </h3>
+          <div className="bg-[#252525] rounded-lg p-4">
+            <ul className="space-y-2">
+              {travelTips.map((tip, i) => (
+                <li key={i} className="flex items-start">
+                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-[#9cadce] bg-opacity-20 flex items-center justify-center mt-0.5 mr-3">
+                    <span className="text-xs font-medium text-[#9cadce]">{i + 1}</span>
+                  </div>
+                  <span className="text-gray-300 text-sm">{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
       
-      {/* Currency conversion table */}
-      {conversionTable}
-      
-      <div className="mt-4 text-xs text-gray-500 flex items-center">
-        <FaGlobe className="mr-1" /> 
-        <span>Exchange rates provided by ExchangeRate API • Locations detected automatically</span>
+      <div className="mt-4 text-xs text-gray-500">
+        Exchange rate: 1 {sourceCurrency.currencySymbol} = {exchangeRate.toFixed(4)} {destCurrency.currencySymbol}
       </div>
     </div>
   );
