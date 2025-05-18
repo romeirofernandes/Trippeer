@@ -504,7 +504,7 @@ console.log("Destination weather API response:", destResponse?.data);
   const tempDiffClass = tempDiff > 0 ? 'text-red-400' : (tempDiff < 0 ? 'text-blue-400' : 'text-gray-400');
 
   return (
-    <div className="p-6">
+    <div className="p-6 text-white">
       <h2 className="text-xl font-semibold mb-4 flex items-center text-[#f8f8f8]">
         <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
       </h2>
