@@ -103,6 +103,8 @@ const Auth = () => {
       navigate("/dashboard");
     } catch (error) {
       let errorMessage = "Authentication failed";
+      
+      // Handle Firebase auth errors
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "Email already in use. Try logging in instead.";
@@ -119,20 +121,25 @@ const Auth = () => {
         case "auth/weak-password":
           errorMessage = "Password should be at least 6 characters";
           break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Please check your connection.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many attempts. Try again later.";
+          break;
         default:
-          errorMessage = error.message;
+          errorMessage = error.message || "Authentication failed";
       }
-
+      
       setError(errorMessage);
-
-      // Sign out if there was an error (either with Firebase or backend)
-      try {
-        await auth.signOut();
-      } catch (signOutError) {
-        console.error(
-          "Error signing out after authentication failure:",
-          signOutError
-        );
+      
+      // Only sign out for registration errors - not login errors
+      if (!isLogin && userCredential?.user) {
+        try {
+          await auth.signOut();
+        } catch (signOutError) {
+          console.error("Error signing out after failed registration:", signOutError);
+        }
       }
     } finally {
       setLoading(false);
@@ -200,7 +207,7 @@ const Auth = () => {
                 →
               </span>
             </button>
-          </div>
+          </motion.div>
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -290,7 +297,7 @@ const Auth = () => {
                 )}
               </motion.button>
             </div>
-          </motion.form>
+          </form>
           
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">
