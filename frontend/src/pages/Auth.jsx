@@ -8,9 +8,10 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "../firebase.config";
-import { FaGoogle, FaRegEnvelope,FaUser } from "react-icons/fa";
+import { FaGoogle, FaRegEnvelope, FaUser, FaPlane } from "react-icons/fa";
 import { IoKeyOutline } from "react-icons/io5";
 import axios from "axios";
+import { motion } from 'framer-motion';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -128,24 +129,52 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-gray-900 to-black">
-      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl relative overflow-hidden border border-gray-700">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500 opacity-20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500 opacity-20 rounded-full blur-3xl"></div>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#080808]">
+      <div className="max-w-md w-full space-y-8 bg-[#111111] p-8 rounded-xl shadow-2xl relative overflow-hidden border border-[#232323]">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-800 opacity-20 rounded-full blur-3xl"
+        ></motion.div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#9cadce] opacity-20 rounded-full blur-3xl"
+        ></motion.div>
         
         <div className="relative">
-          <h2 className="text-center text-3xl font-extrabold text-white mb-6">
-            {isLogin ? "Sign In" : "Create Account"}
-          </h2>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-6"
+          >
+            <div className="flex justify-center mb-2">
+              <FaPlane className="text-3xl text-[#9cadce]" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-[#f8f8f8]">
+              {isLogin ? "Welcome Back" : "Create Account"}
+            </h2>
+            <p className="mt-1 text-sm text-gray-400">
+              {isLogin ? "Sign in to access your trips" : "Join us to start planning your adventures"}
+            </p>
+          </motion.div>
           
           {/* Toggle Switch */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-gray-700 rounded-lg p-1 inline-flex">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex justify-center mb-8"
+          >
+            <div className="bg-[#1a1a1a] rounded-lg p-1 inline-flex">
               <button
                 onClick={() => setIsLogin(true)}
                 className={`px-4 py-2 rounded-md transition-all duration-200 ${
                   isLogin
-                    ? "bg-blue-600 text-white"
+                    ? "bg-indigo-800 text-white"
                     : "text-gray-300 hover:text-white"
                 }`}
               >
@@ -155,49 +184,66 @@ const Auth = () => {
                 onClick={() => setIsLogin(false)}
                 className={`px-4 py-2 rounded-md transition-all duration-200 ${
                   !isLogin
-                    ? "bg-blue-600 text-white"
+                    ? "bg-indigo-800 text-white"
                     : "text-gray-300 hover:text-white"
                 }`}
               >
                 Register
               </button>
             </div>
-          </div>
+          </motion.div>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-900/30 border border-red-500 text-red-200 rounded-md text-sm">
-              {error}
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-900 bg-opacity-30 border border-red-700 text-red-400 rounded-md text-sm"
+            >
+              <p className="flex items-center">
+                <span className="mr-2">⚠</span> {error}
+              </p>
+            </motion.div>
           )}
           
           {/* Google Sign In */}
-          <div className="mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-6"
+          >
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center py-3 px-4 rounded-md bg-white hover:bg-gray-100 transition-all duration-200 text-gray-800 font-medium group"
+              className="w-full flex items-center justify-center py-3 px-4 rounded-md bg-[#1a1a1a] hover:bg-[#232323] border border-[#323232] transition-all duration-200 text-[#f8f8f8] font-medium group"
             >
-              <FaGoogle className="h-5 w-5 mr-2 text-blue-600" />
+              <FaGoogle className="h-5 w-5 mr-2 text-[#9cadce]" />
               <span>Continue with Google</span>
               <span className="ml-1 opacity-0 group-hover:opacity-100 group-hover:ml-2 transition-all duration-200">
                 →
               </span>
             </button>
-          </div>
+          </motion.div>
           
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
+              <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-gray-800 text-gray-400 text-sm">
+              <span className="px-3 bg-[#111111] text-gray-400 text-sm">
                 or continue with email
               </span>
             </div>
           </div>
           
           {/* Email/Password Form */}
-          <form onSubmit={handleEmailAuth} className="space-y-6">
+          <motion.form 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            onSubmit={handleEmailAuth} 
+            className="space-y-6"
+          >
             {/* Name field (only for registration) */}
             {!isLogin && (
               <div className="relative">
@@ -206,7 +252,7 @@ const Auth = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-3 py-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-3 py-3 bg-[#1a1a1a] border border-[#323232] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9cadce] focus:border-transparent"
                   placeholder="Full Name"
                 />
               </div>
@@ -219,7 +265,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 py-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-3 py-3 bg-[#1a1a1a] border border-[#323232] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9cadce] focus:border-transparent"
                 placeholder="Email address"
               />
             </div>
@@ -231,16 +277,18 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 py-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-3 py-3 bg-[#1a1a1a] border border-[#323232] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9cadce] focus:border-transparent"
                 placeholder="Password"
               />
             </div>
             
             <div>
-              <button
+              <motion.button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md text-white bg-indigo-800 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
               >
                 {loading ? (
                   <span className="flex items-center">
@@ -255,9 +303,21 @@ const Auth = () => {
                 ) : (
                   "Create Account"
                 )}
-              </button>
+              </motion.button>
             </div>
-          </form>
+          </motion.form>
+          
+          <div className="mt-6 text-center text-sm">
+            <span className="text-gray-400">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+            </span>
+            <button
+              onClick={handleToggle}
+              className="text-[#9cadce] hover:text-white focus:outline-none transition-colors"
+            >
+              {isLogin ? "Sign up" : "Sign in"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,11 @@
 import React, { useState, createContext, useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { FaRoute, FaCompass } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { motion } from "framer-motion";
+import { auth, signOut } from "../firebase.config";
+import { toast } from "react-hot-toast";
 
 export const SidebarContext = createContext();
 
@@ -28,11 +30,24 @@ export const SidebarProvider = ({ children }) => {
 const Sidebar = () => {
   const { isOpen, setIsOpen } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { title: "Plan Trip", path: "/plan", icon: <FaRoute size={20} /> },
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
   ];
+
+  // Add logout handler function
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success("Logged out successfully");
+      navigate("/auth"); // Redirect to login page after logout
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Failed to logout. Please try again.");
+    }
+  };
 
   const sidebarVariants = {
     open: {
@@ -111,13 +126,11 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* Logout Button */}
+      {/* Logout Button - Updated with logout handler */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => {
-          /* Add logout logic */
-        }}
+        onClick={handleLogout}
         className={`mt-auto mb-8 group flex items-center ${
           isOpen ? "gap-4" : "justify-center"
         } font-medium p-3 hover:bg-[#232323] rounded-md transition-all duration-300`}
