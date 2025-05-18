@@ -151,10 +151,10 @@ const TripHistory = ({ limit }) => {
   };
   
   // Filter trips based on search term
-  const filteredTrips = trips.filter(trip => 
+  const filteredTrips = Array.isArray(trips)? trips.filter(trip => 
     trip.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.destination.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ):[];
   
   if (!user) {
     return (
