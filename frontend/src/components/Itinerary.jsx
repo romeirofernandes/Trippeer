@@ -1796,9 +1796,6 @@ const handleAdjustTimes = (dayIndex, direction) => {
               </div>
             </motion.div>
 
-            {/* Day-by-day itinerary as timeline */}
-// Replace the existing timeline component with this enhanced version
-
 {/* Day-by-day itinerary as timeline */}
 <div className="space-y-8 mb-8">
   {itinerary.days.map((day, index) => (
@@ -1861,25 +1858,6 @@ const handleAdjustTimes = (dayIndex, direction) => {
               </motion.div>
             );
           })}
-        </div>
-      </div>
-      
-      {/* Time adjustment buttons */}
-      <div className="px-4 py-2 bg-[#111111] flex justify-between items-center">
-        <span className="text-xs text-[#9cadce]">Adjust times:</span>
-        <div className="flex space-x-2">
-          <button 
-            className="text-xs px-2 py-1 rounded bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-colors"
-            onClick={() => handleAdjustTimes(index, 'earlier')}
-          >
-            Earlier
-          </button>
-          <button 
-            className="text-xs px-2 py-1 rounded bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-colors"
-            onClick={() => handleAdjustTimes(index, 'later')}
-          >
-            Later
-          </button>
         </div>
       </div>
     </motion.div>
