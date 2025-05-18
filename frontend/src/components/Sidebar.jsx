@@ -6,7 +6,7 @@ import {
   FaCompass,
   FaTachometerAlt,
   FaHistory,
-  FaSuitcase,
+  FaSuitcase,FaRobot,
 } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
@@ -54,6 +54,7 @@ const Sidebar = () => {
       path: "/mumbai-drift",
       icon: <HiOutlineLocationMarker size={20} />,
     },
+    { title: "Travel Assistant", path: "/travel-assistant", icon: <FaRobot size={20} /> },
   ];
 
   // Add logout handler function

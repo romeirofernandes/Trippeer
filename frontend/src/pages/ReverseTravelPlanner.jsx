@@ -11,7 +11,7 @@ import LoadingAnimation from "../components/LoadingAnimation";
 import WildcardButton from "../components/WildcardButton";
 import Sidebar, { SidebarProvider, useSidebar } from "../components/Sidebar";
 import AdventureWheel from "../components/AdventureWheel";
-
+import { toast } from "react-toastify";
 import { TravelContext, TravelProvider } from "../context/TravelContext";
 
 // Animations config
@@ -72,6 +72,16 @@ const ReverseTravelPlannerContent = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!startLocation || !startLocation.lat || !startLocation.lon) {
+    toast.error("Please select a valid location from the dropdown", {
+      position: "top-right",
+      autoClose: 4000,
+      style: { backgroundColor: "#ff4757" }
+    });
+    return;
+  }
+  
+  dispatch({ type: "SET_LOADING", payload: true });
     dispatch({ type: "SET_LOADING", payload: true });
 
     try {
