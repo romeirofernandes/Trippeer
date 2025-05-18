@@ -3,8 +3,7 @@ import React from "react";
 const Landing = () => {
   return (
     <>
-      <h1>Russel is a nonce.</h1>
-    </>
+      <div>hi</div>    </>
   );
 };
 
