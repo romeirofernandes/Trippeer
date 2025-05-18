@@ -5,7 +5,12 @@ import {
   FaPlane, FaCalendarAlt, FaMapMarkerAlt, FaSpinner,
   FaClock, FaSuitcase, FaUtensils, FaUmbrellaBeach,
   FaInfoCircle, FaDownload, FaShare, FaUser, FaSun,
-  FaExchangeAlt, FaCloudSun, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas, FaSave, FaCheck
+  FaExchangeAlt, FaCloudSun, FaMoon, FaCloud, FaArrowRight, FaGlobeAmericas, FaSave, FaCheck,
+  FaPalette, 
+  FaShoppingBag, 
+  FaTree, 
+  FaLandmark, 
+  FaBus 
 } from 'react-icons/fa';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -993,6 +998,74 @@ const handleAdjustTimes = (dayIndex, direction) => {
     return null;
   };
 
+  // Add this state at the top with other state declarations
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+
+  // Add these functions before the return statement
+  const handleNextDay = () => {
+    if (currentDayIndex < itinerary.days.length - 1) {
+      setCurrentDayIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevDay = () => {
+    if (currentDayIndex > 0) {
+      setCurrentDayIndex(prev => prev - 1);
+    }
+  };
+
+  // Add this function before the return statement
+  const getActivityIcon = (activity) => {
+    const description = activity.description?.toLowerCase() || '';
+    
+    // Food related activities
+    if (description.includes('breakfast') || description.includes('lunch') || 
+        description.includes('dinner') || description.includes('food') || 
+        description.includes('restaurant') || description.includes('dining')) {
+      return <FaUtensils className="w-5 h-5" />;
+    }
+    
+    // Sightseeing and attractions
+    if (description.includes('museum') || description.includes('gallery') || 
+        description.includes('art') || description.includes('exhibition')) {
+      return <FaPalette className="w-5 h-5" />;
+    }
+    
+    // Shopping
+    if (description.includes('shopping') || description.includes('market') || 
+        description.includes('mall') || description.includes('store')) {
+      return <FaShoppingBag className="w-5 h-5" />;
+    }
+    
+    // Nature and outdoor activities
+    if (description.includes('park') || description.includes('garden') || 
+        description.includes('nature') || description.includes('hiking') || 
+        description.includes('beach')) {
+      return <FaTree className="w-5 h-5" />;
+    }
+    
+    // Entertainment and nightlife
+    if (description.includes('night') || description.includes('club') || 
+        description.includes('bar') || description.includes('entertainment')) {
+      return <FaMoon className="w-5 h-5" />;
+    }
+    
+    // Cultural activities
+    if (description.includes('temple') || description.includes('church') || 
+        description.includes('mosque') || description.includes('cultural')) {
+      return <FaLandmark className="w-5 h-5" />;
+    }
+    
+    // Transportation
+    if (description.includes('transfer') || description.includes('transport') || 
+        description.includes('bus') || description.includes('train')) {
+      return <FaBus className="w-5 h-5" />;
+    }
+    
+    // Default icon
+    return <FaMapMarkerAlt className="w-5 h-5" />;
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#080808' }}>
       <div className="max-w-4xl mx-auto">
@@ -1599,139 +1672,228 @@ const handleAdjustTimes = (dayIndex, direction) => {
             {/* Display save status */}
             {renderSaveStatus()}
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="p-4 rounded-lg mb-6"
-              style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-            >
-              <div className="flex flex-wrap items-center justify-center md:justify-between gap-4">
-                <motion.div
-                  className="flex items-center"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                    <FaCalendarAlt className="text-black" />
-                  </div>
-                  <div>
-                    <p className="text-xs" style={{ color: '#9cadce' }}>Duration</p>
-                    <p className="text-sm font-bold text-white">{days} Days</p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-center"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                    <FaUser className="text-black" />
-                  </div>
-                  <div>
-                    <p className="text-xs" style={{ color: '#9cadce' }}>Travelers</p>
-                    <p className="text-sm font-bold text-white">{travelers} Persons</p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-center"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                    <FaClock className="text-black" />
-                  </div>
-                  <div>
-                    <p className="text-xs" style={{ color: '#9cadce' }}>Flight Time</p>
-                    <p className="text-sm font-bold text-white">{itinerary.flightTime} Hours</p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-center"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                    <FaMapMarkerAlt className="text-black" />
-                  </div>
-                  <div>
-                    <p className="text-xs" style={{ color: '#9cadce' }}>Distance</p>
-                    <p className="text-sm font-bold text-white">{itinerary.distance} km</p>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-
-{/* Day-by-day itinerary as timeline */}
-<div className="space-y-8 mb-8">
-  {itinerary.days.map((day, index) => (
-    <motion.div
-      key={index}
-      className="rounded-lg shadow-md overflow-hidden"
-      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 * index }}
-      whileHover={{ boxShadow: '0 0 15px rgba(156, 173, 206, 0.2)' }}
-    >
-      <div className="px-4 py-3" style={{ backgroundColor: '#9cadce' }}>
-        <h3 className="font-semibold text-black">Day {day.day}</h3>
-      </div>
-      <div className="p-4">
-        {/* Time ruler */}
-        <div className="relative flex items-center mb-6">
-          <div className="h-1 bg-[#9cadce] opacity-30 flex-grow"></div>
-          <div className="absolute w-full flex justify-between px-2">
-            <span className="text-[10px] text-[#9cadce]">06:00</span>
-            <span className="text-[10px] text-[#9cadce]">12:00</span>
-            <span className="text-[10px] text-[#9cadce]">18:00</span>
-            <span className="text-[10px] text-[#9cadce]">00:00</span>
-          </div>
-        </div>
-        
-        {/* Activities on timeline */}
-        <div className="space-y-4 relative">
-          {day.activities.map((activity, i) => {
-            // Parse time to position activities on timeline
-            const timeString = activity.time || "";
-            const startTime = timeString.split(' - ')[0];
-            const startHour = parseInt(startTime.split(':')[0]) + (startTime.includes('PM') && !startTime.includes('12:') ? 12 : 0);
-            const timePosition = ((startHour - 6 + 24) % 24) / 18 * 100; // Position based on 6am-midnight range
-            
-            return (
+            <div className="space-y-12 mb-8">
               <motion.div
-                key={i}
-                className="relative border-l-2 pl-4 pb-2"
+                key={currentDayIndex}
+                className="rounded-xl shadow-lg overflow-hidden"
                 style={{ 
-                  borderColor: '#9cadce',
-                  marginLeft: `${Math.min(Math.max(timePosition, 0), 100)}%` 
+                  backgroundColor: '#1a1a1a', 
+                  borderColor: '#9cadce', 
+                  borderWidth: '1px',
+                  boxShadow: '0 4px 6px -1px rgba(156, 173, 206, 0.1), 0 2px 4px -1px rgba(156, 173, 206, 0.06)'
                 }}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + (i * 0.1) }}
-                whileHover={{ x: 5 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ 
+                  boxShadow: '0 0 20px rgba(156, 173, 206, 0.3)',
+                  transform: 'translateY(-2px)'
+                }}
               >
-                {/* Timeline dot */}
-                <div className="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-[#9cadce]"></div>
+                {/* Day Header with gradient */}
+                <div className="px-6 py-4" style={{ 
+                  background: 'linear-gradient(135deg, #9cadce 0%, #7a8ba8 100%)',
+                  borderBottom: '1px solid rgba(156, 173, 206, 0.2)'
+                }}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-black text-lg flex items-center">
+                      <span className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center mr-3">
+                        {itinerary.days[currentDayIndex].day}
+                      </span>
+                      Day {itinerary.days[currentDayIndex].day}
+                    </h3>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handlePrevDay}
+                        disabled={currentDayIndex === 0}
+                        className={`px-4 py-2 rounded-lg flex items-center ${
+                          currentDayIndex === 0 
+                            ? 'bg-gray-600 cursor-not-allowed' 
+                            : 'bg-black/20 hover:bg-black/30'
+                        }`}
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous Day
+                      </button>
+                      <button
+                        onClick={handleNextDay}
+                        disabled={currentDayIndex === itinerary.days.length - 1}
+                        className={`px-4 py-2 rounded-lg flex items-center ${
+                          currentDayIndex === itinerary.days.length - 1 
+                            ? 'bg-gray-600 cursor-not-allowed' 
+                            : 'bg-black/20 hover:bg-black/30'
+                        }`}
+                      >
+                        Next Day
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 
-                {/* Activity card */}
-                <div className="bg-[#111111] p-3 rounded-lg">
-                  <p className="text-sm font-medium text-[#9cadce] mb-1">
-                    {activity.time || `Activity ${i + 1}`}
-                  </p>
-                  <p className="text-gray-300">{activity.description || activity}</p>
+                <div className="p-6">
+                  {/* Enhanced Time Ruler */}
+                  <div className="relative mb-8">
+                    <div className="h-2 bg-gradient-to-r from-[#9cadce]/20 via-[#9cadce]/40 to-[#9cadce]/20 rounded-full"></div>
+                    <div className="absolute w-full flex justify-between px-2 -bottom-6">
+                      {['06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00'].map((time, i) => (
+                        <div key={i} className="flex flex-col items-center">
+                          <div className="w-1 h-3 bg-[#9cadce] rounded-full mb-1"></div>
+                          <span className="text-xs text-[#9cadce] font-medium">{time}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Activities Timeline with Connected Arrows */}
+                  <div className="space-y-8 relative">
+                    {itinerary.days[currentDayIndex].activities.map((activity, i) => {
+                      const timeString = activity.time || "";
+                      const startTime = timeString.split(' - ')[0];
+                      const startHour = parseInt(startTime.split(':')[0]) + (startTime.includes('PM') && !startTime.includes('12:') ? 12 : 0);
+                      const timePosition = ((startHour - 6 + 24) % 24) / 18 * 100;
+                      const isLeft = i % 2 === 0;
+                      const isLast = i === itinerary.days[currentDayIndex].activities.length - 1;
+                      
+                      return (
+                        <div className="flex justify-center my-12 relative" key={i}>
+                          <motion.div 
+                            className={`w-5/12 ${isLeft ? 'pr-8' : 'pl-8'} ${isLeft ? 'text-right' : 'text-left'}`}
+                            initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 + (i * 0.1) }}
+                            whileHover={{ x: isLeft ? -5 : 5 }}
+                          >
+                            {isLeft && (
+                              <div className="relative">
+                                {/* Icon positioned outside the box with increased size and distance */}
+                                <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 w-14 h-14 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] z-20 hover:bg-[#9cadce]/20 transition-all duration-300">
+                                  {getActivityIcon(activity)}
+                                </div>
+                                <div className="bg-[#111111] p-4 rounded-lg inline-block shadow-lg border border-[#9cadce]/10 hover:border-[#9cadce]/30 transition-all duration-300 relative">
+                                  {/* Connecting arrow to next activity */}
+                                  {!isLast && (
+                                    <svg className="absolute -right-32 top-1/2 w-64 h-8" viewBox="0 0 400 50" preserveAspectRatio="none">
+                                      <path
+                                        d="M0,25 C80,25 120,0 200,0 C280,0 320,25 400,25"
+                                        fill="none"
+                                        stroke="#9cadce"
+                                        strokeWidth="2"
+                                        strokeDasharray="4 4"
+                                        opacity="0.5"
+                                      />
+                                      {/* Arrow head */}
+                                      <path
+                                        d="M390,20 L400,25 L390,30"
+                                        fill="none"
+                                        stroke="#9cadce"
+                                        strokeWidth="2"
+                                        opacity="0.5"
+                                      />
+                                    </svg>
+                                  )}
+                                  <div>
+                                    <p className="text-sm font-medium text-[#9cadce] mb-2 flex items-center">
+                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                      {activity.time || `Activity ${i + 1}`}
+                                    </p>
+                                    <p className="text-gray-300 leading-relaxed">{activity.description || activity}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+                          
+                          <motion.div 
+                            className={`w-5/12 ${isLeft ? 'pl-8' : 'pr-8'} ${isLeft ? 'text-left' : 'text-right'}`}
+                            initial={{ opacity: 0, x: isLeft ? 20 : -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 + (i * 0.1) }}
+                            whileHover={{ x: isLeft ? 5 : -5 }}
+                          >
+                            {!isLeft && (
+                              <div className="relative">
+                                {/* Icon positioned outside the box with increased size and distance */}
+                                <div className="absolute -left-20 top-1/2 transform -translate-y-1/2 w-14 h-14 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] z-20 hover:bg-[#9cadce]/20 transition-all duration-300">
+                                  {getActivityIcon(activity)}
+                                </div>
+                                <div className="bg-[#111111] p-4 rounded-lg inline-block shadow-lg border border-[#9cadce]/10 hover:border-[#9cadce]/30 transition-all duration-300 relative">
+                                  {/* Connecting arrow to next activity */}
+                                  {!isLast && (
+                                    <svg className="absolute -left-32 top-1/2 w-64 h-8" viewBox="0 0 400 50" preserveAspectRatio="none">
+                                      <path
+                                        d="M400,25 C320,25 280,0 200,0 C120,0 80,25 0,25"
+                                        fill="none"
+                                        stroke="#9cadce"
+                                        strokeWidth="2"
+                                        strokeDasharray="4 4"
+                                        opacity="0.5"
+                                      />
+                                      {/* Arrow head */}
+                                      <path
+                                        d="M10,20 L0,25 L10,30"
+                                        fill="none"
+                                        stroke="#9cadce"
+                                        strokeWidth="2"
+                                        opacity="0.5"
+                                      />
+                                    </svg>
+                                  )}
+                                  <div>
+                                    <p className="text-sm font-medium text-[#9cadce] mb-2 flex items-center">
+                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                      {activity.time || `Activity ${i + 1}`}
+                                    </p>
+                                    <p className="text-gray-300 leading-relaxed">{activity.description || activity}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                {/* Enhanced Time Adjustment Controls */}
+                <div className="px-6 py-4 bg-[#111111] border-t border-[#9cadce]/10">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-[#9cadce] font-medium">Adjust Schedule</span>
+                    <div className="flex space-x-3">
+                      <button 
+                        className="px-4 py-2 rounded-lg bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-all duration-300 flex items-center"
+                        onClick={() => handleAdjustTimes(currentDayIndex, 'earlier')}
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Earlier
+                      </button>
+                      <button 
+                        className="px-4 py-2 rounded-lg bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-all duration-300 flex items-center"
+                        onClick={() => handleAdjustTimes(currentDayIndex, 'later')}
+                      >
+                        Later
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
-            );
-          })}
-        </div>
-      </div>
-    </motion.div>
-  ))}
-</div>
+            </div>
+
             <motion.div
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
