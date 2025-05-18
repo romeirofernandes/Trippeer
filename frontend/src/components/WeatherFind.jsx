@@ -1,0 +1,393 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import { WiHumidity, WiThermometer } from 'react-icons/wi';
+
+const WeatherFind = ({ source, destination }) => {
+  const [sourceWeather, setSourceWeather] = useState(null);
+  const [destinationWeather, setDestinationWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Get API keys from environment variables
+  const API_KEY = import.meta.env.VITE_WEATHER_API_KEY; 
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      if (!source || !destination) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Fetch source weather
+        const sourceResponse = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${source}&days=7&aqi=no&alerts=no`
+        );
+        setSourceWeather(sourceResponse.data);
+
+        // Fetch destination weather
+        const destResponse = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${destination}&days=7&aqi=no&alerts=no`
+        );
+        setDestinationWeather(destResponse.data);
+
+        // Generate AI suggestions based on weather data
+        await generateSuggestions(sourceResponse.data, destResponse.data);
+
+      } catch (err) {
+        console.error('Error fetching weather data:', err);
+        setError('Failed to fetch weather information. Please check your location names.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeather();
+  }, [source, destination]);
+
+  // Function to generate AI-powered suggestions based on weather differences
+  const generateSuggestions = async (sourceData, destData) => {
+    if (!GEMINI_API_KEY) {
+      console.error('Missing Gemini API key');
+      setSuggestions([
+        "Pack light and breathable clothing for warmer days at your destination.",
+        "Don't forget an umbrella if precipitation is expected.",
+        "Layer your clothing to adapt to changing temperatures.",
+        "Consider the local weather pattesrns when planning outdoor activities."
+      ]);
+      return;
+    }
+
+    try {
+      // Create a summary of the weather conditions
+      const sourceTempC = sourceData.current.temp_c;
+      const destTempC = destData.current.temp_c;
+      const tempDiff = Math.abs(sourceTempC - destTempC).toFixed(1);
+      const isDestWarmer = destTempC > sourceTempC;
+      
+      const sourceCondition = sourceData.current.condition.text;
+      const destCondition = destData.current.condition.text;
+      
+      const destForecast = destData.forecast.forecastday.map(day => ({
+        date: day.date,
+        condition: day.day.condition.text,
+        maxTemp: day.day.maxtemp_c,
+        minTemp: day.day.mintemp_c,
+        chanceOfRain: day.day.daily_chance_of_rain
+      }));
+
+      const prompt = `As a travel expert, provide 5 practical pieces of advice for someone traveling from ${source} (current temperature: ${sourceTempC}°C, ${sourceCondition}) to ${destination} (current temperature: ${destTempC}°C, ${destCondition}). The temperature difference is ${tempDiff}°C, with destination being ${isDestWarmer ? 'warmer' : 'cooler'}.
+
+      Destination 7-day forecast summary: ${JSON.stringify(destForecast)}
+      
+      Focus on:
+      1. Clothing recommendations based on the temperature difference and weather conditions
+      2. Items to pack specifically for the destination weather
+      3. Weather-appropriate activities
+      4. Health considerations related to the climate change
+      5. One weather-specific local custom or tip
+      
+      Format the response as a JSON array of 5 suggestion strings, each under 100 characters for compact display:
+      ["suggestion 1", "suggestion 2", "suggestion 3", "suggestion 4", "suggestion 5"]`;
+
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json"
+          }
+        }
+      );
+
+      // Parse the response
+      try {
+        const textContent = response.data.candidates[0].content.parts[0].text;
+        
+        // Find JSON content
+        const jsonMatch = textContent.match(/\[[\s\S]*\]/) || 
+                          textContent.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : textContent;
+        
+        // Parse the JSON
+        const suggestionsData = JSON.parse(jsonStr);
+        setSuggestions(suggestionsData);
+      } catch (parseError) {
+        console.error('Error parsing suggestions:', parseError);
+        setSuggestions([
+          "Pack appropriate clothing for the destination's temperature difference.",
+          "Consider the local weather when planning activities.",
+          "Stay hydrated and protect yourself from the sun in warmer climates.",
+          "Pack an umbrella or rain protection if precipitation is expected.",
+          "Check local weather forecasts regularly during your stay."
+        ]);
+      }
+    } catch (err) {
+      console.error('Error generating suggestions:', err);
+      setSuggestions([
+        "Pack layers to adjust to changing temperatures.",
+        "Consider the season at your destination when packing.",
+        "Check the weather forecast before planning outdoor activities.",
+        "Pack appropriate footwear for the expected conditions.",
+        "Bring sun protection regardless of temperature."
+      ]);
+    }
+  };
+
+  // Function to get appropriate weather icon
+  const getWeatherIcon = (condition) => {
+    if (!condition) return <FaCloud />;
+    
+    const text = condition.text.toLowerCase();
+    if (text.includes('sun') || text.includes('clear')) return <FaSun className="text-yellow-500" />;
+    if (text.includes('rain') || text.includes('drizzle')) return <FaCloudRain className="text-blue-500" />;
+    if (text.includes('snow') || text.includes('sleet') || text.includes('ice')) return <FaSnowflake className="text-blue-300" />;
+    if (text.includes('cloud') || text.includes('overcast')) return <FaCloud className="text-gray-400" />;
+    return <FaCloud className="text-gray-400" />;
+  };
+
+  // Day of week formatter
+  const formatDay = (dateStr) => {
+    if (!dateStr) return '';
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const date = new Date(dateStr);
+    return days[date.getDay()];
+  };
+
+  if (!source || !destination) {
+    return (
+      <div className="bg-indigo-50 p-6 rounded-lg text-center">
+        <FaInfoCircle className="text-indigo-500 text-2xl mx-auto mb-2" />
+        <p className="text-indigo-800">Please set your source and destination to view weather information.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
+        </h2>
+        <div className="flex flex-col items-center justify-center py-12">
+          <FaSpinner className="animate-spin text-3xl text-indigo-500 mb-4" />
+          <p className="text-gray-600">Fetching weather information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
+        </h2>
+        <div className="bg-red-50 p-4 rounded-md text-red-700">
+          <p className="flex items-center">
+            <FaInfoCircle className="mr-2" /> {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate temperature difference
+  const tempDiff = sourceWeather && destinationWeather ? 
+    (destinationWeather.current.temp_c - sourceWeather.current.temp_c).toFixed(1) : 0;
+  
+  const tempDiffClass = tempDiff > 0 ? 'text-red-500' : (tempDiff < 0 ? 'text-blue-500' : 'text-gray-500');
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
+      </h2>
+      
+      {/* Source and Destination Current Weather */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Source Weather */}
+        {sourceWeather && (
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-indigo-800">
+                {sourceWeather.location.name}, {sourceWeather.location.country}
+              </h3>
+              <span className="text-xs text-gray-500">Source</span>
+            </div>
+            <div className="flex mt-4 items-center">
+              <div className="text-5xl mr-4">
+                {getWeatherIcon(sourceWeather.current.condition)}
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-gray-800">
+                  {sourceWeather.current.temp_c}°C
+                </div>
+                <div className="text-gray-600">
+                  {sourceWeather.current.condition.text}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
+              <div className="flex items-center">
+                <WiHumidity className="text-blue-500 mr-1" />
+                <span>Humidity: {sourceWeather.current.humidity}%</span>
+              </div>
+              <div className="flex items-center">
+                <FaWind className="text-blue-400 mr-1" />
+                <span>Wind: {sourceWeather.current.wind_kph} km/h</span>
+              </div>
+              <div className="flex items-center">
+                <WiThermometer className="text-red-400 mr-1" />
+                <span>Feels like: {sourceWeather.current.feelslike_c}°C</span>
+              </div>
+              <div className="flex items-center">
+                <FaUmbrella className="text-indigo-400 mr-1" />
+                <span>Precip: {sourceWeather.current.precip_mm} mm</span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Destination Weather */}
+        {destinationWeather && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-amber-800">
+                {destinationWeather.location.name}, {destinationWeather.location.country}
+              </h3>
+              <span className="text-xs text-gray-500">Destination</span>
+            </div>
+            <div className="flex mt-4 items-center">
+              <div className="text-5xl mr-4">
+                {getWeatherIcon(destinationWeather.current.condition)}
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-gray-800">
+                  {destinationWeather.current.temp_c}°C
+                </div>
+                <div className="text-gray-600">
+                  {destinationWeather.current.condition.text}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
+              <div className="flex items-center">
+                <WiHumidity className="text-blue-500 mr-1" />
+                <span>Humidity: {destinationWeather.current.humidity}%</span>
+              </div>
+              <div className="flex items-center">
+                <FaWind className="text-blue-400 mr-1" />
+                <span>Wind: {destinationWeather.current.wind_kph} km/h</span>
+              </div>
+              <div className="flex items-center">
+                <WiThermometer className="text-red-400 mr-1" />
+                <span>Feels like: {destinationWeather.current.feelslike_c}°C</span>
+              </div>
+              <div className="flex items-center">
+                <FaUmbrella className="text-indigo-400 mr-1" />
+                <span>Precip: {destinationWeather.current.precip_mm} mm</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Temperature Difference */}
+      <div className="bg-gray-50 rounded-lg p-4 mb-6 text-center shadow-inner">
+        <h3 className="font-medium text-gray-700 mb-2">Temperature Difference</h3>
+        <div className="flex items-center justify-center">
+          <div className={`text-3xl font-bold ${tempDiffClass}`}>
+            {tempDiff > 0 ? '+' : ''}{tempDiff}°C
+          </div>
+          <div className="ml-3 text-sm text-gray-600">
+            {tempDiff > 0 
+              ? 'Destination is warmer than source' 
+              : tempDiff < 0 
+                ? 'Destination is cooler than source' 
+                : 'Same temperature at both locations'
+            }
+          </div>
+        </div>
+      </div>
+      
+      {/* Destination Forecast */}
+      {destinationWeather && (
+        <div className="mb-6">
+          <h3 className="font-medium text-gray-800 mb-3">
+            7-Day Forecast for {destinationWeather.location.name}
+          </h3>
+          <div className="overflow-x-auto">
+            <div className="flex space-x-4 p-1 min-w-max">
+              {destinationWeather.forecast.forecastday.map(day => (
+                <div key={day.date} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 w-36">
+                  <div className="text-sm font-medium text-gray-700">
+                    {formatDay(day.date)}
+                  </div>
+                  <div className="text-xs text-gray-500 mb-2">
+                    {day.date}
+                  </div>
+                  <div className="text-2xl mb-1 text-center">
+                    {getWeatherIcon(day.day.condition)}
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="flex items-center">
+                      <FaTemperatureLow className="text-blue-500 mr-1" />
+                      {day.day.mintemp_c}°
+                    </span>
+                    <span className="flex items-center">
+                      <FaTemperatureHigh className="text-red-500 ml-1 mr-1" />
+                      {day.day.maxtemp_c}°
+                    </span>
+                  </div>
+                  <div className="text-xs mt-2 text-center text-gray-600">
+                    {day.day.condition.text}
+                  </div>
+                  <div className="flex items-center justify-center mt-1 text-xs">
+                    <FaUmbrella className="text-blue-400 mr-1" />
+                    <span>{day.day.daily_chance_of_rain}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Smart Suggestions */}
+      <div className="bg-indigo-50 rounded-lg p-4">
+        <h3 className="font-medium text-indigo-900 mb-3 flex items-center">
+          <FaTshirt className="mr-2" /> Smart Travel Suggestions
+        </h3>
+        <ul className="space-y-2">
+          {suggestions.map((suggestion, index) => (
+            <li key={index} className="flex items-start">
+              <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
+              <span className="text-gray-700">{suggestion}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default WeatherFind;

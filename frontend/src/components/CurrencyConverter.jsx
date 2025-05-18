@@ -7,7 +7,8 @@ const CurrencyConverter = ({ source, destination }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const API_KEY = '0988f8d95d339e49ced66a86'; // Your Exchange Rate API key
+  // Get API key from environment variables
+  const API_KEY = import.meta.env.VITE_EXCHANGE_RATE_API_KEY; 
 
   // Common currency codes and their information as fallback
   const commonCurrencies = {
@@ -38,7 +39,7 @@ const CurrencyConverter = ({ source, destination }) => {
     AED: { USD: 0.27, EUR: 0.25, GBP: 0.22, JPY: 42.72, CAD: 0.37, AUD: 0.41, CNY: 1.97, INR: 22.65, SGD: 0.37, QAR: 0.99 },
     QAR: { USD: 0.27, EUR: 0.26, GBP: 0.22, JPY: 43.08, CAD: 0.38, AUD: 0.42, CNY: 1.99, INR: 22.83, SGD: 0.37, AED: 1.01 }
   };
-
+  console.log()
   // Find countries and currencies between source and destination
   useEffect(() => {
     const findCountriesAndCurrencies = async () => {
