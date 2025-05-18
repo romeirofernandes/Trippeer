@@ -23,25 +23,29 @@ const TripCollectionContent = () => {
 
     try {
       setUploading(true);
+      setError(null);
 
       const fileName = `${Date.now()}-${file.name}`;
-      const { data, error } = await supabase.storage
+
+      const { error: uploadError } = await supabase.storage
         .from("trippy")
         .upload(`public/${fileName}`, file, {
           cacheControl: "3600",
           upsert: true,
         });
 
-      if (error) throw error;
+      if (uploadError) {
+        throw uploadError;
+      }
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("trippy").getPublicUrl(`public/${fileName}`);
+      const { data } = supabase.storage
+        .from("trippy")
+        .getPublicUrl(`public/${fileName}`);
 
       setTrips((prev) => [
         {
           id: Date.now(),
-          image_url: publicUrl,
+          image_url: data.publicUrl,
           title: "New Trip",
           className: `absolute top-${Math.floor(
             Math.random() * 40
@@ -52,7 +56,7 @@ const TripCollectionContent = () => {
         ...prev,
       ]);
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Upload error:", err);
       setError(err.message);
     } finally {
       setUploading(false);
