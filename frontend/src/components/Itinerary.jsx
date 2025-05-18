@@ -20,8 +20,8 @@ import debounce from 'lodash.debounce';
 import CurrencyConverter from './CurrencyConverter';
 import WeatherFind from './WeatherFind';
 import FlightSearch from './FlightSearch';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { toast } from 'react-toastify';
+
 const Itinerary = () => {
   // Add this state variable at the top with other state declarations
   
@@ -40,11 +40,13 @@ const Itinerary = () => {
   const [hasGeneratedItinerary, setHasGeneratedItinerary] = useState(false);
 
   const [sourceOptions, setSourceOptions] = useState([]);
-const [destinationOptions, setDestinationOptions] = useState([]);
-const [sourceValid, setSourceValid] = useState(false);
-const [destinationValid, setDestinationValid] = useState(false);
-const [isSourceFocused, setIsSourceFocused] = useState(false);
-const [isDestinationFocused, setIsDestinationFocused] = useState(false);
+  const [destinationOptions, setDestinationOptions] = useState([]);
+  const [sourceValid, setSourceValid] = useState(false);
+  const [destinationValid, setDestinationValid] = useState(false);
+  const [isSourceFocused, setIsSourceFocused] = useState(false);
+  const [isDestinationFocused, setIsDestinationFocused] = useState(false);
+  const [isSourceLoading, setIsSourceLoading] = useState(false);
+  const [isDestinationLoading, setIsDestinationLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(null);
   const [saveError, setSaveError] = useState(null);
@@ -90,12 +92,15 @@ const [isDestinationFocused, setIsDestinationFocused] = useState(false);
 
   // Add this function to search for locations
 const searchLocations = useCallback(
-  debounce(async (query, setOptions) => {
+  debounce(async (query, setOptions, setLoading) => {
     if (!query || query.length < 2) {
       setOptions([]);
+      setLoading(false);
       return;
     }
-
+    
+    setLoading(true);
+    
     try {
       const response = await axios.get(
         `https://nominatim.openstreetmap.org/search`,
@@ -138,7 +143,6 @@ const searchLocations = useCallback(
           
           displayName = parts.join(', ');
         } else {
-          // Fallback to the display name provided by the API
           displayName = location.display_name.split(',').slice(0, 2).join(',');
         }
 
@@ -154,8 +158,10 @@ const searchLocations = useCallback(
     } catch (error) {
       console.error('Error searching locations:', error);
       setOptions([]);
+    } finally {
+      setLoading(false);
     }
-  }, 300),
+  }, 150), // Reduced from 300ms to 150ms for faster response
   []
 );
 
@@ -164,15 +170,14 @@ const handleSourceChange = (e) => {
   const value = e.target.value;
   setSource(value);
   setSourceValid(false);
-  searchLocations(value, setSourceOptions);
+  searchLocations(value, setSourceOptions, setIsSourceLoading);
 };
 
-// Handle destination input change
 const handleDestinationChange = (e) => {
   const value = e.target.value;
   setDestination(value);
   setDestinationValid(false);
-  searchLocations(value, setDestinationOptions);
+  searchLocations(value, setDestinationOptions, setIsDestinationLoading);
 };
 
 // Handle selection from dropdown
@@ -749,9 +754,47 @@ const handleAdjustTimes = (dayIndex, direction) => {
       setError('Failed to show locations on map. Please check your inputs.');
     }
   };
-
+const validateAndSubmit = (e) => {
+  // Prevent default form submission
+  e.preventDefault();
+  
+  console.log("Validation check initiated");
+  
+  // Check validation BEFORE the form submission
+  if (!sourceValid || !destinationValid) {
+    console.log("Invalid source/destination - showing toast");
+    
+    // Show toast notification
+    toast.error("Please select valid source and destination cities from the dropdown", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true
+    });
+    
+    // Highlight the invalid fields with red outline
+    const sourceInput = document.getElementById('source');
+    const destInput = document.getElementById('destination');
+    
+    if (!sourceValid && sourceInput) {
+      sourceInput.style.border = '2px solid #ff4757';
+      sourceInput.focus();
+    }
+    
+    if (!destinationValid && destInput) {
+      destInput.style.border = '2px solid #ff4757';
+    }
+    
+    return;
+  }
+  
+  // If validation passes, call the actual form submission handler
+  handleSubmit(e);
+};
   // Handle form submission
   const handleSubmit = async (e) => {
+    console.log("Form submitted with:")
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -1115,7 +1158,7 @@ const downloadItinerary = () => {
 
           {/* FORM */}
           <motion.form
-            onSubmit={handleSubmit}
+            onSubmit={validateAndSubmit}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -1142,20 +1185,36 @@ const downloadItinerary = () => {
                     required
                     autoComplete="off"
                   />
+                  {!sourceValid && source && (
+  <p className="mt-1 text-xs text-yellow-400">
+    Please select a valid city from the dropdown
+  </p>
+)}
                   {sourceValid && <ValidLocationIndicator />}
-                  {isSourceFocused && sourceOptions.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
-                      {sourceOptions.map((option, index) => (
-                        <div
-                          key={index}
-                          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
-                          onClick={() => handleSelectLocation(option, true)}
-                        >
-                          {option.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Source input dropdown */}
+{isSourceFocused && (
+  <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
+    {isSourceLoading ? (
+      <div className="px-4 py-2 text-sm text-[#9cadce] flex items-center">
+        <FaSpinner className="animate-spin mr-2" /> Searching...
+      </div>
+    ) : sourceOptions.length > 0 ? (
+      sourceOptions.map((option, index) => (
+        <div
+          key={index}
+          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
+          onClick={() => handleSelectLocation(option, true)}
+        >
+          {option.label}
+        </div>
+      ))
+    ) : source.length >= 2 ? (
+      <div className="px-4 py-2 text-sm text-[#9cadce]">No results found</div>
+    ) : (
+      <div className="px-4 py-2 text-sm text-[#9cadce]">Type at least 2 characters</div>
+    )}
+  </div>
+)}
                 </div>
               </div>
 
@@ -1179,20 +1238,36 @@ const downloadItinerary = () => {
                     required
                     autoComplete="off"
                   />
+                  {!destinationValid && destination && (
+  <p className="mt-1 text-xs text-yellow-400">
+    Please select a valid city from the dropdown
+  </p>
+)}
                   {destinationValid && <ValidLocationIndicator />}
-                  {isDestinationFocused && destinationOptions.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
-                      {destinationOptions.map((option, index) => (
-                        <div
-                          key={index}
-                          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
-                          onClick={() => handleSelectLocation(option, false)}
-                        >
-                          {option.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Destination input dropdown (same pattern) */}
+{isDestinationFocused && (
+  <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
+    {isDestinationLoading ? (
+      <div className="px-4 py-2 text-sm text-[#9cadce] flex items-center">
+        <FaSpinner className="animate-spin mr-2" /> Searching...
+      </div>
+    ) : destinationOptions.length > 0 ? (
+      destinationOptions.map((option, index) => (
+        <div
+          key={index}
+          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
+          onClick={() => handleSelectLocation(option, false)}
+        >
+          {option.label}
+        </div>
+      ))
+    ) : destination.length >= 2 ? (
+      <div className="px-4 py-2 text-sm text-[#9cadce]">No results found</div>
+    ) : (
+      <div className="px-4 py-2 text-sm text-[#9cadce]">Type at least 2 characters</div>
+    )}
+  </div>
+)}
                 </div>
               </div>
             </div>
@@ -1383,7 +1458,7 @@ const downloadItinerary = () => {
             <div className="flex justify-center">
               <motion.button
                 type="submit"
-                disabled={loading || !sourceValid || !destinationValid}
+                disabled={loading}
                 className={`w-full py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd] shadow-none ${loading || !sourceValid || !destinationValid ? 'bg-gray-600 cursor-not-allowed text-gray-300' : ''}`}
                 whileHover={!loading && sourceValid && destinationValid ? { scale: 1.02 } : {}}
                 whileTap={!loading && sourceValid && destinationValid ? { scale: 0.98 } : {}}
