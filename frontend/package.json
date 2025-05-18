@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/bricolage-grotesque": "^5.2.7",
     "@fontsource/inter": "^5.2.5",
+    "@fontsource/space-grotesk": "^5.2.7",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.9.0",
     "firebase": "^11.7.3",
