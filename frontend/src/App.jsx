@@ -8,9 +8,11 @@ import Auth from "./pages/Auth";
 import Plan from "./pages/Plan";
 import TripDetail from "./pages/TripDetail";
 import TripHistoryPage from "./pages/TripHistoryPage";
+import TravelAssistant from "./pages/TravelAssistant";
 import { TripCollection } from "./components/TripCollection";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 
 
 function App() {
@@ -55,6 +57,7 @@ function App() {
           <Route path="/itinerary" element={<Plan />} />
           <Route path="/trip-history" element={<TripHistoryPage />} />
           <Route path="/trips" element={<TripCollection />} />
+          <Route path="/travel-assistant" element={<TravelAssistant />} />
         </Routes>
       </Router>
     </SidebarProvider>

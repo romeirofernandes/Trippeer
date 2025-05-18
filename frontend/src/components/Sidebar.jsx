@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
-import { FaRoute, FaCompass, FaTachometerAlt, FaHistory,FaSuitcase } from "react-icons/fa";
+import { FaRoute, FaCompass, FaTachometerAlt, FaHistory,FaSuitcase,FaRobot } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { auth, signOut } from "../firebase.config";
@@ -39,6 +39,7 @@ const Sidebar = () => {
     { title: "Plan Trip", path: "/plan", icon: <FaRoute size={20} /> },
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
     { title: "Trips", path: "/trips", icon: <FaSuitcase size={20} /> },
+    { title: "Travel Assistant", path: "/travel-assistant", icon: <FaRobot size={20} /> },
   ];
 
   // Add logout handler function
