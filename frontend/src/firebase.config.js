@@ -6,6 +6,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  onAuthStateChanged,
+  signOut,
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -44,4 +46,6 @@ export {
   signInWithEmailAndPassword,
   updateProfile,
   analytics,
+  onAuthStateChanged,
+  signOut,
 };

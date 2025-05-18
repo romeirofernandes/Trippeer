@@ -2,8 +2,10 @@ import React from 'react';
 import Button from './Button';
 import GradientText from './GradientText';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CTA = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-20 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-[#080808] to-[#080808] z-0" />
@@ -21,7 +23,7 @@ const CTA = () => {
           Get perfect itineraries in seconds, not hours.
         </p>
         
-        <Button primary className="px-8 py-4 text-lg">
+        <Button onClick={() => navigate('/dashboard')} primary className="px-8 py-4 text-lg">
           Launch the Planner
           <ArrowRight className="ml-2 inline-block w-5 h-5" />
         </Button>
