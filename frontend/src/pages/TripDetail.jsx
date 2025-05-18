@@ -27,6 +27,7 @@ const TripDetail = () => {
     return () => unsubscribe();
   }, []);
   
+  
   // Fetch trip details when user and tripId are available
   useEffect(() => {
     const fetchTripDetails = async () => {
