@@ -1,38 +1,30 @@
-const User = require('../models/user');
+const User = require("../models/user");
 
 exports.registerOrLogin = async (req, res) => {
   try {
     const { name, email, firebaseUID, profilePic } = req.body;
-
-    console.log("Received auth request:", { name, email, firebaseUID });
-
-    // Check if user already exists
     let user = await User.findOne({ email });
 
     if (user) {
-      // User exists, update login time and Firebase UID if needed
-      console.log("Updating existing user:", email);
       user.lastLogin = new Date();
-      
+
       // Update firebaseUID if it has changed (e.g., if user previously used email and now uses Google)
       if (user.firebaseUID !== firebaseUID) {
         user.firebaseUID = firebaseUID;
       }
-      
+
       // Update profile picture if provided
       if (profilePic) {
         user.profilePic = profilePic;
       }
-      
+
       await user.save();
     } else {
-      // Create new user
-      console.log("Creating new user:", email);
       user = new User({
         name,
         email,
         firebaseUID,
-        profilePic: profilePic || '',
+        profilePic: profilePic || "",
         lastLogin: new Date(),
       });
       await user.save();
@@ -57,14 +49,14 @@ exports.getUserProfile = async (req, res) => {
   try {
     const firebaseUID = req.params.firebaseUID;
     const user = await User.findOne({ firebaseUID });
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
-    
+
     res.status(200).json({
       success: true,
       user,
