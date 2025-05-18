@@ -24,7 +24,7 @@ function App() {
               </TravelProvider>
             }
           />
-          <Route path="/itinerary" element={<Itinerary />} />
+          <Route path="/plan" element={<Itinerary />} />
         </Routes>
       </Router>
     </SidebarProvider>
