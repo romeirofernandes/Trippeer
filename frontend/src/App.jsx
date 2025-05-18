@@ -7,6 +7,7 @@ import ReverseTravelPlanner from "./pages/ReverseTravelPlanner";
 import Auth from "./pages/Auth";
 import Plan from "./pages/Plan";
 import TripDetail from "./pages/TripDetail";
+import TripHistoryPage from "./pages/TripHistoryPage";
 
 function App() {
   return (
@@ -27,6 +28,8 @@ function App() {
           <Route path="/plan" element={<Plan />} />
           <Route path="/trip/:id" element={<TripDetail />} />
           <Route path="/trip/:tripId" element={<TripDetail />} />
+          <Route path="/itinerary" element={<Plan />} />
+          <Route path="/trip-history" element={<TripHistoryPage />} />
         </Routes>
       </Router>
     </SidebarProvider>

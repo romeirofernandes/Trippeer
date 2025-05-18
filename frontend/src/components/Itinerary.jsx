@@ -1067,638 +1067,478 @@ const handleAdjustTimes = (dayIndex, direction) => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#080808' }}>
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: '#ffffff' }}>
-            <motion.span
-              className="inline-block px-4 py-1 rounded-lg shadow-md"
-              style={{ backgroundColor: '#9cadce' }}
-              whileHover={{ scale: 1.05, rotate: -3 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <FaPlane className="inline-block mr-2" /> Wanderlust
-            </motion.span>
-          </h1>
-          <p className="mt-3 max-w-4xl mx-auto text-xl sm:mt-4" style={{ color: '#9cadce' }}>
-            Your AI-powered travel planner for memorable adventures
-          </p>
-        </motion.div>
-
-        {/* SECTION 1: TRIP DETAILS FORM */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="rounded-2xl shadow-xl overflow-hidden mb-8"
-          style={{ backgroundColor: '#111111', borderColor: '#9cadce', borderWidth: '1px' }}
-        >
-          <div className="p-6">
-            {/* Trip Form */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Plan Your Adventure</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 
-
-<div>
-  <label htmlFor="source" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-    Starting From
-  </label>
-  <div className="mt-1 relative rounded-md shadow-sm">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-    </div>
-    <input
-      type="text"
-      id="source"
-      value={source}
-      onChange={handleSourceChange}
-      onFocus={() => setIsSourceFocused(true)}
-      onBlur={() => setTimeout(() => setIsSourceFocused(false), 200)}
-      className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white 
-        ${sourceValid ? 'border-green-500' : ''}`}
-      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-      placeholder="Enter a city or country..."
-      required
-      autoComplete="off"
-      
-    />
-    {sourceValid && <ValidLocationIndicator />}
-    {isSourceFocused && sourceOptions.length > 0 && (
-      <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#9cadce] rounded-md shadow-lg max-h-60 overflow-auto">
-        {sourceOptions.map((option, index) => (
-          <div
-            key={index}
-            className="px-4 py-2 text-sm text-white cursor-pointer hover:bg-[#2a2a2a]"
-            onClick={() => handleSelectLocation(option, true)}
+    <div className="flex min-h-screen bg-[#080808]">
+      <div className="flex-1 p-8">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
           >
-            {option.label}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-</div>
+            <h1 className="text-3xl font-bold text-[#f8f8f8]">Plan Your Journey</h1>
+            <p className="mt-2 text-[#9cadce]">Create a personalized travel itinerary with AI assistance</p>
+          </motion.div>
 
-<div>
-  <label htmlFor="destination" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-    Destination
-  </label>
-  <div className="mt-1 relative rounded-md shadow-sm">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-    </div>
-    <input
-      type="text"
-      id="destination"
-      value={destination}
-      onChange={handleDestinationChange}
-      onFocus={() => setIsDestinationFocused(true)}
-      onBlur={() => setTimeout(() => setIsDestinationFocused(false), 200)}
-      className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white
-        ${destinationValid ? 'border-green-500' : ''}`}
-      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-      placeholder="Enter a city or country..."
-      required
-      autoComplete="off"
-    />
-    {destinationValid && <ValidLocationIndicator />}
-    {isDestinationFocused && destinationOptions.length > 0 && (
-      <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#9cadce] rounded-md shadow-lg max-h-60 overflow-auto">
-        {destinationOptions.map((option, index) => (
-          <div
-            key={index}
-            className="px-4 py-2 text-sm text-white cursor-pointer hover:bg-[#2a2a2a]"
-            onClick={() => handleSelectLocation(option, false)}
+          {/* FORM */}
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-8 bg-[#111111] rounded-2xl p-8 mb-8"
           >
-            {option.label}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-</div>
-
-
-                  
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="days" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                      Trip Duration (Days)
-                    </label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaCalendarAlt style={{ color: '#9cadce' }} />
-                      </div>
-                      <input
-                        type="number"
-                        id="days"
-                        min="1"
-                        max="30"
-                        value={days}
-                        onChange={(e) => setDays(parseInt(e.target.value))}
-                        className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                        style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                      />
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="source" className="block text-sm font-medium text-[#f8f8f8]">
+                  Starting From
+                </label>
+                <div className="mt-1 relative rounded-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaMapMarkerAlt className="text-[#9cadce]" />
                   </div>
-
-                  <div>
-                    <label htmlFor="travelers" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                      Number of Travelers
-                    </label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaUser style={{ color: '#9cadce' }} />
-                      </div>
-                      <input
-                        type="number"
-                        id="travelers"
-                        min="1"
-                        max="20"
-                        value={travelers}
-                        onChange={(e) => setTravelers(parseInt(e.target.value))}
-                        className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                        style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Budget Level</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                      <input
-                        type="radio"
-                        id="budget-low"
-                        name="budget"
-                        className="sr-only"
-                        checked={budget === 'low'}
-                        onChange={() => setBudget('low')}
-                      />
-                      <label
-                        htmlFor="budget-low"
-                        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                          budget === 'low'
-                            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                        }`}
-                      >
-                        <span className="block text-sm font-medium">Economy</span>
-                        <span className="block text-xs mt-1">$ Budget-friendly</span>
-                      </label>
-                    </motion.div>
-
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                      <input
-                        type="radio"
-                        id="budget-medium"
-                        name="budget"
-                        className="sr-only"
-                        checked={budget === 'medium'}
-                        onChange={() => setBudget('medium')}
-                      />
-                      <label
-                        htmlFor="budget-medium"
-                        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                          budget === 'medium'
-                            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                        }`}
-                      >
-                        <span className="block text-sm font-medium">Standard</span>
-                        <span className="block text-xs mt-1">$$ Mid-range</span>
-                      </label>
-                    </motion.div>
-
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                      <input
-                        type="radio"
-                        id="budget-high"
-                        name="budget"
-                        className="sr-only"
-                        checked={budget === 'high'}
-                        onChange={() => setBudget('high')}
-                      />
-                      <label
-                        htmlFor="budget-high"
-                        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                          budget === 'high'
-                            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-                            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-                        }`}
-                      >
-                        <span className="block text-sm font-medium">Luxury</span>
-                        <span className="block text-xs mt-1">$$$ Premium</span>
-                      </label>
-                    </motion.div>
-                  </div>
-                  
-
-<div>
-  <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Daily Start Time</label>
-  <div className="grid grid-cols-3 gap-3">
-    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-      <input
-        type="radio"
-        id="time-early"
-        name="startTime"
-        className="sr-only"
-        checked={startTime === 'early'}
-        onChange={() => setStartTime('early')}
-      />
-      <label
-        htmlFor="time-early"
-        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-          startTime === 'early'
-            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-        }`}
-      >
-        <span className="block text-sm font-medium">Early Bird</span>
-        <span className="block text-xs mt-1">Start at 7-8 AM</span>
-      </label>
-    </motion.div>
-
-    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-      <input
-        type="radio"
-        id="time-mid"
-        name="startTime"
-        className="sr-only"
-        checked={startTime === 'mid'}
-        onChange={() => setStartTime('mid')}
-      />
-      <label
-        htmlFor="time-mid"
-        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-          startTime === 'mid'
-          ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-        }`}
-      >
-        <span className="block text-sm font-medium">Regular</span>
-        <span className="block text-xs mt-1">Start at 8-9 AM</span>
-      </label>
-    </motion.div>
-
-    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-      <input
-        type="radio"
-        id="time-late"
-        name="startTime"
-        className="sr-only"
-        checked={startTime === 'late'}
-        onChange={() => setStartTime('late')}
-      />
-      <label
-        htmlFor="time-late"
-        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-          startTime === 'late'
-            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
-            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
-        }`}
-      >
-        <span className="block text-sm font-medium">Relaxed</span>
-        <span className="block text-xs mt-1">Start at 9-10 AM</span>
-      </label>
-    </motion.div>
-  </div>
-</div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Travel Interests</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {interestOptions.map((option) => (
-                      <motion.div key={option.value} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                        <input
-                          type="checkbox"
-                          id={`interest-${option.value}`}
-                          className="sr-only"
-                          checked={interests.includes(option.value)}
-                          onChange={() => toggleInterest(option.value)}
-                        />
-                        <label
-                          htmlFor={`interest-${option.value}`}
-                          className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg ${
-                            interests.includes(option.value)
-                              ? 'bg-[#1a1a1a] text-[#9cadce] border-2 border-[#9cadce]'
-                              : 'border border-gray-600 text-gray-300 hover:border-[#9cadce]'
-                          }`}
+                  <input
+                    type="text"
+                    id="source"
+                    value={source}
+                    onChange={handleSourceChange}
+                    onFocus={() => setIsSourceFocused(true)}
+                    onBlur={() => setTimeout(() => setIsSourceFocused(false), 200)}
+                    className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-[#f8f8f8] bg-[#161616] border-none focus:ring-[#9cadce] ${sourceValid ? 'border-green-500' : ''}`}
+                    placeholder="Enter a city or country..."
+                    required
+                    autoComplete="off"
+                  />
+                  {sourceValid && <ValidLocationIndicator />}
+                  {isSourceFocused && sourceOptions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
+                      {sourceOptions.map((option, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
+                          onClick={() => handleSelectLocation(option, true)}
                         >
                           {option.label}
-                        </label>
-                      </motion.div>
-                    ))}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                <div className="flex justify-center">
-
-<motion.button
-  type="submit"
-  disabled={loading || !sourceValid || !destinationValid}
-  className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm font-medium ${
-    loading || !sourceValid || !destinationValid
-      ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-      : 'bg-[#9cadce] hover:bg-opacity-80 text-black'
-  }`}
-  whileHover={!loading && sourceValid && destinationValid ? { scale: 1.02 } : {}}
-  whileTap={!loading && sourceValid && destinationValid ? { scale: 0.98 } : {}}
->
-  {loading ? (
-    <>
-      <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
-    </>
-  ) : (
-    'Create Travel Plan'
-  )}
-</motion.button>
-                </div>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg border border-red-700"
-                  >
-                    <p className="flex items-center">
-                      <FaInfoCircle className="mr-2" /> {error}
-                    </p>
-                  </motion.div>
-                )}
-              </form>
-            </div>
-
-            {/* Travel Tips and Info */}
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Travel Insights</h2>
-              <motion.div
-                className="p-6 rounded-xl"
-                style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                whileHover={{ boxShadow: '0 0 15px rgba(156, 173, 206, 0.3)' }}
-              >
-                <h3 className="text-lg font-medium mb-4" style={{ color: '#9cadce' }}>Tips for Amazing Trips</h3>
-                <ul className="space-y-3">
-                  <motion.li
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <FaSuitcase className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                    <p className="text-gray-300">Pack light and smart. Check the weather forecast for your destination.</p>
-                  </motion.li>
-                  <motion.li
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <FaUtensils className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                    <p className="text-gray-300">Research local cuisine and try regional specialties for an authentic experience.</p>
-                  </motion.li>
-                  <motion.li
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <FaUmbrellaBeach className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                    <p className="text-gray-300">Balance planned activities with free time for spontaneous exploration.</p>
-                  </motion.li>
-                  <motion.li
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <FaClock className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                    <p className="text-gray-300">Adjust to the local time zone quickly by staying awake until the local night time.</p>
-                  </motion.li>
-                  <motion.li
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <FaSun className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                    <p className="text-gray-300">Protect yourself from the sun with sunscreen, even on cloudy days at popular destinations.</p>
-                  </motion.li>
-                </ul>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Map View Section */}
-        {hasGeneratedItinerary && (
-          <div ref={mapSectionRef} className="mb-8">
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Your Journey Map</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <motion.div
-                  key="map"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  ref={mapContainer}
-                  className="h-96 md:h-[500px] w-full rounded-lg border border-[#9cadce] shadow-lg overflow-hidden"
-                  style={{ boxShadow: '0 0 20px rgba(156, 173, 206, 0.2)' }}
-                ></motion.div>
               </div>
+
               <div>
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="rounded-lg shadow-md p-4 mb-6"
-                  style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                >
-                  <h3 className="text-lg font-medium mb-4" style={{ color: '#9cadce' }}>Trip Overview</h3>
-                  <div className="space-y-4">
-                    <motion.div
-                      whileHover={{ x: 5 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                          <FaPlane className="text-black text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">From: {source}</p>
-                          <p className="text-sm font-medium text-white">To: {destination}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {itinerary && (
-                      <>
-                        <motion.div
-                          whileHover={{ x: 5 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                              <FaClock className="text-black text-sm" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400">Flight Duration</p>
-                              <p className="text-sm font-medium text-white">{itinerary.flightTime} hours</p>
-                            </div>
-                          </div>
-                        </motion.div>
-
-                        <motion.div
-                          whileHover={{ x: 5 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                              <FaMapMarkerAlt className="text-black text-sm" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400">Distance</p>
-                              <p className="text-sm font-medium text-white">{itinerary.distance} kilometers</p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-
-                    {weatherInfo && (
-                      <motion.div
-                        whileHover={{ x: 5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                            {getWeatherIcon(weatherInfo.condition)}
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-400">Weather in {destination}</p>
-                            <p className="text-sm font-medium text-white">
-                              {weatherInfo.condition}, {weatherInfo.temperature}°C
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {currency && (
-                      <motion.div
-                        whileHover={{ x: 5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#9cadce' }}>
-                            <span className="text-black font-bold">{currency.symbol}</span>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-400">Local Currency</p>
-                            <p className="text-sm font-medium text-white">
-                              {currency.name} ({currency.code})
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              1 USD = {currency.exchangeRate} {currency.code}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
+                <label htmlFor="destination" className="block text-sm font-medium text-[#f8f8f8]">
+                  Destination
+                </label>
+                <div className="mt-1 relative rounded-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaMapMarkerAlt className="text-[#9cadce]" />
                   </div>
+                  <input
+                    type="text"
+                    id="destination"
+                    value={destination}
+                    onChange={handleDestinationChange}
+                    onFocus={() => setIsDestinationFocused(true)}
+                    onBlur={() => setTimeout(() => setIsDestinationFocused(false), 200)}
+                    className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-[#f8f8f8] bg-[#161616] border-none focus:ring-[#9cadce] ${destinationValid ? 'border-green-500' : ''}`}
+                    placeholder="Enter a city or country..."
+                    required
+                    autoComplete="off"
+                  />
+                  {destinationValid && <ValidLocationIndicator />}
+                  {isDestinationFocused && destinationOptions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
+                      {destinationOptions.map((option, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
+                          onClick={() => handleSelectLocation(option, false)}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="days" className="block text-sm font-medium text-[#f8f8f8]">
+                  Trip Duration (Days)
+                </label>
+                <div className="mt-1 relative rounded-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaCalendarAlt className="text-[#9cadce]" />
+                  </div>
+                  <input
+                    type="number"
+                    id="days"
+                    min="1"
+                    max="30"
+                    value={days}
+                    onChange={(e) => setDays(parseInt(e.target.value))}
+                    className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-[#f8f8f8] bg-[#161616] border-none focus:ring-[#9cadce]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="travelers" className="block text-sm font-medium text-[#f8f8f8]">
+                  Number of Travelers
+                </label>
+                <div className="mt-1 relative rounded-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaUser className="text-[#9cadce]" />
+                  </div>
+                  <input
+                    type="number"
+                    id="travelers"
+                    min="1"
+                    max="20"
+                    value={travelers}
+                    onChange={(e) => setTravelers(parseInt(e.target.value))}
+                    className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-[#f8f8f8] bg-[#161616] border-none focus:ring-[#9cadce]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Budget Level</label>
+              <div className="grid grid-cols-3 gap-3">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="budget-low"
+                    name="budget"
+                    className="sr-only"
+                    checked={budget === 'low'}
+                    onChange={() => setBudget('low')}
+                  />
+                  <label
+                    htmlFor="budget-low"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'low' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Economy</span>
+                    <span className="block text-xs mt-1">$ Budget-friendly</span>
+                  </label>
                 </motion.div>
 
-                <motion.button
-                  onClick={scrollToItinerary}
-                  className="w-full py-3 px-4 flex items-center justify-center rounded-md shadow-sm font-medium text-black"
-                  style={{ backgroundColor: '#9cadce' }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={!itinerary}
-                >
-                  <FaArrowRight className="mr-2" /> View Detailed Itinerary
-                </motion.button>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="budget-medium"
+                    name="budget"
+                    className="sr-only"
+                    checked={budget === 'medium'}
+                    onChange={() => setBudget('medium')}
+                  />
+                  <label
+                    htmlFor="budget-medium"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'medium' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Standard</span>
+                    <span className="block text-xs mt-1">$$ Mid-range</span>
+                  </label>
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="budget-high"
+                    name="budget"
+                    className="sr-only"
+                    checked={budget === 'high'}
+                    onChange={() => setBudget('high')}
+                  />
+                  <label
+                    htmlFor="budget-high"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'high' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Luxury</span>
+                    <span className="block text-xs mt-1">$$$ Premium</span>
+                  </label>
+                </motion.div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Itinerary Section */}
-        {itinerary && (
-          <div ref={itineraryRef} className="mb-8">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center justify-between mb-6"
-            >
-              <h2 className="text-2xl font-bold" style={{ color: '#ffffff' }}>
-                {source} to {destination} Itinerary
-              </h2>
-              <div className="flex space-x-2">
-                {/* Add the save button here */}
-                {renderSaveButton()}
-                <motion.button
-                  onClick={downloadItinerary}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black"
-                  style={{ backgroundColor: '#9cadce' }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FaDownload className="mr-2" /> Download
-                </motion.button>
-                <motion.button
-                  onClick={shareItinerary}
-                  className="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm"
-                  style={{ borderColor: '#9cadce', color: '#9cadce' }}
-                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(156, 173, 206, 0.1)' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FaShare className="mr-2" /> Share
-                </motion.button>
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Daily Start Time</label>
+              <div className="grid grid-cols-3 gap-3">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="time-early"
+                    name="startTime"
+                    className="sr-only"
+                    checked={startTime === 'early'}
+                    onChange={() => setStartTime('early')}
+                  />
+                  <label
+                    htmlFor="time-early"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'early' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Early Bird</span>
+                    <span className="block text-xs mt-1">Start at 7-8 AM</span>
+                  </label>
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="time-mid"
+                    name="startTime"
+                    className="sr-only"
+                    checked={startTime === 'mid'}
+                    onChange={() => setStartTime('mid')}
+                  />
+                  <label
+                    htmlFor="time-mid"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'mid' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Regular</span>
+                    <span className="block text-xs mt-1">Start at 8-9 AM</span>
+                  </label>
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <input
+                    type="radio"
+                    id="time-late"
+                    name="startTime"
+                    className="sr-only"
+                    checked={startTime === 'late'}
+                    onChange={() => setStartTime('late')}
+                  />
+                  <label
+                    htmlFor="time-late"
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'late' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                  >
+                    <span className="block text-sm font-medium">Relaxed</span>
+                    <span className="block text-xs mt-1">Start at 9-10 AM</span>
+                  </label>
+                </motion.div>
               </div>
-            </motion.div>
-            {/* Display save status */}
-            {renderSaveStatus()}
+            </div>
 
-            <div className="space-y-12 mb-8">
-              <motion.div
-                key={currentDayIndex}
-                className="rounded-xl shadow-lg overflow-hidden"
-                style={{ 
-                  backgroundColor: '#1a1a1a', 
-                  borderColor: '#9cadce', 
-                  borderWidth: '1px',
-                  boxShadow: '0 4px 6px -1px rgba(156, 173, 206, 0.1), 0 2px 4px -1px rgba(156, 173, 206, 0.06)'
-                }}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-                whileHover={{ 
-                  boxShadow: '0 0 20px rgba(156, 173, 206, 0.3)',
-                  transform: 'translateY(-2px)'
-                }}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Travel Interests</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {interestOptions.map((option) => (
+                  <motion.div key={option.value} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                    <input
+                      type="checkbox"
+                      id={`interest-${option.value}`}
+                      className="sr-only"
+                      checked={interests.includes(option.value)}
+                      onChange={() => toggleInterest(option.value)}
+                    />
+                    <label
+                      htmlFor={`interest-${option.value}`}
+                      className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${interests.includes(option.value) ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    >
+                      {option.label}
+                    </label>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <motion.button
+                type="submit"
+                disabled={loading || !sourceValid || !destinationValid}
+                className={`w-full py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd] shadow-none ${loading || !sourceValid || !destinationValid ? 'bg-gray-600 cursor-not-allowed text-gray-300' : ''}`}
+                whileHover={!loading && sourceValid && destinationValid ? { scale: 1.02 } : {}}
+                whileTap={!loading && sourceValid && destinationValid ? { scale: 0.98 } : {}}
               >
-                {/* Day Header with gradient */}
-                <div className="px-6 py-4" style={{ 
-                  background: 'linear-gradient(135deg, #9cadce 0%, #7a8ba8 100%)',
-                  borderBottom: '1px solid rgba(156, 173, 206, 0.2)'
-                }}>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-black text-lg flex items-center">
-                      <span className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center mr-3">
+                {loading ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
+                  </>
+                ) : (
+                  'Create Travel Plan'
+                )}
+              </motion.button>
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg"
+              >
+                <p className="flex items-center">
+                  <FaInfoCircle className="mr-2" /> {error}
+                </p>
+              </motion.div>
+            )}
+          </motion.form>
+
+          {/* MAP SECTION */}
+          {hasGeneratedItinerary && (
+            <div ref={mapSectionRef} className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-[#f8f8f8]">Your Journey Map</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <motion.div
+                    key="map"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    ref={mapContainer}
+                    className="h-96 md:h-[500px] w-full rounded-xl bg-[#161616] overflow-hidden"
+                  ></motion.div>
+                </div>
+                <div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="rounded-xl p-6 mb-6 bg-[#161616]"
+                  >
+                    <div className="space-y-4">
+                      <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-[#9cadce]/20">
+                            <FaPlane className="text-[#9cadce]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-[#f8f8f8]">From: {source}</p>
+                            <p className="text-sm font-medium text-[#f8f8f8]">To: {destination}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {itinerary && (
+                        <>
+                          <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-[#9cadce]/20">
+                                <FaClock className="text-[#9cadce]" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-[#9cadce]">Flight Duration</p>
+                                <p className="text-sm font-medium text-[#f8f8f8]">{itinerary.flightTime} hours</p>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-[#9cadce]/20">
+                                <FaMapMarkerAlt className="text-[#9cadce]" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-[#9cadce]">Distance</p>
+                                <p className="text-sm font-medium text-[#f8f8f8]">{itinerary.distance} kilometers</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+
+                      {weatherInfo && (
+                        <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-[#9cadce]/20">
+                              {getWeatherIcon(weatherInfo.condition)}
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#9cadce]">Weather in {destination}</p>
+                              <p className="text-sm font-medium text-[#f8f8f8]">
+                                {weatherInfo.condition}, {weatherInfo.temperature}°C
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {currency && (
+                        <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-[#9cadce]/20">
+                              <span className="text-[#9cadce] font-bold">{currency.symbol}</span>
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#9cadce]">Local Currency</p>
+                              <p className="text-sm font-medium text-[#f8f8f8]">
+                                {currency.name} ({currency.code})
+                              </p>
+                              <p className="text-xs text-[#9cadce]">
+                                1 USD = {currency.exchangeRate} {currency.code}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+
+                  <motion.button
+                    onClick={scrollToItinerary}
+                    className="w-full py-3 px-4 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={!itinerary}
+                  >
+                    <FaArrowRight className="mr-2" /> View Detailed Itinerary
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ITINERARY SECTION */}
+          {itinerary && (
+            <div ref={itineraryRef} className="mb-8">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center justify-between mb-6"
+              >
+                <h2 className="text-2xl font-bold text-[#f8f8f8]">
+                  {source} to {destination} Itinerary
+                </h2>
+                <div className="flex space-x-2">
+                  {renderSaveButton()}
+                  <motion.button
+                    onClick={downloadItinerary}
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <FaDownload className="mr-2" /> Download
+                  </motion.button>
+                  <motion.button
+                    onClick={shareItinerary}
+                    className="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg border-[#9cadce] text-[#9cadce] hover:bg-[#9cadce]/10"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <FaShare className="mr-2" /> Share
+                  </motion.button>
+                </div>
+              </motion.div>
+              {renderSaveStatus()}
+
+              {/* Day View */}
+              <div className="space-y-8 mb-8">
+                <motion.div
+                  key={currentDayIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-[#161616] rounded-2xl p-6"
+                >
+                  {/* Day Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-[#f8f8f8] text-lg flex items-center">
+                      <span className="w-8 h-8 rounded-full bg-[#9cadce]/20 flex items-center justify-center mr-3 text-[#9cadce]">
                         {itinerary.days[currentDayIndex].day}
                       </span>
                       Day {itinerary.days[currentDayIndex].day}
@@ -1707,11 +1547,7 @@ const handleAdjustTimes = (dayIndex, direction) => {
                       <button
                         onClick={handlePrevDay}
                         disabled={currentDayIndex === 0}
-                        className={`px-4 py-2 rounded-lg flex items-center ${
-                          currentDayIndex === 0 
-                            ? 'bg-gray-600 cursor-not-allowed' 
-                            : 'bg-black/20 hover:bg-black/30'
-                        }`}
+                        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === 0 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -1721,11 +1557,7 @@ const handleAdjustTimes = (dayIndex, direction) => {
                       <button
                         onClick={handleNextDay}
                         disabled={currentDayIndex === itinerary.days.length - 1}
-                        className={`px-4 py-2 rounded-lg flex items-center ${
-                          currentDayIndex === itinerary.days.length - 1 
-                            ? 'bg-gray-600 cursor-not-allowed' 
-                            : 'bg-black/20 hover:bg-black/30'
-                        }`}
+                        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === itinerary.days.length - 1 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
                       >
                         Next Day
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1734,251 +1566,131 @@ const handleAdjustTimes = (dayIndex, direction) => {
                       </button>
                     </div>
                   </div>
-                </div>
-                
-                <div className="p-6">
-                  {/* Enhanced Time Ruler */}
-                  <div className="relative mb-8">
-                    <div className="h-2 bg-gradient-to-r from-[#9cadce]/20 via-[#9cadce]/40 to-[#9cadce]/20 rounded-full"></div>
-                    <div className="absolute w-full flex justify-between px-2 -bottom-6">
-                      {['06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00'].map((time, i) => (
-                        <div key={i} className="flex flex-col items-center">
-                          <div className="w-1 h-3 bg-[#9cadce] rounded-full mb-1"></div>
-                          <span className="text-xs text-[#9cadce] font-medium">{time}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Activities Timeline with Connected Arrows */}
-                  <div className="space-y-8 relative">
-                    {itinerary.days[currentDayIndex].activities.map((activity, i) => {
-                      const timeString = activity.time || "";
-                      const startTime = timeString.split(' - ')[0];
-                      const startHour = parseInt(startTime.split(':')[0]) + (startTime.includes('PM') && !startTime.includes('12:') ? 12 : 0);
-                      const timePosition = ((startHour - 6 + 24) % 24) / 18 * 100;
-                      const isLeft = i % 2 === 0;
-                      const isLast = i === itinerary.days[currentDayIndex].activities.length - 1;
-                      
-                      return (
-                        <div className="flex justify-center my-12 relative" key={i}>
-                          <motion.div 
-                            className={`w-5/12 ${isLeft ? 'pr-8' : 'pl-8'} ${isLeft ? 'text-right' : 'text-left'}`}
-                            initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + (i * 0.1) }}
-                            whileHover={{ x: isLeft ? -5 : 5 }}
-                          >
-                            {isLeft && (
-                              <div className="relative">
-                                {/* Icon positioned outside the box with increased size and distance */}
-                                <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 w-14 h-14 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] z-20 hover:bg-[#9cadce]/20 transition-all duration-300">
-                                  {getActivityIcon(activity)}
-                                </div>
-                                <div className="bg-[#111111] p-4 rounded-lg inline-block shadow-lg border border-[#9cadce]/10 hover:border-[#9cadce]/30 transition-all duration-300 relative">
-                                  {/* Connecting arrow to next activity */}
-                                  {!isLast && (
-                                    <svg className="absolute -right-32 top-1/2 w-64 h-8" viewBox="0 0 400 50" preserveAspectRatio="none">
-                                      <path
-                                        d="M0,25 C80,25 120,0 200,0 C280,0 320,25 400,25"
-                                        fill="none"
-                                        stroke="#9cadce"
-                                        strokeWidth="2"
-                                        strokeDasharray="4 4"
-                                        opacity="0.5"
-                                      />
-                                      {/* Arrow head */}
-                                      <path
-                                        d="M390,20 L400,25 L390,30"
-                                        fill="none"
-                                        stroke="#9cadce"
-                                        strokeWidth="2"
-                                        opacity="0.5"
-                                      />
-                                    </svg>
-                                  )}
-                                  <div>
-                                    <p className="text-sm font-medium text-[#9cadce] mb-2 flex items-center">
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                      {activity.time || `Activity ${i + 1}`}
-                                    </p>
-                                    <p className="text-gray-300 leading-relaxed">{activity.description || activity}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </motion.div>
-                          
-                          <motion.div 
-                            className={`w-5/12 ${isLeft ? 'pl-8' : 'pr-8'} ${isLeft ? 'text-left' : 'text-right'}`}
-                            initial={{ opacity: 0, x: isLeft ? 20 : -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + (i * 0.1) }}
-                            whileHover={{ x: isLeft ? 5 : -5 }}
-                          >
-                            {!isLeft && (
-                              <div className="relative">
-                                {/* Icon positioned outside the box with increased size and distance */}
-                                <div className="absolute -left-20 top-1/2 transform -translate-y-1/2 w-14 h-14 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] z-20 hover:bg-[#9cadce]/20 transition-all duration-300">
-                                  {getActivityIcon(activity)}
-                                </div>
-                                <div className="bg-[#111111] p-4 rounded-lg inline-block shadow-lg border border-[#9cadce]/10 hover:border-[#9cadce]/30 transition-all duration-300 relative">
-                                  {/* Connecting arrow to next activity */}
-                                  {!isLast && (
-                                    <svg className="absolute -left-32 top-1/2 w-64 h-8" viewBox="0 0 400 50" preserveAspectRatio="none">
-                                      <path
-                                        d="M400,25 C320,25 280,0 200,0 C120,0 80,25 0,25"
-                                        fill="none"
-                                        stroke="#9cadce"
-                                        strokeWidth="2"
-                                        strokeDasharray="4 4"
-                                        opacity="0.5"
-                                      />
-                                      {/* Arrow head */}
-                                      <path
-                                        d="M10,20 L0,25 L10,30"
-                                        fill="none"
-                                        stroke="#9cadce"
-                                        strokeWidth="2"
-                                        opacity="0.5"
-                                      />
-                                    </svg>
-                                  )}
-                                  <div>
-                                    <p className="text-sm font-medium text-[#9cadce] mb-2 flex items-center">
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                      {activity.time || `Activity ${i + 1}`}
-                                    </p>
-                                    <p className="text-gray-300 leading-relaxed">{activity.description || activity}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </motion.div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                {/* Enhanced Time Adjustment Controls */}
-                <div className="px-6 py-4 bg-[#111111] border-t border-[#9cadce]/10">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#9cadce] font-medium">Adjust Schedule</span>
-                    <div className="flex space-x-3">
-                      <button 
-                        className="px-4 py-2 rounded-lg bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-all duration-300 flex items-center"
-                        onClick={() => handleAdjustTimes(currentDayIndex, 'earlier')}
+                  {/* Activities */}
+                  <div className="space-y-6">
+                    {itinerary.days[currentDayIndex].activities.map((activity, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * i }}
+                        className="bg-[#232323] rounded-xl p-4 flex items-start"
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Earlier
-                      </button>
-                      <button 
-                        className="px-4 py-2 rounded-lg bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-all duration-300 flex items-center"
-                        onClick={() => handleAdjustTimes(currentDayIndex, 'later')}
-                      >
-                        Later
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
+                        <div className="w-12 h-12 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] mr-4 flex-shrink-0">
+                          {getActivityIcon(activity)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#9cadce] mb-1">
+                            {activity.time || `Activity ${i + 1}`}
+                          </p>
+                          <p className="text-[#f8f8f8]">{activity.description || activity}</p>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
+                  {/* Adjust Schedule */}
+                  <div className="flex justify-end mt-6">
+                    <button
+                      className="px-4 py-2 rounded-lg bg-[#232323] text-[#9cadce] hover:bg-[#9cadce]/20 flex items-center mr-2"
+                      onClick={() => handleAdjustTimes(currentDayIndex, 'earlier')}
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Earlier
+                    </button>
+                    <button
+                      className="px-4 py-2 rounded-lg bg-[#232323] text-[#9cadce] hover:bg-[#9cadce]/20 flex items-center"
+                      onClick={() => handleAdjustTimes(currentDayIndex, 'later')}
+                    >
+                      Later
+                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Accommodation Suggestions */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="bg-[#161616] rounded-2xl p-6 mb-6"
+              >
+                <h3 className="font-semibold mb-4 text-[#f8f8f8]">
+                  <FaSuitcase className="inline-block mr-2 text-[#9cadce]" /> Accommodation Suggestions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {itinerary.accommodationSuggestions?.map((accommodation, index) => (
+                    <motion.div
+                      key={index}
+                      className="bg-[#232323] p-4 rounded-xl"
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <h4 className="font-medium text-[#9cadce] mb-1">{accommodation.name}</h4>
+                      <p className="text-sm text-[#f8f8f8] mb-2">{accommodation.description}</p>
+                      <p className="text-xs inline-block px-2 py-1 rounded bg-[#161616] text-[#9cadce]">
+                        {accommodation.priceRange}
+                      </p>
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
+
+              {/* Travel Tips */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="bg-[#161616] rounded-2xl p-6 mb-6"
+              >
+                <h3 className="font-semibold mb-4 text-[#f8f8f8]">Travel Tips for {destination}</h3>
+                <ul className="space-y-2">
+                  {itinerary.travelTips.map((tip, index) => (
+                    <motion.li
+                      key={index}
+                      className="flex items-start"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + (index * 0.1) }}
+                      whileHover={{ x: 5 }}
+                    >
+                      <FaInfoCircle className="text-[#9cadce] mt-1 mr-3 flex-shrink-0" />
+                      <span className="text-[#f8f8f8]">{tip}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
             </div>
+          )}
 
+          {/* Weather Section */}
+          {itinerary && source && destination && (
             <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5, delay: 0.4 }}
-  className="rounded-lg p-4 mb-6"
-  style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
->
-  <h3 className="font-semibold mb-3" style={{ color: '#9cadce' }}>
-    <FaSuitcase className="inline-block mr-2" /> Accommodation Suggestions
-  </h3>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {itinerary.accommodationSuggestions?.map((accommodation, index) => (
-      <motion.div
-        key={index}
-        className="bg-[#111111] p-4 rounded-lg"
-        whileHover={{ scale: 1.02, backgroundColor: '#1e1e1e' }}
-      >
-        <h4 className="font-medium text-[#9cadce] mb-1">{accommodation.name}</h4>
-        <p className="text-sm text-gray-300 mb-2">{accommodation.description}</p>
-        <p className="text-xs inline-block px-2 py-1 rounded" 
-           style={{ backgroundColor: 'rgba(156, 173, 206, 0.2)', color: '#9cadce' }}>
-          {accommodation.priceRange}
-        </p>
-      </motion.div>
-    ))}
-  </div>
-</motion.div>
-            {/* Travel Tips */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="rounded-lg p-4 mb-6"
-              style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8 bg-[#161616] rounded-2xl p-6"
             >
-              <h3 className="font-semibold mb-3" style={{ color: '#9cadce' }}>Travel Tips for {destination}</h3>
-              <ul className="space-y-2">
-                {itinerary.travelTips.map((tip, index) => (
-                  <motion.li
-                    key={index}
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 + (index * 0.1) }}
-                    whileHover={{ x: 5 }}
-                  >
-                    <FaInfoCircle className="text-[#9cadce] mt-1 mr-2 flex-shrink-0" />
-                    <span className="text-gray-300">{tip}</span>
-                  </motion.li>
-                ))}
-              </ul>
+              <h2 className="text-xl font-semibold mb-4 text-[#f8f8f8]">Weather Information</h2>
+              <WeatherFind source={source} destination={destination} showAfterGeneration={true} />
             </motion.div>
-          </div>
-        )}
+          )}
 
-        {/* Weather Section */}
-{itinerary && source && destination && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.5 }}
-    className="mb-8"
-  >
-    <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Weather Information</h2>
-    <div className="p-0 rounded-lg">
-      <WeatherFind 
-        source={source} 
-        destination={destination}
-        showAfterGeneration={true}
-      />
-    </div>
-  </motion.div>
-)}
-
-        {/* Currency Section */}
-        {itinerary && source && destination && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <CurrencyConverter source={source} destination={destination} />
-          </motion.div>
-        )}
+          {/* Currency Section */}
+          {itinerary && source && destination && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8 bg-[#161616] rounded-2xl p-6"
+            >
+              <CurrencyConverter source={source} destination={destination} />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );
