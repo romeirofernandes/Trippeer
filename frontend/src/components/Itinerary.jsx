@@ -19,6 +19,7 @@ import { auth, onAuthStateChanged } from '../firebase.config';
 import debounce from 'lodash.debounce';
 import CurrencyConverter from './CurrencyConverter';
 import WeatherFind from './WeatherFind';
+import FlightSearch from './FlightSearch';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 const Itinerary = () => {
@@ -1521,6 +1522,9 @@ const downloadItinerary = () => {
                   </motion.button>
                 </div>
               </div>
+
+              {/* Flight Search Section */}
+              <FlightSearch source={source} destination={destination} />
             </div>
           )}
 
