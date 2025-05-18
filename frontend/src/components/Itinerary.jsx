@@ -1620,27 +1620,6 @@ const downloadItinerary = () => {
                       </motion.div>
                     ))}
                   </div>
-                  {/* Adjust Schedule */}
-                  <div className="flex justify-end mt-6">
-                    <button
-                      className="px-4 py-2 rounded-lg bg-[#232323] text-[#9cadce] hover:bg-[#9cadce]/20 flex items-center mr-2"
-                      onClick={() => handleAdjustTimes(currentDayIndex, 'earlier')}
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                      </svg>
-                      Earlier
-                    </button>
-                    <button
-                      className="px-4 py-2 rounded-lg bg-[#232323] text-[#9cadce] hover:bg-[#9cadce]/20 flex items-center"
-                      onClick={() => handleAdjustTimes(currentDayIndex, 'later')}
-                    >
-                      Later
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
                 </motion.div>
               </div>
 
