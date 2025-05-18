@@ -1,11 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { FaRoute, FaCompass } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
+import { motion } from "framer-motion";
+
+export const SidebarContext = createContext();
+
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider");
+  }
+  return context;
+};
+
+export const SidebarProvider = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <SidebarContext.Provider value={{ isOpen, setIsOpen }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+};
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useSidebar();
   const location = useLocation();
 
   const navLinks = [
@@ -13,79 +34,102 @@ const Sidebar = () => {
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
   ];
 
+  const sidebarVariants = {
+    open: {
+      width: "240px",
+      transition: { duration: 0.3, ease: "easeInOut" },
+    },
+    closed: {
+      width: "64px",
+      transition: { duration: 0.3, ease: "easeInOut" },
+    },
+  };
+
+  const textVariants = {
+    open: {
+      opacity: 1,
+      x: 0,
+      display: "block",
+      transition: { delay: 0.1, duration: 0.3 },
+    },
+    closed: {
+      opacity: 0,
+      x: 20,
+      transitionEnd: {
+        display: "none",
+      },
+      transition: { duration: 0.3 },
+    },
+  };
+
   return (
-    <section className="flex gap-6">
+    <motion.div
+      variants={sidebarVariants}
+      initial="closed"
+      animate={isOpen ? "open" : "closed"}
+      className="bg-[#0F0F0F] min-h-screen text-[#f8f8f8] px-3 flex flex-col fixed top-0 left-0 z-50"
+    >
+      {/* Menu Toggle */}
       <div
-        className={`bg-[#0F0F0F] min-h-screen ${
-          isOpen ? "w-60" : "w-16"
-        } duration-500 text-[#f8f8f8] px-4`}
+        className={`py-3 flex ${
+          isOpen ? "justify-end pr-2" : "justify-center"
+        }`}
       >
-        <div className="py-3 flex justify-end">
+        <motion.div>
           <HiMenuAlt3
-            size={26}
-            className="cursor-pointer"
+            size={20}
+            className="cursor-pointer hover:text-gray-300 transition-colors duration-300"
             onClick={() => setIsOpen(!isOpen)}
           />
-        </div>
-        <div className="mt-4 flex flex-col gap-4 relative">
-          {navLinks?.map((link, i) => (
-            <Link
-              to={link?.path}
-              key={i}
-              className={`${
-                location.pathname === link?.path ? "bg-[#232323]" : ""
-              } group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-[#232323] rounded-md transition-all duration-300`}
-            >
-              <div>{link?.icon}</div>
-              <h2
-                style={{
-                  transitionDelay: `${i + 3}00ms`,
-                }}
-                className={`whitespace-pre duration-500 ${
-                  !isOpen && "opacity-0 translate-x-28 overflow-hidden"
-                }`}
-              >
-                {link?.title}
-              </h2>
-              <h2
-                className={`${
-                  isOpen && "hidden"
-                } absolute left-48 bg-[#232323] font-semibold whitespace-pre text-[#f8f8f8] rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
-              >
-                {link?.title}
-              </h2>
-            </Link>
-          ))}
-          <button
-            onClick={() => {
-              /* Add logout logic */
-            }}
-            className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-[#232323] rounded-md mt-auto mb-8`}
-          >
-            <div>
-              <BiLogOut size={20} />
-            </div>
-            <h2
-              style={{
-                transitionDelay: "600ms",
-              }}
-              className={`whitespace-pre duration-500 ${
-                !isOpen && "opacity-0 translate-x-28 overflow-hidden"
-              }`}
-            >
-              Logout
-            </h2>
-            <h2
-              className={`${
-                isOpen && "hidden"
-              } absolute left-48 bg-[#232323] font-semibold whitespace-pre text-[#f8f8f8] rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
-            >
-              Logout
-            </h2>
-          </button>
-        </div>
+        </motion.div>
       </div>
-    </section>
+
+      {/* Navigation Links */}
+      <div className="mt-4 flex flex-col gap-4">
+        {navLinks.map((link, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link
+              to={link.path}
+              className={`${
+                location.pathname === link.path ? "bg-[#232323]" : ""
+              } group flex items-center ${
+                isOpen ? "gap-4" : "justify-center"
+              } font-medium p-3 hover:bg-[#232323] rounded-md transition-all duration-300`}
+            >
+              <div className="flex items-center justify-center">
+                {link.icon}
+              </div>
+              <motion.span variants={textVariants} className="whitespace-pre">
+                {link.title}
+              </motion.span>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Logout Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          /* Add logout logic */
+        }}
+        className={`mt-auto mb-8 group flex items-center ${
+          isOpen ? "gap-4" : "justify-center"
+        } font-medium p-3 hover:bg-[#232323] rounded-md transition-all duration-300`}
+      >
+        <div className="flex items-center justify-center">
+          <BiLogOut size={20} />
+        </div>
+        <motion.span variants={textVariants} className="whitespace-pre">
+          Logout
+        </motion.span>
+      </motion.button>
+    </motion.div>
   );
 };
 
