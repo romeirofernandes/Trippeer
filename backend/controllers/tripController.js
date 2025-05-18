@@ -105,10 +105,13 @@ exports.getUserTrips = async (req, res) => {
 
 // Get a specific trip by ID
 exports.getTripById = async (req, res) => {
+  console.log('Fetching trip by ID');
+  console.log('Request params:', req.params);
   try {
     const { tripId } = req.params;
     const { firebaseUID } = req.query;
-    
+    console.log('tripId:', tripId); 
+    console.log('firebaseUID:', firebaseUID);
     if (!firebaseUID) {
       return res.status(401).json({
         success: false,

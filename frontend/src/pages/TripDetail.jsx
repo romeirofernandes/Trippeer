@@ -36,12 +36,12 @@ const TripDetail = () => {
       
       try {
         setLoading(true);
+        console.log('Fetching trip details for tripId:', tripId);
+        console.log('User UID:', user.uid);
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/trips/${tripId}`,
-          {
-            params: { firebaseUID: user.uid }
-          }
-        );
+  `${import.meta.env.VITE_BACKEND_URL}/api/trips/${tripId}`,
+  { params: { firebaseUID: user.uid } }
+);
         
         setTrip(response.data.trip);
         setLoading(false);
