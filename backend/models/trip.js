@@ -34,15 +34,20 @@ const tripSchema = new mongoose.Schema({
     flightTime: Number,
     distance: Number,
     days: [
+  {
+    day: Number,
+    activities: [
       {
-        day: Number,
-        activities: [String],
-        accommodation: {
-          name: String,
-          description: String,
-        },
-      },
+        time: String,
+        description: String
+      }
     ],
+    accommodation: {
+      name: String,
+      description: String,
+    },
+  },
+],
     travelTips: [String],
   },
   weatherInfo: {

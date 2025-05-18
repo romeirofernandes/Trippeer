@@ -69,40 +69,53 @@ const TripDetail = () => {
   };
   
   // Download itinerary 
-  const downloadItinerary = () => {
-    if (!trip) return;
-    
-    // Create text content
-    let content = `TRAVEL ITINERARY: ${trip.source} to ${trip.destination}\n`;
-    content += `Duration: ${trip.days} days | Travelers: ${trip.travelers}\n`;
-    content += `Flight Time: ${trip.itinerary.flightTime} hours | Distance: ${trip.itinerary.distance} km\n\n`;
-    
-    // Add day by day information
-    trip.itinerary.days.forEach(day => {
-      content += `DAY ${day.day}\n`;
-      day.activities.forEach((activity, i) => {
-        content += `Activity ${i+1}: ${activity}\n`;
-      });
-      content += `Accommodation: ${day.accommodation.name} - ${day.accommodation.description}\n\n`;
+  // Replace the downloadItinerary function
+
+const downloadItinerary = () => {
+  if (!trip) return;
+  
+  // Create text content
+  let content = `TRAVEL ITINERARY: ${trip.source} to ${trip.destination}\n`;
+  content += `Duration: ${trip.days} days | Travelers: ${trip.travelers}\n`;
+  content += `Flight Time: ${trip.itinerary.flightTime} hours | Distance: ${trip.itinerary.distance} km\n\n`;
+  
+  // Add day by day information
+  trip.itinerary.days.forEach(day => {
+    content += `DAY ${day.day}\n`;
+    day.activities.forEach((activity, i) => {
+      if (typeof activity === 'object' && activity !== null) {
+        content += `${activity.time || 'Time not specified'}: ${activity.description || 'Activity details'}\n`;
+      } else {
+        content += `Activity ${i+1}: ${activity || 'Activity details'}\n`;
+      }
     });
     
-    // Add travel tips
+    if (day.accommodation) {
+      content += `\nAccommodation: ${day.accommodation.name || 'Not specified'} - ${day.accommodation.description || 'No description'}\n\n`;
+    } else {
+      content += `\nAccommodation: Not specified\n\n`;
+    }
+  });
+  
+  // Add travel tips
+  if (trip.itinerary.travelTips && trip.itinerary.travelTips.length > 0) {
     content += "TRAVEL TIPS:\n";
     trip.itinerary.travelTips.forEach((tip, i) => {
       content += `- ${tip}\n`;
     });
-    
-    // Create a blob and trigger download
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${trip.destination}-itinerary.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  }
+  
+  // Create a blob and trigger download
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${trip.destination}-itinerary.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
   
   // Share itinerary (mock function)
   const shareItinerary = () => {
@@ -279,21 +292,37 @@ const TripDetail = () => {
                   <div className="p-4">
                     <h5 className="font-medium mb-3" style={{ color: '#9cadce' }}>Activities</h5>
                     <ul className="space-y-3 mb-4">
-                      {day.activities.map((activity, i) => (
-                        <li key={i} className="flex items-start">
-                          <FaWalking className="mt-1 mr-3" style={{ color: '#9cadce' }} />
-                          <span className="text-gray-300">{activity}</span>
-                        </li>
-                      ))}
-                    </ul>
+  {day.activities.map((activity, i) => (
+    <li key={i} className="flex items-start">
+      <FaWalking className="mt-1 mr-3" style={{ color: '#9cadce' }} />
+      {/* Check if activity is an object or string */}
+      {typeof activity === 'object' && activity !== null ? (
+        <div>
+          <span className="text-sm font-medium" style={{ color: '#9cadce' }}>
+            {activity.time || 'Time not specified'}:
+          </span>{' '}
+          <span className="text-gray-300">{activity.description || 'Activity details'}</span>
+        </div>
+      ) : (
+        <span className="text-gray-300">{activity || 'Activity details'}</span>
+      )}
+    </li>
+  ))}
+</ul>
                     
                     <h5 className="font-medium mb-2" style={{ color: '#9cadce' }}>Accommodation</h5>
-                    <div className="rounded-lg p-3" style={{ backgroundColor: '#1a1a1a' }}>
-                      <p className="flex items-center font-medium" style={{ color: '#9cadce' }}>
-                        <FaBed className="mr-2" /> {day.accommodation.name}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-1">{day.accommodation.description}</p>
-                    </div>
+{day.accommodation ? (
+  <div className="rounded-lg p-3" style={{ backgroundColor: '#1a1a1a' }}>
+    <p className="flex items-center font-medium" style={{ color: '#9cadce' }}>
+      <FaBed className="mr-2" /> {day.accommodation.name || 'Accommodation details'}
+    </p>
+    <p className="text-sm text-gray-400 mt-1">{day.accommodation.description || 'No description available'}</p>
+  </div>
+) : (
+  <div className="rounded-lg p-3" style={{ backgroundColor: '#1a1a1a' }}>
+    <p className="text-sm text-gray-400">No accommodation details available</p>
+  </div>
+)}
                   </div>
                 </motion.div>
               ))}

@@ -26,6 +26,8 @@ function App() {
           />
           <Route path="/plan" element={<Plan />} />
           <Route path="/trip/:id" element={<TripDetail />} />
+          <Route path="/plan" element={<Itinerary />} />
+          <Route path="/trip/:tripId" element={<TripDetail />} />
         </Routes>
       </Router>
     </SidebarProvider>

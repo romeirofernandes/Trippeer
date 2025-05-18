@@ -12,10 +12,11 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
 import { auth, onAuthStateChanged } from '../firebase.config';
 import debounce from 'lodash.debounce';
-
+import CurrencyConverter from './CurrencyConverter';
+import WeatherFind from './WeatherFind';
 const Itinerary = () => {
   // Add this state variable at the top with other state declarations
-
+  
   const [startTime, setStartTime] = useState("early"); // 'early', 'mid', 'late'
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
@@ -930,141 +931,9 @@ const handleAdjustTimes = (dayIndex, direction) => {
     }
   };
 
-  // Currency Converter Component
-  const CurrencyConverter = ({ source, destination }) => {
-    const [amount, setAmount] = useState(1);
-    const [fromCurrency, setFromCurrency] = useState('USD');
-    const [toCurrency, setToCurrency] = useState('EUR');
-    const [convertedAmount, setConvertedAmount] = useState(null);
-    const [exchangeRate, setExchangeRate] = useState(null);
+ 
 
-    useEffect(() => {
-      // Fetch exchange rate data from an API
-      const fetchExchangeRate = async () => {
-        try {
-          // In a real app, you would call a currency exchange API here
-          // For this example, we'll use a mock exchange rate
-          const mockRate = 0.85; // 1 USD = 0.85 EUR
-          setExchangeRate(mockRate);
-          setConvertedAmount((amount * mockRate).toFixed(2));
-        } catch (error) {
-          console.error('Error fetching exchange rate:', error);
-        }
-      };
 
-      fetchExchangeRate();
-    }, [amount, fromCurrency, toCurrency]);
-
-    return (
-      <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}>
-        <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Currency Converter</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium mb-1" style={{ color: '#9cadce' }}>Amount</label>
-            <input
-              type="number"
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value))}
-              className="w-full p-2 rounded-md text-white"
-              style={{ backgroundColor: '#111111', borderColor: '#9cadce', borderWidth: '1px' }}
-            />
-          </div>
-          <div>
-            <label htmlFor="fromCurrency" className="block text-sm font-medium mb-1" style={{ color: '#9cadce' }}>From</label>
-            <select
-              id="fromCurrency"
-              value={fromCurrency}
-              onChange={(e) => setFromCurrency(e.target.value)}
-              className="w-full p-2 rounded-md text-white"
-              style={{ backgroundColor: '#111111', borderColor: '#9cadce', borderWidth: '1px' }}
-            >
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="GBP">GBP - British Pound</option>
-              <option value="JPY">JPY - Japanese Yen</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="toCurrency" className="block text-sm font-medium mb-1" style={{ color: '#9cadce' }}>To</label>
-            <select
-              id="toCurrency"
-              value={toCurrency}
-              onChange={(e) => setToCurrency(e.target.value)}
-              className="w-full p-2 rounded-md text-white"
-              style={{ backgroundColor: '#111111', borderColor: '#9cadce', borderWidth: '1px' }}
-            >
-              <option value="EUR">EUR - Euro</option>
-              <option value="USD">USD - US Dollar</option>
-              <option value="GBP">GBP - British Pound</option>
-              <option value="JPY">JPY - Japanese Yen</option>
-            </select>
-          </div>
-        </div>
-        {convertedAmount && (
-          <div className="mt-4 p-4 rounded-md" style={{ backgroundColor: '#111111' }}>
-            <p className="text-lg font-medium" style={{ color: '#9cadce' }}>
-              {amount} {fromCurrency} = {convertedAmount} {toCurrency}
-            </p>
-            <p className="text-sm" style={{ color: '#9cadce' }}>
-              Exchange Rate: 1 {fromCurrency} = {exchangeRate} {toCurrency}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Weather Find Component
-  const WeatherFind = ({ location }) => {
-    const [weatherData, setWeatherData] = useState(null);
-
-    useEffect(() => {
-      // Fetch weather data from an API
-      const fetchWeatherData = async () => {
-        try {
-          // In a real app, you would call a weather API here
-          // For this example, we'll use mock data
-          const mockData = {
-            temperature: 22,
-            condition: 'Sunny',
-            humidity: 65,
-            windSpeed: 10
-          };
-          setWeatherData(mockData);
-        } catch (error) {
-          console.error('Error fetching weather data:', error);
-        }
-      };
-
-      fetchWeatherData();
-    }, [location]);
-
-    return (
-      <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}>
-        <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Weather in {location}</h2>
-        {weatherData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#9cadce' }}>
-                <FaSun className="text-black text-2xl" />
-              </div>
-              <div>
-                <p className="text-lg font-medium" style={{ color: '#9cadce' }}>{weatherData.condition}</p>
-                <p className="text-sm" style={{ color: '#9cadce' }}>{weatherData.temperature}°C</p>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm" style={{ color: '#9cadce' }}>Humidity: {weatherData.humidity}%</p>
-              <p className="text-sm" style={{ color: '#9cadce' }}>Wind Speed: {weatherData.windSpeed} km/h</p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm" style={{ color: '#9cadce' }}>Loading weather data...</p>
-        )}
-      </div>
-    );
-  };
 
   // Add a save button to the itinerary section
   const renderSaveButton = () => {
