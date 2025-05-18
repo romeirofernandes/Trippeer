@@ -1252,7 +1252,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="budget-low"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'low' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'low' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Economy</span>
                     <span className="block text-xs mt-1">$ Budget-friendly</span>
@@ -1270,7 +1270,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="budget-medium"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'medium' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'medium' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Standard</span>
                     <span className="block text-xs mt-1">$$ Mid-range</span>
@@ -1288,7 +1288,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="budget-high"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'high' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${budget === 'high' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Luxury</span>
                     <span className="block text-xs mt-1">$$$ Premium</span>
@@ -1311,7 +1311,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="time-early"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'early' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'early' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Early Bird</span>
                     <span className="block text-xs mt-1">Start at 7-8 AM</span>
@@ -1329,7 +1329,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="time-mid"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'mid' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'mid' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Regular</span>
                     <span className="block text-xs mt-1">Start at 8-9 AM</span>
@@ -1347,7 +1347,7 @@ const downloadItinerary = () => {
                   />
                   <label
                     htmlFor="time-late"
-                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'late' ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                    className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${startTime === 'late' ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                   >
                     <span className="block text-sm font-medium">Relaxed</span>
                     <span className="block text-xs mt-1">Start at 9-10 AM</span>
@@ -1370,7 +1370,7 @@ const downloadItinerary = () => {
                     />
                     <label
                       htmlFor={`interest-${option.value}`}
-                      className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${interests.includes(option.value) ? 'bg-[#9cadce]/20' : 'hover:bg-[#9cadce]/10'}`}
+                      className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg bg-[#161616] border-none focus:ring-[#9cadce] text-[#f8f8f8] ${interests.includes(option.value) ? 'bg-blue-500' : 'hover:bg-[#9cadce]/10'}`}
                     >
                       {option.label}
                     </label>
