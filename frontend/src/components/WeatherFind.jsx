@@ -18,104 +18,119 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   useEffect(() => {
-    const fetchWeather = async () => {
-      if (!source || !destination) {
-        setLoading(false);
-        setError("Source and destination locations are required");
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Check if API key exists and log it (for debugging)
-        if (!API_KEY) {
-          console.error("Weather API key is missing. Check your .env file");
-          throw new Error("Weather API key is missing");
-        }
-        
-        console.log("Using API key:", API_KEY);
-        console.log("Fetching weather data for:", source, destination);
-
-        // Fetch source weather with proper error handling
-        try {
-          const sourceResponse = await axios.get(
-            `https://api.weatherapi.com/v1/forecast.json`,
-            {
-              params: {
-                key: API_KEY,
-                q: encodeURIComponent(source),
-                days: 7,
-                aqi: 'no',
-                alerts: 'no'
-              }
-            }
-          );
-          
-          if (!sourceResponse.data || !sourceResponse.data.current) {
-            throw new Error(`Invalid response for source location: ${source}`);
-          }
-          
-          setSourceWeather(sourceResponse.data);
-          console.log("Source weather data:", sourceResponse.data);
-        } catch (err) {
-          console.error(`Error fetching source weather: ${err.message}`);
-          throw new Error(`Error fetching source weather: ${err.message}`);
-        }
-
-        // Fetch destination weather with proper error handling
-        try {
-          const destResponse = await axios.get(
-            `https://api.weatherapi.com/v1/forecast.json`,
-            {
-              params: {
-                key: API_KEY,
-                q: encodeURIComponent(destination),
-                days: 7,
-                aqi: 'no',
-                alerts: 'no'
-              }
-            }
-          );
-          
-          if (!destResponse.data || !destResponse.data.current) {
-            throw new Error(`Invalid response for destination location: ${destination}`);
-          }
-          
-          setDestinationWeather(destResponse.data);
-          console.log("Destination weather data:", destResponse.data);
-        } catch (err) {
-          console.error(`Error fetching destination weather: ${err.message}`);
-          throw new Error(`Error fetching destination weather: ${err.message}`);
-        }
-        
-        // Only attempt to generate insights if we have valid data
-        if (GEMINI_API_KEY) {
-          await generateWeatherInsights(sourceWeather, destinationWeather);
-          await generateSuggestions(sourceWeather, destinationWeather);
-        } else {
-          console.warn("Gemini API key missing - insights won't be generated");
-        }
-
-      } catch (err) {
-        console.error("Weather data fetch error:", err);
-        setError(`Failed to fetch weather data: ${err.message || "Unknown error"}`);
-        
-        // Clear any partial data
-        setSourceWeather(null);
-        setDestinationWeather(null);
-        setSuggestions([]);
-        setWeatherInsights(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (source && destination) {
-      fetchWeather();
+  const fetchWeather = async () => {
+    if (!source || !destination) {
+      setLoading(false);
+      setError("Source and destination locations are required");
+      return;
     }
-  }, [source, destination, API_KEY]);
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (!API_KEY) {
+        console.error("Weather API key is missing. Check your .env file");
+        throw new Error("Weather API key is missing");
+      }
+
+      console.log("Using API key:", API_KEY);
+      console.log("Fetching weather data for:", source, destination);
+
+      // Declare variables here
+      let sourceResponse = null;
+      let destResponse = null;
+
+      // Fetch source weather
+      try {
+        sourceResponse = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json`,
+          {
+            params: {
+              key: API_KEY,
+              q: encodeURIComponent(source),
+              days: 7,
+              aqi: 'no',
+              alerts: 'no'
+            }
+          }
+        );
+
+        if (!sourceResponse.data || !sourceResponse.data.current) {
+          throw new Error(`Invalid response for source location: ${source}`);
+        }
+
+        setSourceWeather(sourceResponse.data);
+        console.log("Source weather data:", sourceResponse.data);
+      } catch (err) {
+        console.error(`Error fetching source weather: ${err.message}`);
+        throw new Error(`Error fetching source weather: ${err.message}`);
+      }
+
+      // Fetch destination weather
+      try {
+        destResponse = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json`,
+          {
+            params: {
+              key: API_KEY,
+              q: encodeURIComponent(destination),
+              days: 7,
+              aqi: 'no',
+              alerts: 'no'
+            }
+          }
+        );
+
+        if (!destResponse.data || !destResponse.data.current) {
+          throw new Error(`Invalid response for destination location: ${destination}`);
+        }
+
+        setDestinationWeather(destResponse.data);
+        console.log("Destination weather data:", destResponse.data);
+      } catch (err) {
+        console.error(`Error fetching destination weather: ${err.message}`);
+        throw new Error(`Error fetching destination weather: ${err.message}`);
+      }
+      console.log("Source weather API response:", sourceResponse?.data);
+console.log("Destination weather API response:", destResponse?.data);
+      // Only attempt to generate insights if we have valid data
+      if (GEMINI_API_KEY) {
+        if (
+          sourceResponse &&
+          sourceResponse.data &&
+          sourceResponse.data.current &&
+          destResponse &&
+          destResponse.data &&
+          destResponse.data.current
+        ) {
+          await generateWeatherInsights(sourceResponse.data, destResponse.data);
+          await generateSuggestions(sourceResponse.data, destResponse.data);
+        } else {
+          console.warn("Skipping insights: missing current weather data");
+        }
+      } else {
+        console.warn("Gemini API key missing - insights won't be generated");
+      }
+
+    } catch (err) {
+      console.error("Weather data fetch error:", err);
+      setError(`Failed to fetch weather data: ${err.message || "Unknown error"}`);
+
+      // Clear any partial data
+      setSourceWeather(null);
+      setDestinationWeather(null);
+      setSuggestions([]);
+      setWeatherInsights(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (source && destination) {
+    fetchWeather();
+  }
+}, [source, destination, API_KEY]);
 
   // Helper function to create mock weather data if API fails but we have basic info
   const createMockWeatherData = (locationName, basicInfo) => {
@@ -429,9 +444,9 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
   };
 
   // If showing only after generation is required and we don't have an itinerary yet
-  if (showAfterGeneration && !weatherInfo) {
-    return null; // Don't render anything until travel plan is generated
-  }
+  // if (showAfterGeneration && !weatherInfo) {
+  //   return null; // Don't render anything until travel plan is generated
+  // }
 
   if (!source || !destination) {
     return (
