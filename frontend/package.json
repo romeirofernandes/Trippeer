@@ -14,17 +14,15 @@
     "@fontsource/space-grotesk": "^5.2.7",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.9.0",
-<<<<<<< HEAD
     "dotenv": "^16.5.0",
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
-=======
+
     "firebase": "^11.7.3",
-<<<<<<< HEAD
->>>>>>> 38f243ff0d55674fe91fc9befd2eee4d472fc549
-=======
+
+
     "framer-motion": "^12.12.1",
->>>>>>> 5e2726941209f5a8032af335f840ffce3a3495c0
+
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
