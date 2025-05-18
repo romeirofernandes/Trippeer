@@ -72,10 +72,10 @@ const Itinerary = () => {
       
       // Use a nicer map style (Stamen Terrain)
       // Replace your existing tile layer with this more reliable one
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 19
-}).addTo(mapRef.current);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(mapRef.current);
       
       // Create custom plane icon
       const planeIcon = L.icon({
