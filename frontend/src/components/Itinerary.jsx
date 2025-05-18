@@ -12,6 +12,9 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
 
 const Itinerary = () => {
+  // Add this state variable at the top with other state declarations
+
+  const [startTime, setStartTime] = useState("early"); // 'early', 'mid', 'late'
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
   const [days, setDays] = useState(3);
@@ -198,44 +201,64 @@ const Itinerary = () => {
   };
 
   // Enhanced function to generate itinerary with Gemini API
-  const generateItinerary = async (sourceName, destName, days, travelersCount, budgetLevel, interestsList) => {
-    try {
-      // Get API key from environment variable
-      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+  const generateItinerary = async (sourceName, destName, days, travelersCount, budgetLevel, interestsList, startTimePreference) => {
+  try {
+    // Get API key from environment variable
+    const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-      if (!API_KEY) {
-        console.error('Missing Gemini API key in environment variables');
-        throw new Error('API key not configured');
-      }
+    if (!API_KEY) {
+      console.error('Missing Gemini API key in environment variables');
+      throw new Error('API key not configured');
+    }
 
-      const interestsText = interestsList.length > 0
-        ? `Interests include: ${interestsList.join(', ')}.`
-        : '';
+    const interestsText = interestsList.length > 0
+      ? `Interests include: ${interestsList.join(', ')}.`
+      : '';
 
-      const budgetText = {
-        'low': 'on a limited budget (budget-friendly options)',
-        'medium': 'with a moderate budget (mid-range options)',
-        'high': 'with a luxury budget (high-end experiences)'
-      }[budgetLevel];
+    const budgetText = {
+      'low': 'on a limited budget (budget-friendly options)',
+      'medium': 'with a moderate budget (mid-range options)',
+      'high': 'with a luxury budget (high-end experiences)'
+    }[budgetLevel];
+    
+    const startTimeText = {
+      'early': 'Start the day early, with breakfast around 7:00 AM - 8:00 AM',
+      'mid': 'Start the day at a regular pace, with breakfast around 8:00 AM - 9:00 AM',
+      'late': 'Start the day in a relaxed manner, with breakfast around 9:00 AM - 10:00 AM'
+    }[startTimePreference];
 
-      const prompt = `You are a travel expert who creates detailed itineraries. Create a ${days}-day travel itinerary from ${sourceName} to ${destName} for ${travelersCount} travelers ${budgetText}. ${interestsText} Include estimated flight time in hours, approximate distance in km, and 3 activities for each day that are appropriate for the destination and align with the travelers' interests and budget. Also include a recommended hotel or accommodation for each night.
+    const prompt = `You are a travel expert who creates detailed itineraries. Create a ${days}-day travel itinerary from ${sourceName} to ${destName} for ${travelersCount} travelers ${budgetText}. ${interestsText} 
 
-      Return as JSON with this structure:
-      {
-        "flightTime": number,
-        "distance": number,
-        "days": [
-          {
-            "day": number,
-            "activities": [string, string, string],
-            "accommodation": {
-              "name": string,
-              "description": string
-            }
-          }
-        ],
-        "travelTips": [string, string, string]
-      }`;
+${startTimeText} and schedule activities throughout the day in a logical sequence. For each day, include 4-6 activities with specific time slots (e.g., "09:00 AM - 10:30 AM"). Include breakfast, lunch and dinner with specific time slots. Make sure activities are appropriate for the destination and align with the travelers' interests and budget.
+
+Also include estimated flight time in hours and approximate distance in km.
+
+At the end, provide 2-3 accommodation suggestions appropriate for the entire stay (not different accommodations for each day), considering the budget level.
+
+Return ONLY as JSON with this structure:
+{
+  "flightTime": number,
+  "distance": number,
+  "days": [
+    {
+      "day": number,
+      "activities": [
+        {
+          "time": string (e.g., "09:00 AM - 11:30 AM"),
+          "description": string
+        }
+      ]
+    }
+  ],
+  "accommodationSuggestions": [
+    {
+      "name": string,
+      "description": string,
+      "priceRange": string
+    }
+  ],
+  "travelTips": [string, string, string]
+}`;
 
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
@@ -293,31 +316,122 @@ const Itinerary = () => {
     } catch (error) {
       console.error('Error calling Gemini API:', error);
 
-      // More detailed fallback data if API call fails
-      return {
-        flightTime: Math.floor(Math.random() * 10) + 2,
-        distance: Math.floor(Math.random() * 5000) + 500,
-        days: Array.from({ length: days }, (_, i) => ({
-          day: i + 1,
-          activities: [
-            `Explore ${destName}'s city center`,
-            `Try local cuisine in ${destName}`,
-            `Visit popular tourist attractions in ${destName}`
-          ],
-          accommodation: {
-            name: `${destName} Central Hotel`,
-            description: "Comfortable accommodation in a central location"
-          }
-        })),
-        travelTips: [
-          "Remember to check visa requirements before traveling",
-          "Currency exchange rates may vary, check before departure",
-          "Always have travel insurance for international trips"
-        ]
-      };
+      // Update the fallback data in the catch block of generateItinerary function
+
+return {
+  flightTime: Math.floor(Math.random() * 10) + 2,
+  distance: Math.floor(Math.random() * 5000) + 500,
+  days: Array.from({ length: days }, (_, i) => ({
+    day: i + 1,
+    activities: [
+      {
+        time: "08:00 AM - 09:00 AM",
+        description: "Breakfast at hotel"
+      },
+      {
+        time: "09:30 AM - 12:00 PM",
+        description: `Explore ${destName}'s city center`
+      },
+      {
+        time: "12:30 PM - 02:00 PM",
+        description: `Lunch at a popular local restaurant`
+      },
+      {
+        time: "02:30 PM - 05:00 PM",
+        description: `Visit popular tourist attractions in ${destName}`
+      },
+      {
+        time: "06:00 PM - 08:00 PM",
+        description: `Dinner and evening entertainment`
+      }
+    ]
+  })),
+  accommodationSuggestions: [
+    {
+      name: `${destName} Central Hotel`,
+      description: "Comfortable accommodation in a central location with easy access to main attractions",
+      priceRange: `${budget === 'high' ? '$$$' : (budget === 'medium' ? '$$' : '$')}`
+    },
+    {
+      name: `${destName} Plaza Suites`,
+      description: "Modern rooms with city views and complimentary breakfast",
+      priceRange: `${budget === 'high' ? '$$$' : (budget === 'medium' ? '$$' : '$')}`
+    }
+  ],
+  travelTips: [
+    "Remember to check visa requirements before traveling",
+    "Currency exchange rates may vary, check before departure",
+    "Always have travel insurance for international trips"
+  ]
+};
     }
   };
+// Add this time adjustment function before the return statement
 
+// Function to adjust activity times earlier or later
+const handleAdjustTimes = (dayIndex, direction) => {
+  if (!itinerary || !itinerary.days) return;
+  
+  // Create a deep copy of the itinerary to modify
+  const updatedItinerary = JSON.parse(JSON.stringify(itinerary));
+  const day = updatedItinerary.days[dayIndex];
+  
+  if (!day || !day.activities) return;
+  
+  // Amount to adjust (in hours)
+  const adjustment = direction === 'earlier' ? -1 : 1;
+  
+  // Adjust each activity's time
+  day.activities = day.activities.map(activity => {
+    if (!activity.time) return activity;
+    
+    // Parse time 
+    const [timeRange, period] = activity.time.split(' ');
+    const [startTime, endTime] = timeRange.split(' - ');
+    
+    // Function to adjust a time string by hours
+    const adjustTime = (timeStr, periodStr, hours) => {
+      const [hourStr, minuteStr] = timeStr.split(':');
+      let hour = parseInt(hourStr);
+      const isPM = periodStr === 'PM' && hour !== 12;
+      const isAM = periodStr === 'AM' || hour === 12;
+      
+      // Convert to 24-hour format
+      if (isPM) hour += 12;
+      if (isAM && hour === 12) hour = 0;
+      
+      // Adjust hour
+      hour = (hour + hours + 24) % 24;
+      
+      // Convert back to 12-hour format
+      const newPeriod = hour >= 12 ? 'PM' : 'AM';
+      const newHour = hour % 12 || 12;
+      
+      return {
+        time: `${newHour}:${minuteStr}`,
+        period: newPeriod
+      };
+    };
+    
+    // Adjust start and end times
+    const [startPart, startPeriod] = startTime.includes(' ') ? startTime.split(' ') : [startTime, period];
+    const [endPart, endPeriod] = endTime.includes(' ') ? endTime.split(' ') : [endTime, period];
+    
+    const adjustedStart = adjustTime(startPart, startPeriod || period, adjustment);
+    const adjustedEnd = adjustTime(endPart, endPeriod || period, adjustment);
+    
+    // Format the new time string
+    const newTime = `${adjustedStart.time} ${adjustedStart.period} - ${adjustedEnd.time} ${adjustedEnd.period}`;
+    
+    return {
+      ...activity,
+      time: newTime
+    };
+  });
+  
+  // Update the itinerary with adjusted times
+  setItinerary(updatedItinerary);
+};
   // Calculate bearing between two points
   const calculateBearing = (startLat, startLng, destLat, destLng) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -513,7 +627,8 @@ const Itinerary = () => {
         days,
         travelers,
         budget,
-        interests
+        interests,
+        startTime
       );
 
       setItinerary(generatedItinerary);
@@ -913,6 +1028,78 @@ const Itinerary = () => {
                       </label>
                     </motion.div>
                   </div>
+                  // Add this option to the form after the budget section
+
+<div>
+  <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Daily Start Time</label>
+  <div className="grid grid-cols-3 gap-3">
+    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+      <input
+        type="radio"
+        id="time-early"
+        name="startTime"
+        className="sr-only"
+        checked={startTime === 'early'}
+        onChange={() => setStartTime('early')}
+      />
+      <label
+        htmlFor="time-early"
+        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+          startTime === 'early'
+            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
+        }`}
+      >
+        <span className="block text-sm font-medium">Early Bird</span>
+        <span className="block text-xs mt-1">Start at 7-8 AM</span>
+      </label>
+    </motion.div>
+
+    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+      <input
+        type="radio"
+        id="time-mid"
+        name="startTime"
+        className="sr-only"
+        checked={startTime === 'mid'}
+        onChange={() => setStartTime('mid')}
+      />
+      <label
+        htmlFor="time-mid"
+        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+          startTime === 'mid'
+          ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
+        }`}
+      >
+        <span className="block text-sm font-medium">Regular</span>
+        <span className="block text-xs mt-1">Start at 8-9 AM</span>
+      </label>
+    </motion.div>
+
+    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+      <input
+        type="radio"
+        id="time-late"
+        name="startTime"
+        className="sr-only"
+        checked={startTime === 'late'}
+        onChange={() => setStartTime('late')}
+      />
+      <label
+        htmlFor="time-late"
+        className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+          startTime === 'late'
+            ? 'bg-[#1a1a1a] border-2 border-[#9cadce] text-[#9cadce]'
+            : 'border border-gray-600 hover:border-[#9cadce] text-gray-300'
+        }`}
+      >
+        <span className="block text-sm font-medium">Relaxed</span>
+        <span className="block text-xs mt-1">Start at 9-10 AM</span>
+      </label>
+    </motion.div>
+  </div>
+</div>
                 </div>
 
                 <div>
@@ -1272,55 +1459,123 @@ const Itinerary = () => {
               </div>
             </motion.div>
 
-            {/* Day-by-day itinerary */}
-            <div className="space-y-8 mb-8">
-              {itinerary.days.map((day, index) => (
-                <motion.div
-                  key={index}
-                  className="rounded-lg shadow-md overflow-hidden"
-                  style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 * index }}
-                  whileHover={{ boxShadow: '0 0 15px rgba(156, 173, 206, 0.2)' }}
-                >
-                  <div className="px-4 py-3" style={{ backgroundColor: '#9cadce' }}>
-                    <h3 className="font-semibold text-black">Day {day.day}</h3>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-medium text-[#9cadce] mb-3">Activities</h4>
-                    <ul className="space-y-3 mb-4">
-                      {day.activities.map((activity, i) => (
-                        <motion.li
-                          key={i}
-                          className="flex items-start"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 + (i * 0.1) }}
-                          whileHover={{ x: 5 }}
-                        >
-                          <span className="inline-flex items-center justify-center h-6 w-6 rounded-full text-xs font-medium mr-3" style={{ backgroundColor: '#9cadce', color: 'black' }}>
-                            {i + 1}
-                          </span>
-                          <span className="text-gray-300">{activity}</span>
-                        </motion.li>
-                      ))}
-                    </ul>
+            {/* Day-by-day itinerary as timeline */}
+// Replace the existing timeline component with this enhanced version
 
-                    <h4 className="font-medium text-[#9cadce] mb-2">Accommodation</h4>
-                    <motion.div
-                      className="rounded-lg p-3"
-                      style={{ backgroundColor: '#111111' }}
-                      whileHover={{ backgroundColor: '#1e1e1e' }}
-                    >
-                      <p className="font-medium text-[#9cadce]">{day.accommodation.name}</p>
-                      <p className="text-sm text-gray-400">{day.accommodation.description}</p>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
+{/* Day-by-day itinerary as timeline */}
+<div className="space-y-8 mb-8">
+  {itinerary.days.map((day, index) => (
+    <motion.div
+      key={index}
+      className="rounded-lg shadow-md overflow-hidden"
+      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 * index }}
+      whileHover={{ boxShadow: '0 0 15px rgba(156, 173, 206, 0.2)' }}
+    >
+      <div className="px-4 py-3" style={{ backgroundColor: '#9cadce' }}>
+        <h3 className="font-semibold text-black">Day {day.day}</h3>
+      </div>
+      <div className="p-4">
+        {/* Time ruler */}
+        <div className="relative flex items-center mb-6">
+          <div className="h-1 bg-[#9cadce] opacity-30 flex-grow"></div>
+          <div className="absolute w-full flex justify-between px-2">
+            <span className="text-[10px] text-[#9cadce]">06:00</span>
+            <span className="text-[10px] text-[#9cadce]">12:00</span>
+            <span className="text-[10px] text-[#9cadce]">18:00</span>
+            <span className="text-[10px] text-[#9cadce]">00:00</span>
+          </div>
+        </div>
+        
+        {/* Activities on timeline */}
+        <div className="space-y-4 relative">
+          {day.activities.map((activity, i) => {
+            // Parse time to position activities on timeline
+            const timeString = activity.time || "";
+            const startTime = timeString.split(' - ')[0];
+            const startHour = parseInt(startTime.split(':')[0]) + (startTime.includes('PM') && !startTime.includes('12:') ? 12 : 0);
+            const timePosition = ((startHour - 6 + 24) % 24) / 18 * 100; // Position based on 6am-midnight range
+            
+            return (
+              <motion.div
+                key={i}
+                className="relative border-l-2 pl-4 pb-2"
+                style={{ 
+                  borderColor: '#9cadce',
+                  marginLeft: `${Math.min(Math.max(timePosition, 0), 100)}%` 
+                }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + (i * 0.1) }}
+                whileHover={{ x: 5 }}
+              >
+                {/* Timeline dot */}
+                <div className="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-[#9cadce]"></div>
+                
+                {/* Activity card */}
+                <div className="bg-[#111111] p-3 rounded-lg">
+                  <p className="text-sm font-medium text-[#9cadce] mb-1">
+                    {activity.time || `Activity ${i + 1}`}
+                  </p>
+                  <p className="text-gray-300">{activity.description || activity}</p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+      
+      {/* Time adjustment buttons */}
+      <div className="px-4 py-2 bg-[#111111] flex justify-between items-center">
+        <span className="text-xs text-[#9cadce]">Adjust times:</span>
+        <div className="flex space-x-2">
+          <button 
+            className="text-xs px-2 py-1 rounded bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-colors"
+            onClick={() => handleAdjustTimes(index, 'earlier')}
+          >
+            Earlier
+          </button>
+          <button 
+            className="text-xs px-2 py-1 rounded bg-[#1a1a1a] text-[#9cadce] hover:bg-[#9cadce] hover:text-black transition-colors"
+            onClick={() => handleAdjustTimes(index, 'later')}
+          >
+            Later
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  ))}
+</div>
+            <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: 0.4 }}
+  className="rounded-lg p-4 mb-6"
+  style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+>
+  <h3 className="font-semibold mb-3" style={{ color: '#9cadce' }}>
+    <FaSuitcase className="inline-block mr-2" /> Accommodation Suggestions
+  </h3>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {itinerary.accommodationSuggestions?.map((accommodation, index) => (
+      <motion.div
+        key={index}
+        className="bg-[#111111] p-4 rounded-lg"
+        whileHover={{ scale: 1.02, backgroundColor: '#1e1e1e' }}
+      >
+        <h4 className="font-medium text-[#9cadce] mb-1">{accommodation.name}</h4>
+        <p className="text-sm text-gray-300 mb-2">{accommodation.description}</p>
+        <p className="text-xs inline-block px-2 py-1 rounded" 
+           style={{ backgroundColor: 'rgba(156, 173, 206, 0.2)', color: '#9cadce' }}>
+          {accommodation.priceRange}
+        </p>
+      </motion.div>
+    ))}
+  </div>
+</motion.div>
             {/* Travel Tips */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
