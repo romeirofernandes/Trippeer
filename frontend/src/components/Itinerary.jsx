@@ -1560,67 +1560,118 @@ const downloadItinerary = () => {
 
               {/* Day View */}
               <div className="space-y-8 mb-8">
-                <motion.div
-                  key={currentDayIndex}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-[#161616] rounded-2xl p-6"
-                >
-                  {/* Day Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-[#f8f8f8] text-lg flex items-center">
-                      <span className="w-8 h-8 rounded-full bg-[#9cadce]/20 flex items-center justify-center mr-3 text-[#9cadce]">
-                        {itinerary.days[currentDayIndex].day}
-                      </span>
-                      Day {itinerary.days[currentDayIndex].day}
-                    </h3>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handlePrevDay}
-                        disabled={currentDayIndex === 0}
-                        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === 0 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Previous Day
-                      </button>
-                      <button
-                        onClick={handleNextDay}
-                        disabled={currentDayIndex === itinerary.days.length - 1}
-                        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === itinerary.days.length - 1 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
-                      >
-                        Next Day
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  {/* Activities */}
-                  <div className="space-y-6">
-                    {itinerary.days[currentDayIndex].activities.map((activity, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * i }}
-                        className="bg-[#232323] rounded-xl p-4 flex items-start"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-[#9cadce]/10 flex items-center justify-center text-[#9cadce] mr-4 flex-shrink-0">
-                          {getActivityIcon(activity)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#9cadce] mb-1">
-                            {activity.time || `Activity ${i + 1}`}
-                          </p>
-                          <p className="text-[#f8f8f8]">{activity.description || activity}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
+                {/* Day-by-day itinerary as timeline */}
+<motion.div
+  key={currentDayIndex}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+  className="bg-[#161616] rounded-2xl p-6 mb-8"
+>
+  {/* Day Header */}
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="font-bold text-[#f8f8f8] text-lg flex items-center">
+      <span className="w-8 h-8 rounded-full bg-[#9cadce]/20 flex items-center justify-center mr-3 text-[#9cadce]">
+        {itinerary.days[currentDayIndex].day}
+      </span>
+      Day {itinerary.days[currentDayIndex].day}
+    </h3>
+    <div className="flex space-x-2">
+      <button
+        onClick={handlePrevDay}
+        disabled={currentDayIndex === 0}
+        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === 0 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
+      >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Previous Day
+      </button>
+      <button
+        onClick={handleNextDay}
+        disabled={currentDayIndex === itinerary.days.length - 1}
+        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === itinerary.days.length - 1 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
+      >
+        Next Day
+        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {/* Timeline Container */}
+  <div className="relative">
+    {/* Center Timeline Line */}
+    <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-[#9cadce]/30"></div>
+    
+    {/* Activities */}
+    <div className="space-y-8">
+      {itinerary.days[currentDayIndex].activities.map((activity, i) => {
+        const isLeft = i % 2 === 0;
+        const isLast = i === itinerary.days[currentDayIndex].activities.length - 1;
+        
+        return (
+          <div className="relative flex items-center" key={i}>
+            {/* Time indicator in center */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="w-10 h-10 rounded-full bg-[#161616] border-4 border-[#9cadce]/30 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-[#9cadce] flex items-center justify-center text-black">
+                  {getActivityIcon(activity)}
+                </div>
+              </div>
+            </div>
+            
+            {/* Left side activity */}
+            {isLeft ? (
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 * i }}
+                className="w-1/2 pr-8 text-right"
+              >
+                <div className="bg-[#232323] p-4 rounded-xl inline-block relative mr-8">
+                  {/* Right arrow */}
+                  <div className="absolute top-1/2 right-0 transform translate-x-full -translate-y-1/2 w-0 h-0 border-8 border-transparent border-l-[#232323]"></div>
+                  
+                  <p className="text-sm font-medium text-[#9cadce] mb-1">{activity.time}</p>
+                  <p className="text-[#f8f8f8]">{activity.description}</p>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="w-1/2"></div>
+            )}
+            
+            {/* Right side activity */}
+            {!isLeft ? (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 * i }}
+                className="w-1/2 pl-8"
+              >
+                <div className="bg-[#232323] p-4 rounded-xl inline-block relative ml-8">
+                  {/* Left arrow */}
+                  <div className="absolute top-1/2 left-0 transform -translate-x-full -translate-y-1/2 w-0 h-0 border-8 border-transparent border-r-[#232323]"></div>
+                  
+                  <p className="text-sm font-medium text-[#9cadce] mb-1">{activity.time}</p>
+                  <p className="text-[#f8f8f8]">{activity.description}</p>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="w-1/2"></div>
+            )}
+            
+            {/* Connecting line to next activity */}
+            {!isLast && (
+              <div className="absolute left-1/2 top-10 w-0.5 h-full -mb-8 bg-gradient-to-b from-[#9cadce]/30 to-transparent"></div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</motion.div>
               </div>
 
               {/* Accommodation Suggestions */}
