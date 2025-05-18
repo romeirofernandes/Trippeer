@@ -10,14 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
     "@splinetool/react-spline": "^4.0.0",
-    "@tailwindcss/vite": "^4.1.7",
-    "framer-motion": "^12.12.1",
     "lucide-react": "^0.511.0",
-=======
     "@fontsource/inter": "^5.2.5",
     "@fontsource/space-grotesk": "^5.2.7",
     "@tailwindcss/vite": "^4.1.7",

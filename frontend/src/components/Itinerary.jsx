@@ -1077,31 +1077,21 @@ const Itinerary = () => {
                 ))}
               </div>
 
-                {/* Travel Tips */}
-                <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-                  <h3 className="font-semibold text-indigo-900 mb-3">Travel Tips for {destination}</h3>
-                  <ul className="space-y-2">
-                    {itinerary.travelTips.map((tip, index) => (
-                      <li key={index} className="flex items-start">
-                        <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
-                        <span className="text-gray-700">{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={() => setCurrentTab('details')}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Plan Another Trip
-                  </button>
-                </div>
+              {/* Travel Tips */}
+              <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-indigo-900 mb-3">Travel Tips for {destination}</h3>
+                <ul className="space-y-2">
+                  {itinerary.travelTips.map((tip, index) => (
+                    <li key={index} className="flex items-start">
+                      <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
+                      <span className="text-gray-700">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
