@@ -27,6 +27,7 @@ export const SidebarProvider = ({ children }) => {
   );
 };
 
+
 const Sidebar = () => {
   const { isOpen, setIsOpen } = useSidebar();
   const location = useLocation();
