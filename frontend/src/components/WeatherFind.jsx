@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb } from 'react-icons/fa';
+import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb, FaExclamationTriangle } from 'react-icons/fa';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 
 const WeatherFind = ({ source, destination, showAfterGeneration = false, weatherInfo = null }) => {
@@ -20,72 +20,101 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
     const fetchWeather = async () => {
       if (!source || !destination) {
         setLoading(false);
+        setError("Source and destination locations are required");
         return;
       }
 
-      setLoading(true);
-      setError(null);
-
       try {
-        // Fetch source weather
-        const sourceResponse = await axios.get(
-          `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${source}&days=7&aqi=no&alerts=no`
-        );
-        setSourceWeather(sourceResponse.data);
-
-        // Fetch destination weather
-        const destResponse = await axios.get(
-          `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${destination}&days=7&aqi=no&alerts=no`
-        );
-        setDestinationWeather(destResponse.data);
-
-        // Generate AI suggestions based on weather data
-        await generateSuggestions(sourceResponse.data, destResponse.data);
+        setLoading(true);
+        setError(null);
         
-        // Generate detailed weather insights using Gemini
-        await generateWeatherInsights(sourceResponse.data, destResponse.data);
+        // Check if API key exists and log it (for debugging)
+        if (!API_KEY) {
+          console.error("Weather API key is missing. Check your .env file");
+          throw new Error("Weather API key is missing");
+        }
+        
+        console.log("Using API key:", API_KEY);
+        console.log("Fetching weather data for:", source, destination);
+
+        // Fetch source weather with proper error handling
+        try {
+          const sourceResponse = await axios.get(
+            `https://api.weatherapi.com/v1/forecast.json`,
+            {
+              params: {
+                key: API_KEY,
+                q: encodeURIComponent(source),
+                days: 7,
+                aqi: 'no',
+                alerts: 'no'
+              }
+            }
+          );
+          
+          if (!sourceResponse.data || !sourceResponse.data.current) {
+            throw new Error(`Invalid response for source location: ${source}`);
+          }
+          
+          setSourceWeather(sourceResponse.data);
+          console.log("Source weather data:", sourceResponse.data);
+        } catch (err) {
+          console.error(`Error fetching source weather: ${err.message}`);
+          throw new Error(`Error fetching source weather: ${err.message}`);
+        }
+
+        // Fetch destination weather with proper error handling
+        try {
+          const destResponse = await axios.get(
+            `https://api.weatherapi.com/v1/forecast.json`,
+            {
+              params: {
+                key: API_KEY,
+                q: encodeURIComponent(destination),
+                days: 7,
+                aqi: 'no',
+                alerts: 'no'
+              }
+            }
+          );
+          
+          if (!destResponse.data || !destResponse.data.current) {
+            throw new Error(`Invalid response for destination location: ${destination}`);
+          }
+          
+          setDestinationWeather(destResponse.data);
+          console.log("Destination weather data:", destResponse.data);
+        } catch (err) {
+          console.error(`Error fetching destination weather: ${err.message}`);
+          throw new Error(`Error fetching destination weather: ${err.message}`);
+        }
+        
+        // Only attempt to generate insights if we have valid data
+        if (GEMINI_API_KEY) {
+          await generateWeatherInsights(sourceWeather, destinationWeather);
+          await generateSuggestions(sourceWeather, destinationWeather);
+        } else {
+          console.warn("Gemini API key missing - insights won't be generated");
+        }
 
       } catch (err) {
-        console.error('Error fetching weather data:', err);
+        console.error("Weather data fetch error:", err);
+        setError(`Failed to fetch weather data: ${err.message || "Unknown error"}`);
         
-        // If we have weatherInfo from parent, use it to create mock data
-        if (weatherInfo) {
-          const mockSourceData = createMockWeatherData(source, weatherInfo);
-          const mockDestData = createMockWeatherData(destination, weatherInfo);
-          
-          setSourceWeather(mockSourceData);
-          setDestinationWeather(mockDestData);
-          
-          // Generate basic insights and suggestions
-          setSuggestions([
-            `Pack for ${weatherInfo.condition || 'variable'} weather in ${destination}.`,
-            `Temperatures around ${weatherInfo.temperature || '20'}°C at your destination.`,
-            "Check local weather forecasts regularly during your stay.",
-            "Pack layers to adjust to changing temperatures.",
-            "Bring sun protection regardless of temperature."
-          ]);
-          
-          setWeatherInsights({
-            summary: `Weather in ${destination} is currently ${weatherInfo.condition || 'variable'} with temperatures around ${weatherInfo.temperature || '20'}°C.`,
-            keyDifferences: [
-              "Temperature variation between locations",
-              "Weather conditions may differ",
-              "Humidity levels may vary"
-            ],
-            recommendation: "Pack versatile clothing appropriate for the forecasted conditions."
-          });
-          
-          setError(null);
-        } else {
-          setError('Failed to fetch weather information. Please check your location names.');
-        }
+        // Clear any partial data
+        setSourceWeather(null);
+        setDestinationWeather(null);
+        setSuggestions([]);
+        setWeatherInsights(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWeather();
-  }, [source, destination]);
+    if (source && destination) {
+      fetchWeather();
+    }
+  }, [source, destination, API_KEY]);
 
   // Helper function to create mock weather data if API fails but we have basic info
   const createMockWeatherData = (locationName, basicInfo) => {
@@ -122,33 +151,39 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
 
   useEffect(() => {
     // Make weather data available to parent components through a global variable for access
-    if (sourceWeather && destinationWeather) {
-      // Calculate temperature difference
-      const tempDiff = (destinationWeather.current.temp_c - sourceWeather.current.temp_c).toFixed(1);
-      
-      // Create an object with formatted weather data
-      window.tripWeatherData = {
-        sourceWeather: {
-          temperature: sourceWeather.current.temp_c,
-          condition: sourceWeather.current.condition.text,
-          humidity: sourceWeather.current.humidity,
-          windSpeed: sourceWeather.current.wind_kph
-        },
-        destinationWeather: {
-          temperature: destinationWeather.current.temp_c,
-          condition: destinationWeather.current.condition.text,
-          humidity: destinationWeather.current.humidity,
-          windSpeed: destinationWeather.current.wind_kph,
-          forecast: destinationWeather.forecast.forecastday.map(day => ({
-            date: day.date,
-            maxTemp: day.day.maxtemp_c,
-            minTemp: day.day.mintemp_c,
-            condition: day.day.condition.text,
-            chanceOfRain: day.day.daily_chance_of_rain
-          }))
-        },
-        tempDiff: tempDiff
-      };
+    // But only if we have valid data from both locations
+    if (sourceWeather && destinationWeather && 
+        sourceWeather.current && destinationWeather.current) {
+      try {
+        // Calculate temperature difference
+        const tempDiff = (destinationWeather.current.temp_c - sourceWeather.current.temp_c).toFixed(1);
+        
+        // Create an object with formatted weather data
+        window.tripWeatherData = {
+          sourceWeather: {
+            temperature: sourceWeather.current.temp_c,
+            condition: sourceWeather.current.condition.text,
+            humidity: sourceWeather.current.humidity,
+            windSpeed: sourceWeather.current.wind_kph
+          },
+          destinationWeather: {
+            temperature: destinationWeather.current.temp_c,
+            condition: destinationWeather.current.condition.text,
+            humidity: destinationWeather.current.humidity,
+            windSpeed: destinationWeather.current.wind_kph,
+            forecast: destinationWeather.forecast.forecastday.map(day => ({
+              date: day.date,
+              maxTemp: day.day.maxtemp_c,
+              minTemp: day.day.mintemp_c,
+              condition: day.day.condition.text,
+              chanceOfRain: day.day.daily_chance_of_rain
+            }))
+          },
+          tempDiff: tempDiff
+        };
+      } catch (err) {
+        console.error("Error formatting weather data:", err);
+      }
     }
   }, [sourceWeather, destinationWeather]);
 
@@ -422,14 +457,25 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
+      <div className="p-6 rounded-lg shadow-md bg-[#111111] border border-[#232323]">
+        <h2 className="text-xl font-semibold mb-4 flex items-center text-[#f8f8f8]">
+          <FaExclamationTriangle className="mr-2 text-red-500" /> Weather Error
         </h2>
-        <div className="bg-red-50 p-4 rounded-md text-red-700">
-          <p className="flex items-center">
-            <FaInfoCircle className="mr-2" /> {error}
+        <div className="p-4 rounded-md bg-red-500/20 border border-red-500">
+          <p className="flex items-center text-red-200">
+            <FaInfoCircle className="mr-2 flex-shrink-0" /> {error}
           </p>
+          <p className="mt-2 text-sm text-red-200">
+            Check that your locations are valid and the API key is correctly configured.
+          </p>
+        </div>
+        <div className="mt-4 text-sm text-[#9cadce]">
+          <p>Troubleshooting steps:</p>
+          <ul className="list-disc pl-5 mt-2 space-y-1 text-[#a0a0a0]">
+            <li>Verify that "{source}" and "{destination}" are valid locations</li>
+            <li>Check that your weather API key is valid in environment variables</li>
+            <li>Ensure you have internet connectivity</li>
+          </ul>
         </div>
       </div>
     );
@@ -439,11 +485,11 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
   const tempDiff = sourceWeather && destinationWeather ? 
     (destinationWeather.current.temp_c - sourceWeather.current.temp_c).toFixed(1) : 0;
   
-  const tempDiffClass = tempDiff > 0 ? 'text-red-500' : (tempDiff < 0 ? 'text-blue-500' : 'text-gray-500');
+  const tempDiffClass = tempDiff > 0 ? 'text-red-400' : (tempDiff < 0 ? 'text-blue-400' : 'text-gray-400');
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+    <div className="p-6">
+      <h2 className="text-xl font-semibold mb-4 flex items-center text-[#f8f8f8]">
         <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
       </h2>
       
@@ -451,12 +497,12 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Source Weather */}
         {sourceWeather && (
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-sm">
+          <div className="bg-[#161616] rounded-lg p-4 shadow-sm border border-[#232323]">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-indigo-800">
+              <h3 className="text-lg font-medium text-[#9cadce]">
                 {sourceWeather.location.name}, {sourceWeather.location.country}
               </h3>
-              <span className="text-xs text-gray-500">Source</span>
+              <span className="text-xs text-[#a0a0a0]">Source</span>
             </div>
             <div className="flex mt-4 items-center">
               <div className="text-5xl mr-4">
@@ -494,12 +540,12 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
         
         {/* Destination Weather */}
         {destinationWeather && (
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4 shadow-sm">
+          <div className="bg-[#161616] rounded-lg p-4 shadow-sm border border-[#232323]">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-amber-800">
+              <h3 className="text-lg font-medium text-[#9cadce]">
                 {destinationWeather.location.name}, {destinationWeather.location.country}
               </h3>
-              <span className="text-xs text-gray-500">Destination</span>
+              <span className="text-xs text-[#a0a0a0]">Destination</span>
             </div>
             <div className="flex mt-4 items-center">
               <div className="text-5xl mr-4">
@@ -537,13 +583,13 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
       </div>
       
       {/* Temperature Difference */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6 text-center shadow-inner">
-        <h3 className="font-medium text-gray-700 mb-2">Temperature Difference</h3>
+      <div className="bg-[#161616] rounded-lg p-4 mb-6 text-center shadow-inner border border-[#232323]">
+        <h3 className="font-medium text-[#f8f8f8] mb-2">Temperature Difference</h3>
         <div className="flex items-center justify-center">
           <div className={`text-3xl font-bold ${tempDiffClass}`}>
             {tempDiff > 0 ? '+' : ''}{tempDiff}°C
           </div>
-          <div className="ml-3 text-sm text-gray-600">
+          <div className="ml-3 text-sm text-[#a0a0a0]">
             {tempDiff > 0 
               ? 'Destination is warmer than source' 
               : tempDiff < 0 
@@ -556,8 +602,8 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
       
       {/* AI-powered Weather Insights */}
       {weatherInsights && (
-        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-5 mb-6 shadow-inner">
-          <h3 className="font-medium text-indigo-900 mb-3 flex items-center">
+        <div className="bg-[#161616] rounded-lg p-5 mb-6 shadow-inner border border-[#232323]">
+          <h3 className="font-medium text-[#9cadce] mb-3 flex items-center">
             <FaLightbulb className="mr-2 text-yellow-500" /> Smart Weather Analysis
           </h3>
           
@@ -603,13 +649,13 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
       {/* Destination Forecast */}
       {destinationWeather && (
         <div className="mb-6">
-          <h3 className="font-medium text-gray-800 mb-3">
+          <h3 className="font-medium text-[#f8f8f8] mb-3">
             7-Day Forecast for {destinationWeather.location.name}
           </h3>
           <div className="overflow-x-auto">
             <div className="flex space-x-4 p-1 min-w-max">
               {destinationWeather.forecast.forecastday.map(day => (
-                <div key={day.date} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 w-36">
+                <div key={day.date} className="bg-[#161616] rounded-lg shadow-sm border border-[#232323] p-3 w-36">
                   <div className="text-sm font-medium text-gray-700">
                     {formatDay(day.date)}
                   </div>
@@ -644,15 +690,15 @@ const WeatherFind = ({ source, destination, showAfterGeneration = false, weather
       )}
       
       {/* Smart Suggestions */}
-      <div className="bg-indigo-50 rounded-lg p-4">
-        <h3 className="font-medium text-indigo-900 mb-3 flex items-center">
+      <div className="bg-[#161616] rounded-lg p-4 border border-[#232323]">
+        <h3 className="font-medium text-[#9cadce] mb-3 flex items-center">
           <FaTshirt className="mr-2" /> Smart Travel Suggestions
         </h3>
         <ul className="space-y-2">
           {suggestions.map((suggestion, index) => (
             <li key={index} className="flex items-start">
-              <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
-              <span className="text-gray-700">{suggestion}</span>
+              <FaInfoCircle className="text-[#9cadce] mt-1 mr-2 flex-shrink-0" />
+              <span className="text-[#f8f8f8]">{suggestion}</span>
             </li>
           ))}
         </ul>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef,useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import {
@@ -1920,21 +1920,23 @@ const handleAdjustTimes = (dayIndex, direction) => {
         )}
 
         {/* Weather Section */}
-        {itinerary && source && destination && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
-          >
-            <WeatherFind 
-              source={source} 
-              destination={destination}
-              showAfterGeneration={true}
-              weatherInfo={weatherInfo}
-            />
-          </motion.div>
-        )}
+{itinerary && source && destination && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.5 }}
+    className="mb-8"
+  >
+    <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Weather Information</h2>
+    <div className="p-0 rounded-lg">
+      <WeatherFind 
+        source={source} 
+        destination={destination}
+        showAfterGeneration={true}
+      />
+    </div>
+  </motion.div>
+)}
 
         {/* Currency Section */}
         {itinerary && source && destination && (
