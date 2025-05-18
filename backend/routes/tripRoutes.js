@@ -7,7 +7,7 @@ router.post('/', tripController.createTrip);
 
 // Get all trips for a user
 router.get('/user/:firebaseUID', tripController.getUserTrips);
-
+router.get('/stats/:firebaseUID', tripController.getTripStats);
 // Get a specific trip by ID
 router.get('/:tripId', tripController.getTripById);
 

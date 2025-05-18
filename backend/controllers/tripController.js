@@ -53,6 +53,25 @@ exports.createTrip = async (req, res) => {
   }
 };
 
+exports.getTripStats = async (req, res) => {
+  try {
+    const { firebaseUID } = req.params;
+    if (!firebaseUID) {
+      return res.status(400).json({ error: "Missing firebaseUID" });
+    }
+    const trips = await Trip.find({ firebaseUID });
+
+    // Example stats calculation
+    const total = trips.length;
+    const upcoming = trips.filter(trip => /* add your logic for upcoming */ true).length;
+    const countries = new Set(trips.map(trip => trip.destination)).size;
+    const distance = trips.reduce((sum, trip) => sum + (trip.itinerary?.distance || 0), 0);
+
+    res.json({ total, upcoming, countries, distance });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 // Get all trips for a user
 exports.getUserTrips = async (req, res) => {
   try {
