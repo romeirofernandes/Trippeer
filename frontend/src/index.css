@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "@fontsource/inter";
 @import "@fontsource/space-grotesk";
+@import 'leaflet/dist/leaflet.css';
 
 body{
     font-family: 'Inter', sans-serif;
@@ -14,4 +15,88 @@ h1, h2, h3, h4, h5, h6{
 
 button {
     cursor: pointer;
+}
+
+/* Add this to your CSS file or as a style tag in your component */
+.custom-marker {
+  background: none;
+  border: none;
+}
+
+.marker-container {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.marker {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  position: relative;
+  z-index: 2;
+}
+
+.source-marker {
+  background-color: #4F46E5;
+}
+
+.dest-marker {
+  background-color: #EF4444;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.source-marker + .pulse-ring {
+  background-color: rgba(79, 70, 229, 0.3);
+}
+
+.dest-marker + .pulse-ring {
+  background-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Add these styles to your index.css */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.leaflet-tile-pane {
+  opacity: 1 !important;
+}
+
+.leaflet-tile {
+  visibility: visible !important;
+}
+
+.plane-icon {
+  background: none;
+  border: none;
+}
+
+.plane-icon div {
+  transition: transform 0.3s ease;
 }
