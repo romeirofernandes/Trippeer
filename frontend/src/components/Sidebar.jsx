@@ -33,6 +33,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const navLinks = [
+    { title: "Trippeer", path: "/"},
     { title: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt size={20} /> },
     { title: "Plan Trip", path: "/plan", icon: <FaRoute size={20} /> },
     { title: "Explore", path: "/explore", icon: <FaCompass size={20} /> },
