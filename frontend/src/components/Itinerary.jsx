@@ -3,11 +3,13 @@ import axios from 'axios';
 import { 
   FaPlane, FaCalendarAlt, FaMapMarkerAlt, FaSpinner, 
   FaClock, FaSuitcase, FaUtensils, FaUmbrellaBeach, 
-  FaInfoCircle, FaDownload, FaShare, FaUser, FaSun
+  FaInfoCircle, FaDownload, FaShare, FaUser, FaSun,
+  FaExchangeAlt
 } from 'react-icons/fa';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
+import CurrencyConverter from './CurrencyConverter';
 
 const Itinerary = () => {
   const [source, setSource] = useState('');
@@ -19,7 +21,7 @@ const Itinerary = () => {
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState(null);
   const [error, setError] = useState(null);
-  const [currentTab, setCurrentTab] = useState('details'); // 'details', 'map', 'itinerary'
+  const [currentTab, setCurrentTab] = useState('details'); // 'details', 'map', 'itinerary', 'currency'
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [currency, setCurrency] = useState(null);
   
@@ -598,6 +600,17 @@ const Itinerary = () => {
             >
               Itinerary
             </button>
+            <button
+              className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm sm:text-base ${
+                currentTab === 'currency'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setCurrentTab('currency')}
+              disabled={!source || !destination}
+            >
+              <FaExchangeAlt className="inline-block mr-1" /> Currency
+            </button>
           </div>
           
           {/* Tab Content */}
@@ -1075,6 +1088,55 @@ const Itinerary = () => {
                   >
                     Plan Another Trip
                   </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Currency Converter Tab */}
+            {currentTab === 'currency' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  Currency Converter
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <CurrencyConverter source={source} destination={destination} />
+                  </div>
+                  <div>
+                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 mb-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Currency Tips</h3>
+                      <ul className="space-y-3">
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Always check the exchange rate before exchanging currency at your destination.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Credit cards often offer better exchange rates than currency exchange services.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Inform your bank about your travel plans to avoid card blocks.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Keep some local currency for small purchases and emergencies.</p>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <button
+                      onClick={() => setCurrentTab('itinerary')}
+                      className={`w-full py-3 px-4 flex items-center justify-center rounded-md shadow-sm text-white font-medium ${
+                        !itinerary
+                          ? 'bg-indigo-300 cursor-not-allowed'
+                          : 'bg-indigo-600 hover:bg-indigo-700'
+                      }`}
+                      disabled={!itinerary}
+                    >
+                      Back to Itinerary
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
