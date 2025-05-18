@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaPlane, FaSpinner, FaSearch, FaInfoCircle } from 'react-icons/fa';
+import { FaPlane, FaSpinner, FaSearch, FaInfoCircle, FaFilter } from 'react-icons/fa';
 import axios from 'axios';
 
 // Common airport codes for major cities
@@ -169,6 +169,10 @@ const FlightSearch = ({ source, destination }) => {
     source: [],
     destination: []
   });
+  const [filterCriteria, setFilterCriteria] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedAirline, setSelectedAirline] = useState('all');
+  const [availableAirlines, setAvailableAirlines] = useState([]);
 
   // Function to find airport codes for a city
   const findAirportCodes = (cityName) => {
@@ -222,7 +226,7 @@ const FlightSearch = ({ source, destination }) => {
           access_key: import.meta.env.VITE_AVIATIONSTACK_API_KEY,
           dep_iata: sourceIata,
           arr_iata: destIata,
-          limit: 5  // Limit to 5 flights
+          limit: 5
         }
       });
 
@@ -230,7 +234,6 @@ const FlightSearch = ({ source, destination }) => {
         throw new Error(response.data.error.message);
       }
 
-      // Filter out any null or undefined flights and limit to 5
       const validFlights = (response.data.data || [])
         .filter(flight => 
           flight && 
@@ -239,12 +242,15 @@ const FlightSearch = ({ source, destination }) => {
           flight.departure && 
           flight.arrival
         )
-        .slice(0, 5);  // Ensure we only get 5 flights even if API returns more
+        .slice(0, 5);
 
       if (validFlights.length === 0) {
         setError('No flights found for the selected route');
       } else {
         setFlights(validFlights);
+        // Extract unique airlines from the flights
+        const airlines = [...new Set(validFlights.map(flight => flight.airline.name))];
+        setAvailableAirlines(airlines);
       }
     } catch (err) {
       console.error('Flight search error:', err);
@@ -252,6 +258,108 @@ const FlightSearch = ({ source, destination }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getFlightDate = (scheduledTime) => {
+    const date = new Date(scheduledTime);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const filterFlights = () => {
+    let filteredFlights = flights;
+
+    // Apply date/status filters
+    switch (filterCriteria) {
+      case 'today':
+        filteredFlights = filteredFlights.filter(flight => 
+          getFlightDate(flight.departure.scheduled) === 'Today'
+        );
+        break;
+      case 'tomorrow':
+        filteredFlights = filteredFlights.filter(flight => 
+          getFlightDate(flight.departure.scheduled) === 'Tomorrow'
+        );
+        break;
+      case 'scheduled':
+        filteredFlights = filteredFlights.filter(flight => 
+          flight.flight_status === 'scheduled'
+        );
+        break;
+      case 'delayed':
+        filteredFlights = filteredFlights.filter(flight => 
+          flight.flight_status === 'delayed'
+        );
+        break;
+    }
+
+    // Apply airline filter
+    if (selectedAirline !== 'all') {
+      filteredFlights = filteredFlights.filter(flight => 
+        flight.airline.name === selectedAirline
+      );
+    }
+
+    return filteredFlights;
+  };
+
+  const renderFlights = () => {
+    const filteredFlights = filterFlights();
+    const flightsByDate = filteredFlights.reduce((acc, flight) => {
+      const date = getFlightDate(flight.departure.scheduled);
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(flight);
+      return acc;
+    }, {});
+
+    return Object.entries(flightsByDate).map(([date, dateFlights]) => (
+      <div key={date} className="mb-6">
+        <h4 className="text-lg font-medium text-[#9cadce] mb-3">{date}</h4>
+        <div className="grid gap-4">
+          {dateFlights.map((flight, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-[#232323] p-4 rounded-xl"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-[#9cadce] font-medium">
+                    {flight.airline?.name} - {flight.flight?.iata}
+                  </p>
+                  <p className="text-[#f8f8f8]">
+                    {flight.departure?.airport} → {flight.arrival?.airport}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[#9cadce]">
+                    {flight.departure?.scheduled?.split('T')[1].slice(0, 5)} - {flight.arrival?.scheduled?.split('T')[1].slice(0, 5)}
+                  </p>
+                  <p className="text-[#f8f8f8]">
+                    Status: <span className={flight.flight_status === 'scheduled' ? 'text-green-400' : 'text-yellow-400'}>
+                      {flight.flight_status}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -282,7 +390,7 @@ const FlightSearch = ({ source, destination }) => {
               )}
             </div>
             
-    <div>
+            <div>
               <p className="text-[#f8f8f8]">
                 <span className="text-[#9cadce]">To:</span> {destination}
               </p>
@@ -304,24 +412,105 @@ const FlightSearch = ({ source, destination }) => {
           </div>
         </div>
 
-        <motion.button
-          type="submit"
-          className="w-full py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          disabled={loading || !sourceIata || !destIata}
-        >
-          {loading ? (
-            <>
-              <FaSpinner className="animate-spin mr-2" /> Searching Flights...
-            </>
-          ) : (
-            <>
-              <FaSearch className="mr-2" /> Search Flights
-            </>
+        <div className="flex gap-4">
+          <motion.button
+            type="submit"
+            className="flex-1 py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={loading || !sourceIata || !destIata}
+          >
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" /> Searching Flights...
+              </>
+            ) : (
+              <>
+                <FaSearch className="mr-2" /> Search Flights
+              </>
+            )}
+          </motion.button>
+
+          {flights.length > 0 && (
+            <motion.button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className="py-3 px-6 flex items-center justify-center rounded-lg font-medium text-[#f8f8f8] bg-[#232323] hover:bg-[#2a2a2a]"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FaFilter className="mr-2" /> Filters
+            </motion.button>
           )}
-        </motion.button>
+        </div>
       </form>
+
+      {showFilters && flights.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-4 bg-[#232323] p-4 rounded-xl space-y-4"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => setFilterCriteria('all')}
+              className={`p-2 rounded-lg text-sm ${
+                filterCriteria === 'all' 
+                  ? 'bg-[#9cadce] text-black' 
+                  : 'bg-[#161616] text-[#f8f8f8]'
+              }`}
+            >
+              All Flights
+            </button>
+            <button
+              onClick={() => setFilterCriteria('today')}
+              className={`p-2 rounded-lg text-sm ${
+                filterCriteria === 'today' 
+                  ? 'bg-[#9cadce] text-black' 
+                  : 'bg-[#161616] text-[#f8f8f8]'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              onClick={() => setFilterCriteria('tomorrow')}
+              className={`p-2 rounded-lg text-sm ${
+                filterCriteria === 'tomorrow' 
+                  ? 'bg-[#9cadce] text-black' 
+                  : 'bg-[#161616] text-[#f8f8f8]'
+              }`}
+            >
+              Tomorrow
+            </button>
+            <button
+              onClick={() => setFilterCriteria('scheduled')}
+              className={`p-2 rounded-lg text-sm ${
+                filterCriteria === 'scheduled' 
+                  ? 'bg-[#9cadce] text-black' 
+                  : 'bg-[#161616] text-[#f8f8f8]'
+              }`}
+            >
+              Scheduled
+            </button>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Filter by Airline</label>
+            <select
+              value={selectedAirline}
+              onChange={(e) => setSelectedAirline(e.target.value)}
+              className="w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 border border-[#9cadce]/20"
+            >
+              <option value="all">All Airlines</option>
+              {availableAirlines.map((airline) => (
+                <option key={airline} value={airline}>
+                  {airline}
+                </option>
+              ))}
+            </select>
+          </div>
+        </motion.div>
+      )}
 
       {error && (
         <motion.div
@@ -336,40 +525,8 @@ const FlightSearch = ({ source, destination }) => {
       )}
 
       {flights.length > 0 && (
-        <div className="mt-6 space-y-4">
-          <h3 className="text-lg font-medium text-[#f8f8f8]">Available Flights</h3>
-          <div className="grid gap-4">
-            {flights.map((flight, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-[#232323] p-4 rounded-xl"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-[#9cadce] font-medium">
-                      {flight.airline?.name} - {flight.flight?.iata}
-                    </p>
-                    <p className="text-[#f8f8f8]">
-                      {flight.departure?.airport} → {flight.arrival?.airport}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[#9cadce]">
-                      {flight.departure?.scheduled?.split('T')[1].slice(0, 5)} - {flight.arrival?.scheduled?.split('T')[1].slice(0, 5)}
-                    </p>
-                    <p className="text-[#f8f8f8]">
-                      Status: <span className={flight.flight_status === 'scheduled' ? 'text-green-400' : 'text-yellow-400'}>
-                        {flight.flight_status}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <div className="mt-6">
+          {renderFlights()}
         </div>
       )}
     </div>
