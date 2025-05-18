@@ -71,11 +71,11 @@ const Itinerary = () => {
       mapRef.current = L.map(mapContainer.current).setView([20, 0], 2);
       
       // Use a nicer map style (Stamen Terrain)
-      L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-        subdomains: 'abcd'
-      }).addTo(mapRef.current);
+      // Replace your existing tile layer with this more reliable one
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+}).addTo(mapRef.current);
       
       // Create custom plane icon
       const planeIcon = L.icon({
