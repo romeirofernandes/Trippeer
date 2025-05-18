@@ -21,6 +21,7 @@ const Itinerary = () => {
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState(null);
   const [error, setError] = useState(null);
+  const [currentTab, setCurrentTab] = useState('details'); // 'details', 'map', 'itinerary', 'currency'
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [currency, setCurrency] = useState(null);
   const [hasGeneratedItinerary, setHasGeneratedItinerary] = useState(false);
@@ -503,10 +504,8 @@ const Itinerary = () => {
       setItinerary(generatedItinerary);
       setHasGeneratedItinerary(true);
       
-      // Scroll to map section after itinerary is generated
-      setTimeout(() => {
-        scrollToMap();
-      }, 500);
+      // Switch to map tab
+      setCurrentTab('map');
       
     } catch (err) {
       console.error('Error:', err);
@@ -571,8 +570,6 @@ const Itinerary = () => {
           </p>
         </div>
 
-        {/* SECTION 1: TRIP DETAILS FORM */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200">
@@ -623,261 +620,259 @@ const Itinerary = () => {
           
           {/* Tab Content */}
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Trip Form */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Plan Your Adventure</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="source" className="block text-sm font-medium text-gray-700">
-                        Starting From
-                      </label>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaMapMarkerAlt className="h-5 w-5 text-indigo-500" />
-                        </div>
-                        <input
-                          type="text"
-                          id="source"
-                          value={source}
-                          onChange={(e) => setSource(e.target.value)}
-                          className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
-                          placeholder="New York, Tokyo..."
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
-                        Destination
-                      </label>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaMapMarkerAlt className="h-5 w-5 text-red-500" />
-                        </div>
-                        <input
-                          type="text"
-                          id="destination"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                          className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
-                          placeholder="Paris, Bangkok..."
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="days" className="block text-sm font-medium text-gray-700">
-                        Trip Duration (Days)
-                      </label>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaCalendarAlt className="h-5 w-5 text-indigo-500" />
-                        </div>
-                        <input
-                          type="number"
-                          id="days"
-                          min="1"
-                          max="30"
-                          value={days}
-                          onChange={(e) => setDays(parseInt(e.target.value))}
-                          className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="travelers" className="block text-sm font-medium text-gray-700">
-                        Number of Travelers
-                      </label>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaUser className="h-5 w-5 text-indigo-500" />
-                        </div>
-                        <input
-                          type="number"
-                          id="travelers"
-                          min="1"
-                          max="20"
-                          value={travelers}
-                          onChange={(e) => setTravelers(parseInt(e.target.value))}
-                          className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Budget Level</label>
-                    <div className="grid grid-cols-3 gap-3">
+            {/* Trip Details Tab */}
+            {currentTab === 'details' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Trip Form */}
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Plan Your Adventure</h2>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <input
-                          type="radio"
-                          id="budget-low"
-                          name="budget"
-                          className="sr-only"
-                          checked={budget === 'low'}
-                          onChange={() => setBudget('low')}
-                        />
-                        <label
-                          htmlFor="budget-low"
-                          className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                            budget === 'low'
-                              ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
-                              : 'border border-gray-300 hover:border-indigo-300'
-                          }`}
-                        >
-                          <span className="block text-sm font-medium">Economy</span>
-                          <span className="block text-xs mt-1">$ Budget-friendly</span>
+                        <label htmlFor="source" className="block text-sm font-medium text-gray-700">
+                          Starting From
                         </label>
-                      </div>
-                      
-                      <div>
-                        <input
-                          type="radio"
-                          id="budget-medium"
-                          name="budget"
-                          className="sr-only"
-                          checked={budget === 'medium'}
-                          onChange={() => setBudget('medium')}
-                        />
-                        <label
-                          htmlFor="budget-medium"
-                          className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                            budget === 'medium'
-                                                            ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
-                              : 'border border-gray-300 hover:border-indigo-300'
-                          }`}
-                        >
-                          <span className="block text-sm font-medium">Standard</span>
-                          <span className="block text-xs mt-1">$$ Mid-range</span>
-                        </label>
-                      </div>
-                      
-                      <div>
-                        <input
-                          type="radio"
-                          id="budget-high"
-                          name="budget"
-                          className="sr-only"
-                          checked={budget === 'high'}
-                          onChange={() => setBudget('high')}
-                        />
-                        <label
-                          htmlFor="budget-high"
-                          className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
-                            budget === 'high'
-                              ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
-                              : 'border border-gray-300 hover:border-indigo-300'
-                          }`}
-                        >
-                          <span className="block text-sm font-medium">Luxury</span>
-                          <span className="block text-xs mt-1">$$$ Premium</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Travel Interests</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {interestOptions.map((option) => (
-                        <div key={option.value}>
+                        <div className="mt-1 relative rounded-md shadow-sm">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaMapMarkerAlt className="h-5 w-5 text-indigo-500" />
+                          </div>
                           <input
-                            type="checkbox"
-                            id={`interest-${option.value}`}
+                            type="text"
+                            id="source"
+                            value={source}
+                            onChange={(e) => setSource(e.target.value)}
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
+                            placeholder="New York, Tokyo..."
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
+                          Destination
+                        </label>
+                        <div className="mt-1 relative rounded-md shadow-sm">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaMapMarkerAlt className="h-5 w-5 text-red-500" />
+                          </div>
+                          <input
+                            type="text"
+                            id="destination"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
+                            placeholder="Paris, Bangkok..."
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="days" className="block text-sm font-medium text-gray-700">
+                          Trip Duration (Days)
+                        </label>
+                        <div className="mt-1 relative rounded-md shadow-sm">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaCalendarAlt className="h-5 w-5 text-indigo-500" />
+                          </div>
+                          <input
+                            type="number"
+                            id="days"
+                            min="1"
+                            max="30"
+                            value={days}
+                            onChange={(e) => setDays(parseInt(e.target.value))}
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="travelers" className="block text-sm font-medium text-gray-700">
+                          Number of Travelers
+                        </label>
+                        <div className="mt-1 relative rounded-md shadow-sm">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaUser className="h-5 w-5 text-indigo-500" />
+                          </div>
+                          <input
+                            type="number"
+                            id="travelers"
+                            min="1"
+                            max="20"
+                            value={travelers}
+                            onChange={(e) => setTravelers(parseInt(e.target.value))}
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-4 py-3 sm:text-sm border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Budget Level</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <input
+                            type="radio"
+                            id="budget-low"
+                            name="budget"
                             className="sr-only"
-                            checked={interests.includes(option.value)}
-                            onChange={() => toggleInterest(option.value)}
+                            checked={budget === 'low'}
+                            onChange={() => setBudget('low')}
                           />
                           <label
-                            htmlFor={`interest-${option.value}`}
-                            className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg ${
-                              interests.includes(option.value)
-                                ? 'bg-indigo-100 text-indigo-800 border-2 border-indigo-500'
-                                : 'border border-gray-300 hover:bg-gray-50'
+                            htmlFor="budget-low"
+                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                              budget === 'low'
+                                ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
+                                : 'border border-gray-300 hover:border-indigo-300'
                             }`}
                           >
-                            {option.label}
+                            <span className="block text-sm font-medium">Economy</span>
+                            <span className="block text-xs mt-1">$ Budget-friendly</span>
                           </label>
                         </div>
-                      ))}
+                        
+                        <div>
+                          <input
+                            type="radio"
+                            id="budget-medium"
+                            name="budget"
+                            className="sr-only"
+                            checked={budget === 'medium'}
+                            onChange={() => setBudget('medium')}
+                          />
+                          <label
+                            htmlFor="budget-medium"
+                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                              budget === 'medium'
+                                                            ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
+                                : 'border border-gray-300 hover:border-indigo-300'
+                            }`}
+                          >
+                            <span className="block text-sm font-medium">Standard</span>
+                            <span className="block text-xs mt-1">$$ Mid-range</span>
+                          </label>
+                        </div>
+                        
+                        <div>
+                          <input
+                            type="radio"
+                            id="budget-high"
+                            name="budget"
+                            className="sr-only"
+                            checked={budget === 'high'}
+                            onChange={() => setBudget('high')}
+                          />
+                          <label
+                            htmlFor="budget-high"
+                            className={`cursor-pointer flex flex-col items-center justify-center w-full p-3 rounded-lg ${
+                              budget === 'high'
+                                ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700'
+                                : 'border border-gray-300 hover:border-indigo-300'
+                            }`}
+                          >
+                            <span className="block text-sm font-medium">Luxury</span>
+                            <span className="block text-xs mt-1">$$$ Premium</span>
+                          </label>
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-center">
-                    <button
-                      type="submit"
-                      disabled={loading || !source || !destination}
-                      className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm text-white font-medium ${
-                        loading || !source || !destination
-                          ? 'bg-indigo-300 cursor-not-allowed'
-                          : 'bg-indigo-600 hover:bg-indigo-700'
-                      }`}
-                    >
-                      {loading ? (
-                        <>
-                          <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
-                        </>
-                      ) : (
-                        'Create Travel Plan'
-                      )}
-                    </button>
-                  </div>
-
-                  {error && (
-                    <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">
-                      <p className="flex items-center">
-                        <FaInfoCircle className="mr-2" /> {error}
-                      </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Travel Interests</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {interestOptions.map((option) => (
+                          <div key={option.value}>
+                            <input
+                              type="checkbox"
+                              id={`interest-${option.value}`}
+                              className="sr-only"
+                              checked={interests.includes(option.value)}
+                              onChange={() => toggleInterest(option.value)}
+                            />
+                            <label
+                              htmlFor={`interest-${option.value}`}
+                              className={`cursor-pointer flex items-center justify-center w-full px-3 py-2 text-xs rounded-lg ${
+                                interests.includes(option.value)
+                                  ? 'bg-indigo-100 text-indigo-800 border-2 border-indigo-500'
+                                  : 'border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {option.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )}
-                </form>
-              </div>
 
-              {/* Travel Tips and Info */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Travel Insights</h2>
-                <div className="bg-indigo-50 p-6 rounded-xl">
-                  <h3 className="text-lg font-medium text-indigo-900 mb-4">Tips for Amazing Trips</h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start">
-                      <FaSuitcase className="mt-1 mr-3 text-indigo-500" />
-                      <p className="text-gray-700">Pack light and smart. Check the weather forecast for your destination.</p>
-                    </li>
-                    <li className="flex items-start">
-                      <FaUtensils className="mt-1 mr-3 text-indigo-500" />
-                      <p className="text-gray-700">Research local cuisine and try regional specialties for an authentic experience.</p>
-                    </li>
-                    <li className="flex items-start">
-                      <FaUmbrellaBeach className="mt-1 mr-3 text-indigo-500" />
-                      <p className="text-gray-700">Balance planned activities with free time for spontaneous exploration.</p>
-                    </li>
-                    <li className="flex items-start">
-                      <FaClock className="mt-1 mr-3 text-indigo-500" />
-                      <p className="text-gray-700">Adjust to the local time zone quickly by staying awake until the local night time.</p>
-                    </li>
-                    <li className="flex items-start">
-                      <FaSun className="mt-1 mr-3 text-indigo-500" />
-                      <p className="text-gray-700">Protect yourself from the sun with sunscreen, even on cloudy days at popular destinations.</p>
-                    </li>
-                  </ul>
+                    <div className="flex justify-center">
+                      <button
+                        type="submit"
+                        disabled={loading || !source || !destination}
+                        className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm text-white font-medium ${
+                          loading || !source || !destination
+                            ? 'bg-indigo-300 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-700'
+                        }`}
+                      >
+                        {loading ? (
+                          <>
+                            <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
+                          </>
+                        ) : (
+                          'Create Travel Plan'
+                        )}
+                      </button>
+                    </div>
+
+                    {error && (
+                      <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        <p className="flex items-center">
+                          <FaInfoCircle className="mr-2" /> {error}
+                        </p>
+                      </div>
+                    )}
+                  </form>
+                </div>
+
+                {/* Travel Tips and Info */}
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Travel Insights</h2>
+                  <div className="bg-indigo-50 p-6 rounded-xl">
+                    <h3 className="text-lg font-medium text-indigo-900 mb-4">Tips for Amazing Trips</h3>
+                    <ul className="space-y-3">
+                      <li className="flex items-start">
+                        <FaSuitcase className="mt-1 mr-3 text-indigo-500" />
+                        <p className="text-gray-700">Pack light and smart. Check the weather forecast for your destination.</p>
+                      </li>
+                      <li className="flex items-start">
+                        <FaUtensils className="mt-1 mr-3 text-indigo-500" />
+                        <p className="text-gray-700">Research local cuisine and try regional specialties for an authentic experience.</p>
+                      </li>
+                      <li className="flex items-start">
+                        <FaUmbrellaBeach className="mt-1 mr-3 text-indigo-500" />
+                        <p className="text-gray-700">Balance planned activities with free time for spontaneous exploration.</p>
+                      </li>
+                      <li className="flex items-start">
+                        <FaClock className="mt-1 mr-3 text-indigo-500" />
+                        <p className="text-gray-700">Adjust to the local time zone quickly by staying awake until the local night time.</p>
+                      </li>
+                      <li className="flex items-start">
+                        <FaSun className="mt-1 mr-3 text-indigo-500" />
+                        <p className="text-gray-700">Protect yourself from the sun with sunscreen, even on cloudy days at popular destinations.</p>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            )}
 
-        {/* SECTION 2: MAP VIEW */}
-        {hasGeneratedItinerary && (
-          <div ref={mapSectionRef} className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Your Journey Map</h2>
+            {/* Map Tab */}
+            {currentTab === 'map' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                   <div 
@@ -975,123 +970,170 @@ const Itinerary = () => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* SECTION 3: ITINERARY DETAILS */}
-        {itinerary && (
-          <div ref={itineraryRef} className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {source} to {destination} Itinerary
-                </h2>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={downloadItinerary}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    <FaDownload className="mr-2" /> Download
-                  </button>
-                  <button
-                    onClick={shareItinerary}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-white hover:bg-gray-50"
-                  >
-                    <FaShare className="mr-2" /> Share
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-indigo-50 p-4 rounded-lg mb-6">
-                <div className="flex flex-wrap items-center justify-center md:justify-between gap-4">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <FaCalendarAlt className="text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-indigo-600">Duration</p>
-                      <p className="text-sm font-bold">{days} Days</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <FaUser className="text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-indigo-600">Travelers</p>
-                      <p className="text-sm font-bold">{travelers} Persons</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <FaClock className="text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-indigo-600">Flight Time</p>
-                      <p className="text-sm font-bold">{itinerary.flightTime} Hours</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <FaMapMarkerAlt className="text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-indigo-600">Distance</p>
-                      <p className="text-sm font-bold">{itinerary.distance} km</p>
-                    </div>
+            {/* Itinerary Tab */}
+            {currentTab === 'itinerary' && itinerary && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {source} to {destination} Itinerary
+                  </h2>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={downloadItinerary}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <FaDownload className="mr-2" /> Download
+                    </button>
+                    <button
+                      onClick={shareItinerary}
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-white hover:bg-gray-50"
+                    >
+                      <FaShare className="mr-2" /> Share
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Day-by-day itinerary */}
-              <div className="space-y-8 mb-8">
-                {itinerary.days.map((day, index) => (
-                  <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="bg-indigo-600 px-4 py-3 text-white">
-                      <h3 className="font-semibold">Day {day.day}</h3>
+                <div className="bg-indigo-50 p-4 rounded-lg mb-6">
+                  <div className="flex flex-wrap items-center justify-center md:justify-between gap-4">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                        <FaCalendarAlt className="text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-600">Duration</p>
+                        <p className="text-sm font-bold">{days} Days</p>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h4 className="font-medium text-gray-700 mb-3">Activities</h4>
-                      <ul className="space-y-3 mb-4">
-                        {day.activities.map((activity, i) => (
-                          <li key={i} className="flex items-start">
-                            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 text-indigo-800 text-xs font-medium mr-3">
-                              {i + 1}
-                            </span>
-                            <span className="text-gray-700">{activity}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      <h4 className="font-medium text-gray-700 mb-2">Accommodation</h4>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="font-medium text-indigo-700">{day.accommodation.name}</p>
-                        <p className="text-sm text-gray-600">{day.accommodation.description}</p>
+                    
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                        <FaUser className="text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-600">Travelers</p>
+                        <p className="text-sm font-bold">{travelers} Persons</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                        <FaClock className="text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-600">Flight Time</p>
+                        <p className="text-sm font-bold">{itinerary.flightTime} Hours</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                        <FaMapMarkerAlt className="text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-600">Distance</p>
+                        <p className="text-sm font-bold">{itinerary.distance} km</p>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* Travel Tips */}
-              <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-indigo-900 mb-3">Travel Tips for {destination}</h3>
-                <ul className="space-y-2">
-                  {itinerary.travelTips.map((tip, index) => (
-                    <li key={index} className="flex items-start">
-                      <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
-                      <span className="text-gray-700">{tip}</span>
-                    </li>
+                {/* Day-by-day itinerary */}
+                <div className="space-y-8 mb-8">
+                  {itinerary.days.map((day, index) => (
+                    <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                      <div className="bg-indigo-600 px-4 py-3 text-white">
+                        <h3 className="font-semibold">Day {day.day}</h3>
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-medium text-gray-700 mb-3">Activities</h4>
+                        <ul className="space-y-3 mb-4">
+                          {day.activities.map((activity, i) => (
+                            <li key={i} className="flex items-start">
+                              <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 text-indigo-800 text-xs font-medium mr-3">
+                                {i + 1}
+                              </span>
+                              <span className="text-gray-700">{activity}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        
+                        <h4 className="font-medium text-gray-700 mb-2">Accommodation</h4>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="font-medium text-indigo-700">{day.accommodation.name}</p>
+                          <p className="text-sm text-gray-600">{day.accommodation.description}</p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
+                {/* Travel Tips */}
+                <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+                  <h3 className="font-semibold text-indigo-900 mb-3">Travel Tips for {destination}</h3>
+                  <ul className="space-y-2">
+                    {itinerary.travelTips.map((tip, index) => (
+                      <li key={index} className="flex items-start">
+                        <FaInfoCircle className="text-indigo-600 mt-1 mr-2 flex-shrink-0" />
+                        <span className="text-gray-700">{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Currency Converter Tab */}
+            {currentTab === 'currency' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  Currency Converter
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <CurrencyConverter source={source} destination={destination} />
+                  </div>
+                  <div>
+                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 mb-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Currency Tips</h3>
+                      <ul className="space-y-3">
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Always check the exchange rate before exchanging currency at your destination.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Credit cards often offer better exchange rates than currency exchange services.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Inform your bank about your travel plans to avoid card blocks.</p>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mt-1 mr-3 text-indigo-500" />
+                          <p className="text-gray-700">Keep some local currency for small purchases and emergencies.</p>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <button
+                      onClick={() => setCurrentTab('itinerary')}
+                      className={`w-full py-3 px-4 flex items-center justify-center rounded-md shadow-sm text-white font-medium ${
+                        !itinerary
+                          ? 'bg-indigo-300 cursor-not-allowed'
+                          : 'bg-indigo-600 hover:bg-indigo-700'
+                      }`}
+                      disabled={!itinerary}
+                    >
+                      Back to Itinerary
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
