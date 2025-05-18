@@ -721,7 +721,7 @@ const Itinerary = () => {
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#080808' }}>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -738,7 +738,7 @@ const Itinerary = () => {
               <FaPlane className="inline-block mr-2" /> Wanderlust
             </motion.span>
           </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-xl sm:mt-4" style={{ color: '#9cadce' }}>
+          <p className="mt-3 max-w-4xl mx-auto text-xl sm:mt-4" style={{ color: '#9cadce' }}>
             Your AI-powered travel planner for memorable adventures
           </p>
         </motion.div>
