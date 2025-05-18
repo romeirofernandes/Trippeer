@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useCallback } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import {
@@ -10,6 +10,7 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotatedmarker';
+import debounce from 'lodash.debounce';
 
 const Itinerary = () => {
   // Add this state variable at the top with other state declarations
@@ -27,6 +28,13 @@ const Itinerary = () => {
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [currency, setCurrency] = useState(null);
   const [hasGeneratedItinerary, setHasGeneratedItinerary] = useState(false);
+
+  const [sourceOptions, setSourceOptions] = useState([]);
+const [destinationOptions, setDestinationOptions] = useState([]);
+const [sourceValid, setSourceValid] = useState(false);
+const [destinationValid, setDestinationValid] = useState(false);
+const [isSourceFocused, setIsSourceFocused] = useState(false);
+const [isDestinationFocused, setIsDestinationFocused] = useState(false);
 
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -49,6 +57,15 @@ const Itinerary = () => {
     { value: 'art', label: 'Arts & Museums' }
   ];
 
+  const ValidLocationIndicator = () => (
+  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+      <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    </span>
+  </div>
+);
   // Helper function to toggle interests
   const toggleInterest = (value) => {
     if (interests.includes(value)) {
@@ -58,6 +75,107 @@ const Itinerary = () => {
     }
   };
 
+  // Add this function to search for locations
+const searchLocations = useCallback(
+  debounce(async (query, setOptions) => {
+    if (!query || query.length < 2) {
+      setOptions([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search`,
+        {
+          params: {
+            q: query,
+            format: 'json',
+            addressdetails: 1,
+            limit: 5,
+            'accept-language': 'en'
+          }
+        }
+      );
+
+      // Filter to include only cities, towns, or countries
+      const validLocations = response.data.filter(location => {
+        return (
+          location.type === 'city' || 
+          location.type === 'administrative' ||
+          (location.address && 
+            (location.address.city || 
+             location.address.town || 
+             location.address.state || 
+             location.address.country))
+        );
+      });
+
+      const formattedOptions = validLocations.map(location => {
+        // Create a human-readable display name
+        let displayName = '';
+        const address = location.address;
+
+        if (address) {
+          const parts = [];
+          if (address.city) parts.push(address.city);
+          else if (address.town) parts.push(address.town);
+          
+          if (address.state) parts.push(address.state);
+          if (address.country) parts.push(address.country);
+          
+          displayName = parts.join(', ');
+        } else {
+          // Fallback to the display name provided by the API
+          displayName = location.display_name.split(',').slice(0, 2).join(',');
+        }
+
+        return {
+          value: displayName,
+          label: displayName,
+          lat: location.lat,
+          lon: location.lon
+        };
+      });
+
+      setOptions(formattedOptions);
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setOptions([]);
+    }
+  }, 300),
+  []
+);
+
+// Handle source input change
+const handleSourceChange = (e) => {
+  const value = e.target.value;
+  setSource(value);
+  setSourceValid(false);
+  searchLocations(value, setSourceOptions);
+};
+
+// Handle destination input change
+const handleDestinationChange = (e) => {
+  const value = e.target.value;
+  setDestination(value);
+  setDestinationValid(false);
+  searchLocations(value, setDestinationOptions);
+};
+
+// Handle selection from dropdown
+const handleSelectLocation = (location, isSource) => {
+  if (isSource) {
+    setSource(location.value);
+    setSourceOptions([]);
+    setSourceValid(true);
+    setIsSourceFocused(false);
+  } else {
+    setDestination(location.value);
+    setDestinationOptions([]);
+    setDestinationValid(true);
+    setIsDestinationFocused(false);
+  }
+};
   // Scroll to map section
   const scrollToMap = () => {
     mapSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -872,47 +990,89 @@ const handleAdjustTimes = (dayIndex, direction) => {
               <h2 className="text-xl font-semibold mb-4" style={{ color: '#ffffff' }}>Plan Your Adventure</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="source" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                      Starting From
-                    </label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-                      </div>
-                      <input
-                        type="text"
-                        id="source"
-                        value={source}
-                        onChange={(e) => setSource(e.target.value)}
-                        className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                        style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                        placeholder="New York, Tokyo..."
-                        required
-                      />
-                    </div>
-                  </div>
+                 
 
-                  <div>
-                    <label htmlFor="destination" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
-                      Destination
-                    </label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaMapMarkerAlt style={{ color: '#9cadce' }} />
-                      </div>
-                      <input
-                        type="text"
-                        id="destination"
-                        value={destination}
-                        onChange={(e) => setDestination(e.target.value)}
-                        className="block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white"
-                        style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
-                        placeholder="Paris, Bangkok..."
-                        required
-                      />
-                    </div>
-                  </div>
+<div>
+  <label htmlFor="source" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+    Starting From
+  </label>
+  <div className="mt-1 relative rounded-md shadow-sm">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <FaMapMarkerAlt style={{ color: '#9cadce' }} />
+    </div>
+    <input
+      type="text"
+      id="source"
+      value={source}
+      onChange={handleSourceChange}
+      onFocus={() => setIsSourceFocused(true)}
+      onBlur={() => setTimeout(() => setIsSourceFocused(false), 200)}
+      className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white 
+        ${sourceValid ? 'border-green-500' : ''}`}
+      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+      placeholder="Enter a city or country..."
+      required
+      autoComplete="off"
+      
+    />
+    {sourceValid && <ValidLocationIndicator />}
+    {isSourceFocused && sourceOptions.length > 0 && (
+      <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#9cadce] rounded-md shadow-lg max-h-60 overflow-auto">
+        {sourceOptions.map((option, index) => (
+          <div
+            key={index}
+            className="px-4 py-2 text-sm text-white cursor-pointer hover:bg-[#2a2a2a]"
+            onClick={() => handleSelectLocation(option, true)}
+          >
+            {option.label}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+<div>
+  <label htmlFor="destination" className="block text-sm font-medium" style={{ color: '#9cadce' }}>
+    Destination
+  </label>
+  <div className="mt-1 relative rounded-md shadow-sm">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <FaMapMarkerAlt style={{ color: '#9cadce' }} />
+    </div>
+    <input
+      type="text"
+      id="destination"
+      value={destination}
+      onChange={handleDestinationChange}
+      onFocus={() => setIsDestinationFocused(true)}
+      onBlur={() => setTimeout(() => setIsDestinationFocused(false), 200)}
+      className={`block w-full pl-10 pr-4 py-3 sm:text-sm rounded-lg text-white
+        ${destinationValid ? 'border-green-500' : ''}`}
+      style={{ backgroundColor: '#1a1a1a', borderColor: '#9cadce', borderWidth: '1px' }}
+      placeholder="Enter a city or country..."
+      required
+      autoComplete="off"
+    />
+    {destinationValid && <ValidLocationIndicator />}
+    {isDestinationFocused && destinationOptions.length > 0 && (
+      <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#9cadce] rounded-md shadow-lg max-h-60 overflow-auto">
+        {destinationOptions.map((option, index) => (
+          <div
+            key={index}
+            className="px-4 py-2 text-sm text-white cursor-pointer hover:bg-[#2a2a2a]"
+            onClick={() => handleSelectLocation(option, false)}
+          >
+            {option.label}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+
+                  
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1028,7 +1188,7 @@ const handleAdjustTimes = (dayIndex, direction) => {
                       </label>
                     </motion.div>
                   </div>
-                  // Add this option to the form after the budget section
+                  
 
 <div>
   <label className="block text-sm font-medium mb-2" style={{ color: '#9cadce' }}>Daily Start Time</label>
@@ -1130,25 +1290,26 @@ const handleAdjustTimes = (dayIndex, direction) => {
                 </div>
 
                 <div className="flex justify-center">
-                  <motion.button
-                    type="submit"
-                    disabled={loading || !source || !destination}
-                    className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm font-medium ${
-                      loading || !source || !destination
-                        ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                        : 'bg-[#9cadce] hover:bg-opacity-80 text-black'
-                    }`}
-                    whileHover={!loading && source && destination ? { scale: 1.02 } : {}}
-                    whileTap={!loading && source && destination ? { scale: 0.98 } : {}}
-                  >
-                    {loading ? (
-                      <>
-                        <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
-                      </>
-                    ) : (
-                      'Create Travel Plan'
-                    )}
-                  </motion.button>
+
+<motion.button
+  type="submit"
+  disabled={loading || !sourceValid || !destinationValid}
+  className={`w-full py-3 px-6 flex items-center justify-center rounded-md shadow-sm font-medium ${
+    loading || !sourceValid || !destinationValid
+      ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+      : 'bg-[#9cadce] hover:bg-opacity-80 text-black'
+  }`}
+  whileHover={!loading && sourceValid && destinationValid ? { scale: 1.02 } : {}}
+  whileTap={!loading && sourceValid && destinationValid ? { scale: 0.98 } : {}}
+>
+  {loading ? (
+    <>
+      <FaSpinner className="animate-spin mr-2" /> Generating Itinerary...
+    </>
+  ) : (
+    'Create Travel Plan'
+  )}
+</motion.button>
                 </div>
 
                 {error && (
