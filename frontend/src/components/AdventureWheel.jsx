@@ -100,8 +100,8 @@ const AdventureWheel = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8">
-      <div className="relative w-96 h-96">
+    <div className="flex flex-col items-center space-y-4 sm:space-y-8">
+      <div className="relative w-[280px] h-[280px] sm:w-96 sm:h-96">
         <motion.div
           className="w-full h-full rounded-full relative overflow-hidden"
           style={{
@@ -130,9 +130,9 @@ const AdventureWheel = () => {
                     y="50"
                     textAnchor="middle"
                     transform={`
-            rotate(${angle}, 50, 50)
-            translate(0, -30)
-          `}
+                      rotate(${angle}, 50, 50)
+                      translate(0, -30)
+                    `}
                     fill="#f8f8f8"
                     style={{ fontSize: "4px" }}
                   >
@@ -154,16 +154,17 @@ const AdventureWheel = () => {
           onClick={spinWheel}
           disabled={spinning}
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                     bg-[#9cadce] hover:bg-[#8b9dbd] text-[#f8f8f8] rounded-full w-24 h-24 
+                     bg-[#9cadce] hover:bg-[#8b9dbd] text-[#f8f8f8] rounded-full 
+                     w-16 h-16 sm:w-24 sm:h-24
                      flex items-center justify-center shadow-xl transition-all duration-300
                      disabled:opacity-50 disabled:cursor-not-allowed z-20
                      border-4 border-[#232323]"
         >
-          <span className="text-xl font-bold">{spinning ? "🎲" : "SPIN!"}</span>
+          <span className="text-base sm:text-xl font-bold">{spinning ? "🎲" : "SPIN!"}</span>
         </button>
 
         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-30">
-          <span className="text-3xl text-[#f8f8f8]">▼</span>
+          <span className="text-2xl sm:text-3xl text-[#f8f8f8]">▼</span>
         </div>
       </div>
 
@@ -174,12 +175,12 @@ const AdventureWheel = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="text-center p-6 bg-[#161616] rounded-xl border border-[#232323] shadow-lg"
+            className="text-center p-4 sm:p-6 bg-[#161616] rounded-xl border border-[#232323] shadow-lg w-full max-w-[280px] sm:max-w-[384px]"
           >
-            <h3 className="text-2xl font-bold text-[#f8f8f8] mb-3">
+            <h3 className="text-xl sm:text-2xl font-bold text-[#f8f8f8] mb-2 sm:mb-3">
               {selectedAdventure.emoji} {selectedAdventure.text}
             </h3>
-            <p className="text-[#a0a0a0] text-lg">
+            <p className="text-[#a0a0a0] text-base sm:text-lg">
               {selectedAdventure.description}
             </p>
           </motion.div>

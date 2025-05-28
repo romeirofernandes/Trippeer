@@ -126,84 +126,91 @@ const ReverseTravelPlannerContent = () => {
           marginLeft: isOpen ? "240px" : "64px",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex-1 p-8"
+        className="flex-1 p-4 sm:p-6 md:p-8"
       >
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 text-[#f8f8f8]">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[#f8f8f8]">
             Reverse Travel Planner
           </h1>
 
           {/* Form Section */}
           <motion.form
             onSubmit={handleSubmit}
-            className="space-y-8 bg-[#111111] rounded-xl p-8 border border-[#232323] shadow-xl"
+            className="space-y-6 sm:space-y-8 bg-[#111111] rounded-xl p-4 sm:p-6 md:p-8 border border-[#232323] shadow-xl"
           >
             {/* Budget Input */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-[#f8f8f8]">
                 Budget
               </label>
-              <input
-                type="number"
-                value={budget}
-                onChange={(e) =>
-                  dispatch({
-                    type: "SET_BUDGET",
-                    payload: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-[#161616] border border-[#232323] rounded-lg focus:ring-2 focus:ring-[#9cadce] transition-all text-[#f8f8f8]"
-                placeholder="Enter amount in your currency"
-                required
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9cadce]">$</span>
+                <input
+                  type="number"
+                  value={budget}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_BUDGET",
+                      payload: e.target.value,
+                    })
+                  }
+                  className="w-full pl-8 pr-4 py-3 bg-[#161616] border border-[#232323] rounded-lg focus:ring-2 focus:ring-[#9cadce] transition-all text-[#f8f8f8] text-base"
+                  placeholder="Enter amount in your currency"
+                  required
+                />
+              </div>
             </div>
 
             {/* Other form components */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <DurationSlider
-                value={duration}
-                onChange={(val) =>
-                  dispatch({
-                    type: "SET_DURATION",
-                    payload: val,
-                  })
-                }
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-4">
+                <DurationSlider
+                  value={duration}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "SET_DURATION",
+                      payload: val,
+                    })
+                  }
+                />
 
-              <LocationInput
-                value={startLocation}
-                onChange={(val) =>
-                  dispatch({
-                    type: "SET_LOCATION",
-                    payload: val,
-                  })
-                }
-              />
+                <LocationInput
+                  value={startLocation}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "SET_LOCATION",
+                      payload: val,
+                    })
+                  }
+                />
+              </div>
 
-              <MoodSelector
-                value={mood}
-                onChange={(val) =>
-                  dispatch({
-                    type: "SET_MOOD",
-                    payload: val,
-                  })
-                }
-              />
+              <div className="space-y-4">
+                <MoodSelector
+                  value={mood}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "SET_MOOD",
+                      payload: val,
+                    })
+                  }
+                />
 
-              <WeatherDropdown
-                value={weather}
-                options={weatherOptions}
-                onChange={(val) =>
-                  dispatch({
-                    type: "SET_WEATHER",
-                    payload: val,
-                  })
-                }
-              />
+                <WeatherDropdown
+                  value={weather}
+                  options={weatherOptions}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "SET_WEATHER",
+                      payload: val,
+                    })
+                  }
+                />
+              </div>
 
               {/* Trip Type Selection */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-200">
+                <label className="block text-sm font-medium text-[#f8f8f8]">
                   Trip Type
                 </label>
                 <select
@@ -214,7 +221,7 @@ const ReverseTravelPlannerContent = () => {
                       payload: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 bg-[#161616] border border-[#232323] rounded-lg focus:ring-2 focus:ring-[#9cadce] transition-all text-[#f8f8f8]"
+                  className="w-full px-4 py-3 bg-[#161616] border border-[#232323] rounded-lg focus:ring-2 focus:ring-[#9cadce] transition-all text-[#f8f8f8] text-base"
                 >
                   {tripTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -229,21 +236,25 @@ const ReverseTravelPlannerContent = () => {
                 <label className="block text-sm font-medium text-[#f8f8f8]">
                   Max Travel Time (hours)
                 </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="12"
-                  value={maxTravelTime}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "SET_MAX_TRAVEL_TIME",
-                      payload: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full accent-[#9cadce]"
-                />
-                <div className="text-sm text-[#a0a0a0] text-right">
-                  {maxTravelTime} hours
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="1"
+                    max="12"
+                    value={maxTravelTime}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_MAX_TRAVEL_TIME",
+                        payload: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full accent-[#9cadce] h-2 rounded-lg"
+                  />
+                  <div className="flex justify-between text-sm text-[#a0a0a0] mt-2">
+                    <span>1h</span>
+                    <span className="font-medium">{maxTravelTime}h</span>
+                    <span>12h</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -254,7 +265,7 @@ const ReverseTravelPlannerContent = () => {
               disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 px-6 bg-[#9cadce] hover:bg-[#8b9dbd] rounded-lg font-medium text-[#f8f8f8] shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              className="w-full py-3 px-6 bg-[#9cadce] hover:bg-[#8b9dbd] rounded-lg font-medium text-[#f8f8f8] shadow-lg hover:shadow-xl transition-all disabled:opacity-50 text-base"
             >
               {loading ? <LoadingAnimation /> : "Find Destinations"}
             </motion.button>
@@ -267,44 +278,88 @@ const ReverseTravelPlannerContent = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="mt-12 space-y-8"
+                className="mt-8 sm:mt-12 space-y-6 sm:space-y-8"
               >
                 {/* International Destinations */}
-                <div>
-                  <h2 className="text-3xl font-bold mb-4 text-[#f8f8f8] ">
-                    Suggested Destinations
+                <div className="bg-[#111111] rounded-xl p-4 sm:p-6 border border-[#232323]">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-[#f8f8f8] flex items-center">
+                    <span className="mr-2">🌍</span> International Destinations
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {destinations.international.map((dest, index) => (
-                      <DestinationCard
+                      <motion.div
                         key={index}
-                        destination={dest}
-                        delay={index * 0.1}
-                      />
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <DestinationCard
+                          destination={dest}
+                          delay={index * 0.1}
+                        />
+                      </motion.div>
                     ))}
                   </div>
                 </div>
+
                 {/* Domestic Destinations */}
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-[#111111] rounded-xl p-4 sm:p-6 border border-[#232323]">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-[#f8f8f8] flex items-center">
+                    <span className="mr-2">🏠</span> Domestic Destinations
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {destinations.domestic.map((dest, index) => (
-                      <DestinationCard
+                      <motion.div
                         key={index}
-                        destination={dest}
-                        delay={index * 0.1}
-                      />
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <DestinationCard
+                          destination={dest}
+                          delay={index * 0.1}
+                        />
+                      </motion.div>
                     ))}
                   </div>
                 </div>
                 
-                <div className="p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-[#f8f8f8] text-center">
-                    Spin for a Random Adventure!
-                  </h2>
-                  <AdventureWheel />
-                  <p className="text-[#a0a0a0] text-center mt-4">
-                    Can't decide? Let the wheel choose your next adventure!
-                  </p>
+                {/* Adventure Wheel Section */}
+                <div className="bg-[#111111] rounded-xl p-4 sm:p-6 md:p-8 border border-[#232323]">
+                  <div className="max-w-3xl mx-auto">
+                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#f8f8f8] text-center flex items-center justify-center">
+                      <span className="mr-2">🎡</span> Spin for a Random Adventure!
+                    </h2>
+                    <div className="relative w-full max-w-[280px] sm:max-w-[384px] mx-auto mb-4 sm:mb-6">
+                      <AdventureWheel />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-[#a0a0a0] text-sm sm:text-base">
+                        Can't decide? Let the wheel choose your next adventure!
+                      </p>
+                      <p className="text-[#9cadce] text-xs sm:text-sm">
+                        Click the wheel to spin and discover your next destination
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 px-6 bg-[#9cadce] hover:bg-[#8b9dbd] rounded-lg font-medium text-[#f8f8f8] shadow-lg hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center"
+                  >
+                    <span className="mr-2">📱</span> Save to Mobile
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 px-6 bg-[#232323] hover:bg-[#2a2a2a] rounded-lg font-medium text-[#f8f8f8] shadow-lg hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center"
+                  >
+                    <span className="mr-2">📤</span> Share Results
+                  </motion.button>
                 </div>
               </motion.div>
             )}
@@ -316,7 +371,7 @@ const ReverseTravelPlannerContent = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200"
+              className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200 text-sm sm:text-base"
             >
               {error}
             </motion.div>

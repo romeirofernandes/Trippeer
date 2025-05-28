@@ -11,7 +11,12 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
 
 // Connect to MongoDB
 mongoose
