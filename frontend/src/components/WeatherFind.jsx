@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb, FaExclamationTriangle } from 'react-icons/fa';
+import { FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind, FaUmbrella, FaTemperatureLow, FaTemperatureHigh, FaTshirt, FaInfoCircle, FaSpinner, FaLightbulb, FaExclamationTriangle, FaExchangeAlt } from 'react-icons/fa';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
+import { motion } from 'framer-motion';
 
 const WeatherFind = ({ source, destination, showAfterGeneration = false, weatherInfo = null }) => {
   console.log("WeatherFind component rendered with source:", source, "and destination:", destination);
@@ -504,221 +505,126 @@ console.log("Destination weather API response:", destResponse?.data);
   const tempDiffClass = tempDiff > 0 ? 'text-red-400' : (tempDiff < 0 ? 'text-blue-400' : 'text-gray-400');
 
   return (
-    <div className="p-6 text-white">
-      <h2 className="text-xl font-semibold mb-4 flex items-center text-[#f8f8f8]">
-        <FaSun className="mr-2 text-yellow-500" /> Weather Comparison
-      </h2>
-      
-      {/* Source and Destination Current Weather */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Source Weather */}
-        {sourceWeather && (
-          <div className="bg-[#161616] rounded-lg p-4 shadow-sm border border-[#232323]">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-[#9cadce]">
-                {sourceWeather.location.name}, {sourceWeather.location.country}
-              </h3>
-              <span className="text-xs text-[#a0a0a0]">Source</span>
-            </div>
-            <div className="flex mt-4 items-center">
-              <div className="text-5xl mr-4">
-                {getWeatherIcon(sourceWeather.current.condition)}
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-800">
-                  {sourceWeather.current.temp_c}°C
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#232323] rounded-xl p-4"
+        >
+          <h3 className="text-sm md:text-base font-medium text-[#f8f8f8] mb-3">Weather in {source}</h3>
+          {sourceWeather ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#161616] flex items-center justify-center mr-3">
+                    {getWeatherIcon(sourceWeather.current.condition)}
+                  </div>
+                  <div>
+                    <p className="text-lg md:text-xl font-semibold text-[#f8f8f8]">
+                      {sourceWeather.current.temp_c}°C
+                    </p>
+                    <p className="text-sm text-[#9cadce]">{sourceWeather.current.condition.text}</p>
+                  </div>
                 </div>
-                <div className="text-gray-600">
-                  {sourceWeather.current.condition.text}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
-              <div className="flex items-center">
-                <WiHumidity className="text-blue-500 mr-1" />
-                <span>Humidity: {sourceWeather.current.humidity}%</span>
-              </div>
-              <div className="flex items-center">
-                <FaWind className="text-blue-400 mr-1" />
-                <span>Wind: {sourceWeather.current.wind_kph} km/h</span>
-              </div>
-              <div className="flex items-center">
-                <WiThermometer className="text-red-400 mr-1" />
-                <span>Feels like: {sourceWeather.current.feelslike_c}°C</span>
-              </div>
-              <div className="flex items-center">
-                <FaUmbrella className="text-indigo-400 mr-1" />
-                <span>Precip: {sourceWeather.current.precip_mm} mm</span>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Destination Weather */}
-        {destinationWeather && (
-          <div className="bg-[#161616] rounded-lg p-4 shadow-sm border border-[#232323]">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-[#9cadce]">
-                {destinationWeather.location.name}, {destinationWeather.location.country}
-              </h3>
-              <span className="text-xs text-[#a0a0a0]">Destination</span>
-            </div>
-            <div className="flex mt-4 items-center">
-              <div className="text-5xl mr-4">
-                {getWeatherIcon(destinationWeather.current.condition)}
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-800">
-                  {destinationWeather.current.temp_c}°C
-                </div>
-                <div className="text-gray-600">
-                  {destinationWeather.current.condition.text}
+                <div className="text-right">
+                  <p className="text-sm text-[#9cadce]">Humidity</p>
+                  <p className="text-[#f8f8f8]">{sourceWeather.current.humidity}%</p>
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
-              <div className="flex items-center">
-                <WiHumidity className="text-blue-500 mr-1" />
-                <span>Humidity: {destinationWeather.current.humidity}%</span>
-              </div>
-              <div className="flex items-center">
-                <FaWind className="text-blue-400 mr-1" />
-                <span>Wind: {destinationWeather.current.wind_kph} km/h</span>
-              </div>
-              <div className="flex items-center">
-                <WiThermometer className="text-red-400 mr-1" />
-                <span>Feels like: {destinationWeather.current.feelslike_c}°C</span>
-              </div>
-              <div className="flex items-center">
-                <FaUmbrella className="text-indigo-400 mr-1" />
-                <span>Precip: {destinationWeather.current.precip_mm} mm</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Temperature Difference */}
-      <div className="bg-[#161616] rounded-lg p-4 mb-6 text-center shadow-inner border border-[#232323]">
-        <h3 className="font-medium text-[#f8f8f8] mb-2">Temperature Difference</h3>
-        <div className="flex items-center justify-center">
-          <div className={`text-3xl font-bold ${tempDiffClass}`}>
-            {tempDiff > 0 ? '+' : ''}{tempDiff}°C
-          </div>
-          <div className="ml-3 text-sm text-[#a0a0a0]">
-            {tempDiff > 0 
-              ? 'Destination is warmer than source' 
-              : tempDiff < 0 
-                ? 'Destination is cooler than source' 
-                : 'Same temperature at both locations'
-            }
-          </div>
-        </div>
-      </div>
-      
-      {/* AI-powered Weather Insights */}
-      {weatherInsights && (
-        <div className="bg-[#161616] rounded-lg p-5 mb-6 shadow-inner border border-[#232323]">
-          <h3 className="font-medium text-[#9cadce] mb-3 flex items-center">
-            <FaLightbulb className="mr-2 text-yellow-500" /> Smart Weather Analysis
-          </h3>
-          
-          {insightsLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <FaSpinner className="animate-spin text-indigo-500 mr-2" />
-              <span>Generating insights...</span>
             </div>
           ) : (
-            <div className="space-y-4">
-              <p className="text-gray-700">{weatherInsights.summary}</p>
-              
-              <div>
-                <h4 className="text-sm font-medium text-indigo-700 mb-1">Key Weather Differences:</h4>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {weatherInsights.keyDifferences.map((diff, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center mr-2">
-                        <span className="text-xs font-medium text-indigo-600">{index + 1}</span>
-                      </div>
-                      <span className="text-gray-600 text-sm">{diff}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="bg-white p-3 rounded-md border border-indigo-100">
-                <h4 className="text-sm font-medium text-indigo-700 mb-1">Recommendation:</h4>
-                <p className="text-gray-600 text-sm">{weatherInsights.recommendation}</p>
-              </div>
-              
-              {weatherInsights.phenomena && (
-                <div className="bg-yellow-50 p-3 rounded-md border border-yellow-100">
-                  <h4 className="text-sm font-medium text-yellow-700 mb-1">Notable Weather Phenomena:</h4>
-                  <p className="text-gray-600 text-sm">{weatherInsights.phenomena}</p>
-                </div>
-              )}
+            <div className="flex items-center justify-center h-20">
+              <FaSpinner className="animate-spin text-[#9cadce]" />
             </div>
           )}
-        </div>
-      )}
-      
-      {/* Destination Forecast */}
-      {destinationWeather && (
-        <div className="mb-6">
-          <h3 className="font-medium text-[#f8f8f8] mb-3">
-            7-Day Forecast for {destinationWeather.location.name}
-          </h3>
-          <div className="overflow-x-auto">
-            <div className="flex space-x-4 p-1 min-w-max">
-              {destinationWeather.forecast.forecastday.map(day => (
-                <div key={day.date} className="bg-[#161616] rounded-lg shadow-sm border border-[#232323] p-3 w-36">
-                  <div className="text-sm font-medium text-gray-700">
-                    {formatDay(day.date)}
+        </motion.div>
+
+        {/* Destination Weather */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-[#232323] rounded-xl p-4"
+        >
+          <h3 className="text-sm md:text-base font-medium text-[#f8f8f8] mb-3">Weather in {destination}</h3>
+          {destinationWeather ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#161616] flex items-center justify-center mr-3">
+                    {getWeatherIcon(destinationWeather.current.condition)}
                   </div>
-                  <div className="text-xs text-gray-500 mb-2">
-                    {day.date}
-                  </div>
-                  <div className="text-2xl mb-1 text-center">
-                    {getWeatherIcon(day.day.condition)}
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="flex items-center">
-                      <FaTemperatureLow className="text-blue-500 mr-1" />
-                      {day.day.mintemp_c}°
-                    </span>
-                    <span className="flex items-center">
-                      <FaTemperatureHigh className="text-red-500 ml-1 mr-1" />
-                      {day.day.maxtemp_c}°
-                    </span>
-                  </div>
-                  <div className="text-xs mt-2 text-center text-gray-600">
-                    {day.day.condition.text}
-                  </div>
-                  <div className="flex items-center justify-center mt-1 text-xs">
-                    <FaUmbrella className="text-blue-400 mr-1" />
-                    <span>{day.day.daily_chance_of_rain}%</span>
+                  <div>
+                    <p className="text-lg md:text-xl font-semibold text-[#f8f8f8]">
+                      {destinationWeather.current.temp_c}°C
+                    </p>
+                    <p className="text-sm text-[#9cadce]">{destinationWeather.current.condition.text}</p>
                   </div>
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="text-sm text-[#9cadce]">Humidity</p>
+                  <p className="text-[#f8f8f8]">{destinationWeather.current.humidity}%</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-20">
+              <FaSpinner className="animate-spin text-[#9cadce]" />
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Temperature Difference */}
+      {tempDiff !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-[#232323] rounded-xl p-4"
+        >
+          <h3 className="text-sm md:text-base font-medium text-[#f8f8f8] mb-3">Temperature Difference</h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FaExchangeAlt className="text-[#9cadce] mr-3" />
+              <p className="text-[#f8f8f8]">
+                {tempDiff > 0 ? 'Warmer' : 'Cooler'} by {Math.abs(tempDiff)}°C
+              </p>
+            </div>
+            <div className="text-sm text-[#9cadce]">
+              {tempDiff > 0 ? 'Pack lighter clothes' : 'Pack warmer clothes'}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
-      
-      {/* Smart Suggestions */}
-      <div className="bg-[#161616] rounded-lg p-4 border border-[#232323]">
-        <h3 className="font-medium text-[#9cadce] mb-3 flex items-center">
-          <FaTshirt className="mr-2" /> Smart Travel Suggestions
-        </h3>
-        <ul className="space-y-2">
-          {suggestions.map((suggestion, index) => (
-            <li key={index} className="flex items-start">
-              <FaInfoCircle className="text-[#9cadce] mt-1 mr-2 flex-shrink-0" />
-              <span className="text-[#f8f8f8]">{suggestion}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+
+      {/* Weather Tips */}
+      {suggestions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-[#232323] rounded-xl p-4"
+        >
+          <h3 className="text-sm md:text-base font-medium text-[#f8f8f8] mb-3">Weather Tips</h3>
+          <ul className="space-y-2">
+            {suggestions.map((suggestion, index) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                className="flex items-start text-sm md:text-base"
+              >
+                <FaInfoCircle className="text-[#9cadce] mt-1 mr-2 flex-shrink-0" />
+                <span className="text-[#f8f8f8]">{suggestion}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      )}
     </div>
   );
 };

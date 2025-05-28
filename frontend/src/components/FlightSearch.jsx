@@ -173,6 +173,7 @@ const FlightSearch = ({ source, destination }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAirline, setSelectedAirline] = useState('all');
   const [availableAirlines, setAvailableAirlines] = useState([]);
+  const [isLoadingIata, setIsLoadingIata] = useState(false);
 
   // Function to find airport codes for a city
   const findAirportCodes = (cityName) => {
@@ -363,66 +364,78 @@ const FlightSearch = ({ source, destination }) => {
   };
 
   return (
-    <div className="bg-[#161616] rounded-2xl p-6 mb-8">
-      <h2 className="text-xl font-semibold mb-4 text-[#f8f8f8]">Flight Search</h2>
+    <div className="bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 md:mb-8">
+      <h2 className="text-lg md:text-xl font-semibold mb-4 text-[#f8f8f8]">Flight Search</h2>
       
       <form onSubmit={searchFlights} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Route</label>
-          <div className="bg-[#232323] p-4 rounded-xl space-y-4">
+          <div className="bg-[#232323] p-3 md:p-4 rounded-xl space-y-4">
             <div>
-              <p className="text-[#f8f8f8]">
+              <p className="text-sm md:text-base text-[#f8f8f8]">
                 <span className="text-[#9cadce]">From:</span> {source}
               </p>
-              {availableAirports.source.length > 0 && (
+              {isLoadingIata ? (
+                <div className="mt-2 flex items-center text-[#9cadce]">
+                  <FaSpinner className="animate-spin mr-2" /> Finding airport codes...
+                </div>
+              ) : availableAirports.source.length > 0 ? (
                 <div className="mt-2">
-                  <label className="text-sm text-[#9cadce]">Select Airport:</label>
+                  <label className="text-xs md:text-sm text-[#9cadce]">Select Airport:</label>
                   <select
                     value={sourceIata}
                     onChange={(e) => setSourceIata(e.target.value)}
-                    className="mt-1 w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 border border-[#9cadce]/20"
+                    className="mt-1 w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 text-sm md:text-base border border-[#9cadce]/20"
                   >
                     {availableAirports.source.map((code) => (
                       <option key={code} value={code}>{code}</option>
                     ))}
                   </select>
                 </div>
+              ) : (
+                <p className="mt-2 text-sm text-red-400">No airport codes found</p>
               )}
             </div>
             
             <div>
-              <p className="text-[#f8f8f8]">
+              <p className="text-sm md:text-base text-[#f8f8f8]">
                 <span className="text-[#9cadce]">To:</span> {destination}
               </p>
-              {availableAirports.destination.length > 0 && (
+              {isLoadingIata ? (
+                <div className="mt-2 flex items-center text-[#9cadce]">
+                  <FaSpinner className="animate-spin mr-2" /> Finding airport codes...
+                </div>
+              ) : availableAirports.destination.length > 0 ? (
                 <div className="mt-2">
-                  <label className="text-sm text-[#9cadce]">Select Airport:</label>
+                  <label className="text-xs md:text-sm text-[#9cadce]">Select Airport:</label>
                   <select
                     value={destIata}
                     onChange={(e) => setDestIata(e.target.value)}
-                    className="mt-1 w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 border border-[#9cadce]/20"
+                    className="mt-1 w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 text-sm md:text-base border border-[#9cadce]/20"
                   >
                     {availableAirports.destination.map((code) => (
                       <option key={code} value={code}>{code}</option>
                     ))}
                   </select>
                 </div>
+              ) : (
+                <p className="mt-2 text-sm text-red-400">No airport codes found</p>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <motion.button
             type="submit"
-            className="flex-1 py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            disabled={loading || !sourceIata || !destIata}
+            disabled={loading}
+            className={`w-full sm:w-auto py-2 md:py-3 px-4 md:px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            whileHover={!loading ? { scale: 1.02 } : {}}
+            whileTap={!loading ? { scale: 0.98 } : {}}
           >
             {loading ? (
               <>
-                <FaSpinner className="animate-spin mr-2" /> Searching Flights...
+                <FaSpinner className="animate-spin mr-2" /> Searching...
               </>
             ) : (
               <>
@@ -431,101 +444,73 @@ const FlightSearch = ({ source, destination }) => {
             )}
           </motion.button>
 
-          {flights.length > 0 && (
-            <motion.button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className="py-3 px-6 flex items-center justify-center rounded-lg font-medium text-[#f8f8f8] bg-[#232323] hover:bg-[#2a2a2a]"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <FaFilter className="mr-2" /> Filters
-            </motion.button>
-          )}
+          <motion.button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full sm:w-auto py-2 md:py-3 px-4 md:px-6 flex items-center justify-center rounded-lg font-medium border border-[#9cadce] text-[#9cadce] hover:bg-[#9cadce]/10"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <FaFilter className="mr-2" /> Filters
+          </motion.button>
         </div>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg text-sm md:text-base"
+          >
+            <p className="flex items-center">
+              <FaInfoCircle className="mr-2" /> {error}
+            </p>
+          </motion.div>
+        )}
       </form>
 
-      {showFilters && flights.length > 0 && (
+      {/* Filter Panel */}
+      {showFilters && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-4 bg-[#232323] p-4 rounded-xl space-y-4"
+          exit={{ opacity: 0, height: 0 }}
+          className="mt-4 bg-[#232323] rounded-xl p-4"
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button
-              onClick={() => setFilterCriteria('all')}
-              className={`p-2 rounded-lg text-sm ${
-                filterCriteria === 'all' 
-                  ? 'bg-[#9cadce] text-black' 
-                  : 'bg-[#161616] text-[#f8f8f8]'
-              }`}
-            >
-              All Flights
-            </button>
-            <button
-              onClick={() => setFilterCriteria('today')}
-              className={`p-2 rounded-lg text-sm ${
-                filterCriteria === 'today' 
-                  ? 'bg-[#9cadce] text-black' 
-                  : 'bg-[#161616] text-[#f8f8f8]'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => setFilterCriteria('tomorrow')}
-              className={`p-2 rounded-lg text-sm ${
-                filterCriteria === 'tomorrow' 
-                  ? 'bg-[#9cadce] text-black' 
-                  : 'bg-[#161616] text-[#f8f8f8]'
-              }`}
-            >
-              Tomorrow
-            </button>
-            <button
-              onClick={() => setFilterCriteria('scheduled')}
-              className={`p-2 rounded-lg text-sm ${
-                filterCriteria === 'scheduled' 
-                  ? 'bg-[#9cadce] text-black' 
-                  : 'bg-[#161616] text-[#f8f8f8]'
-              }`}
-            >
-              Scheduled
-            </button>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Date</label>
+              <select
+                value={filterCriteria}
+                onChange={(e) => setFilterCriteria(e.target.value)}
+                className="w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 text-sm md:text-base border border-[#9cadce]/20"
+              >
+                <option value="all">All Flights</option>
+                <option value="today">Today</option>
+                <option value="tomorrow">Tomorrow</option>
+                <option value="week">This Week</option>
+              </select>
+            </div>
 
-          <div className="mt-4">
-            <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Filter by Airline</label>
-            <select
-              value={selectedAirline}
-              onChange={(e) => setSelectedAirline(e.target.value)}
-              className="w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 border border-[#9cadce]/20"
-            >
-              <option value="all">All Airlines</option>
-              {availableAirlines.map((airline) => (
-                <option key={airline} value={airline}>
-                  {airline}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Airline</label>
+              <select
+                value={selectedAirline}
+                onChange={(e) => setSelectedAirline(e.target.value)}
+                className="w-full bg-[#161616] text-[#f8f8f8] rounded-lg p-2 text-sm md:text-base border border-[#9cadce]/20"
+              >
+                <option value="all">All Airlines</option>
+                {availableAirlines.map((airline) => (
+                  <option key={airline} value={airline}>{airline}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </motion.div>
       )}
 
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg"
-        >
-          <p className="flex items-center">
-            <FaInfoCircle className="mr-2" /> {error}
-          </p>
-        </motion.div>
-      )}
-
+      {/* Flight Results */}
       {flights.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-6 space-y-4">
           {renderFlights()}
         </div>
       )}

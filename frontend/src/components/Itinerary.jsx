@@ -1144,16 +1144,16 @@ const downloadItinerary = () => {
 
   return (
     <div className="flex min-h-screen bg-[#080808]">
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-8"
+            className="mb-6 md:mb-8"
           >
-            <h1 className="text-3xl font-bold text-[#f8f8f8]">Plan Your Journey</h1>
-            <p className="mt-2 text-[#9cadce]">Create a personalized travel itinerary with AI assistance</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#f8f8f8]">Plan Your Journey</h1>
+            <p className="mt-2 text-sm md:text-base text-[#9cadce]">Create a personalized travel itinerary with AI assistance</p>
           </motion.div>
 
           {/* FORM */}
@@ -1162,8 +1162,9 @@ const downloadItinerary = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="space-y-8 bg-[#111111] rounded-2xl p-8 mb-8"
+            className="space-y-6 md:space-y-8 bg-[#111111] rounded-xl md:rounded-2xl p-4 md:p-8 mb-6 md:mb-8"
           >
+            {/* Source and Destination Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="source" className="block text-sm font-medium text-[#f8f8f8]">
@@ -1272,7 +1273,8 @@ const downloadItinerary = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Days and Travelers Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="days" className="block text-sm font-medium text-[#f8f8f8]">
                   Trip Duration (Days)
@@ -1314,9 +1316,10 @@ const downloadItinerary = () => {
               </div>
             </div>
 
+            {/* Budget Level */}
             <div>
               <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Budget Level</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                   <input
                     type="radio"
@@ -1373,9 +1376,10 @@ const downloadItinerary = () => {
               </div>
             </div>
 
+            {/* Daily Start Time */}
             <div>
               <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Daily Start Time</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                   <input
                     type="radio"
@@ -1432,9 +1436,10 @@ const downloadItinerary = () => {
               </div>
             </div>
 
+            {/* Travel Interests */}
             <div>
               <label className="block text-sm font-medium mb-2 text-[#f8f8f8]">Travel Interests</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {interestOptions.map((option) => (
                   <motion.div key={option.value} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                     <input
@@ -1455,11 +1460,12 @@ const downloadItinerary = () => {
               </div>
             </div>
 
+            {/* Submit Button */}
             <div className="flex justify-center">
               <motion.button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd] shadow-none ${loading || !sourceValid || !destinationValid ? 'bg-gray-600 cursor-not-allowed text-gray-300' : ''}`}
+                className={`w-full sm:w-auto py-3 px-6 flex items-center justify-center rounded-lg font-medium text-black bg-[#9cadce] hover:bg-[#8b9dbd] shadow-none ${loading || !sourceValid || !destinationValid ? 'bg-gray-600 cursor-not-allowed text-gray-300' : ''}`}
                 whileHover={!loading && sourceValid && destinationValid ? { scale: 1.02 } : {}}
                 whileTap={!loading && sourceValid && destinationValid ? { scale: 0.98 } : {}}
               >
@@ -1472,33 +1478,21 @@ const downloadItinerary = () => {
                 )}
               </motion.button>
             </div>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg"
-              >
-                <p className="flex items-center">
-                  <FaInfoCircle className="mr-2" /> {error}
-                </p>
-              </motion.div>
-            )}
           </motion.form>
 
           {/* MAP SECTION */}
           {hasGeneratedItinerary && (
-            <div ref={mapSectionRef} className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-[#f8f8f8]">Your Journey Map</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-2">
+            <div ref={mapSectionRef} className="mb-6 md:mb-8">
+              <h2 className="text-lg md:text-xl font-semibold mb-4 text-[#f8f8f8]">Your Journey Map</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="lg:col-span-2">
                   <motion.div
                     key="map"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
                     ref={mapContainer}
-                    className="h-96 md:h-[500px] w-full rounded-xl bg-[#161616] overflow-hidden"
+                    className="h-64 sm:h-80 md:h-96 lg:h-[500px] w-full rounded-xl bg-[#161616] overflow-hidden"
                   ></motion.div>
                 </div>
                 <div>
@@ -1506,7 +1500,7 @@ const downloadItinerary = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="rounded-xl p-6 mb-6 bg-[#161616]"
+                    className="rounded-xl p-4 md:p-6 mb-4 md:mb-6 bg-[#161616]"
                   >
                     <div className="space-y-4">
                       <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
@@ -1599,27 +1593,29 @@ const downloadItinerary = () => {
               </div>
 
               {/* Flight Search Section */}
-              <FlightSearch source={source} destination={destination} />
+              <div className="mt-6 md:mt-8">
+                <FlightSearch source={source} destination={destination} />
+              </div>
             </div>
           )}
 
           {/* ITINERARY SECTION */}
           {itinerary && (
-            <div ref={itineraryRef} className="mb-8">
+            <div ref={itineraryRef} className="mb-6 md:mb-8">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="flex items-center justify-between mb-6"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
               >
-                <h2 className="text-2xl font-bold text-[#f8f8f8]">
+                <h2 className="text-xl md:text-2xl font-bold text-[#f8f8f8]">
                   {source} to {destination} Itinerary
                 </h2>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   {renderSaveButton()}
                   <motion.button
                     onClick={downloadItinerary}
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
+                    className="inline-flex items-center px-3 md:px-4 py-2 text-sm font-medium rounded-lg text-black bg-[#9cadce] hover:bg-[#8b9dbd]"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -1627,7 +1623,7 @@ const downloadItinerary = () => {
                   </motion.button>
                   <motion.button
                     onClick={shareItinerary}
-                    className="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg border-[#9cadce] text-[#9cadce] hover:bg-[#9cadce]/10"
+                    className="inline-flex items-center px-3 md:px-4 py-2 border text-sm font-medium rounded-lg border-[#9cadce] text-[#9cadce] hover:bg-[#9cadce]/10"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -1635,122 +1631,99 @@ const downloadItinerary = () => {
                   </motion.button>
                 </div>
               </motion.div>
-              {renderSaveStatus()}
 
               {/* Day View */}
-              <div className="space-y-8 mb-8">
-                {/* Day-by-day itinerary as timeline */}
-<motion.div
-  key={currentDayIndex}
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
-  className="bg-[#161616] rounded-2xl p-6 mb-8"
->
-  {/* Day Header */}
-  <div className="flex items-center justify-between mb-6">
-    <h3 className="font-bold text-[#f8f8f8] text-lg flex items-center">
-      <span className="w-8 h-8 rounded-full bg-[#9cadce]/20 flex items-center justify-center mr-3 text-[#9cadce]">
-        {itinerary.days[currentDayIndex].day}
-      </span>
-      Day {itinerary.days[currentDayIndex].day}
-    </h3>
-    <div className="flex space-x-2">
-      <button
-        onClick={handlePrevDay}
-        disabled={currentDayIndex === 0}
-        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === 0 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
-      >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Previous Day
-      </button>
-      <button
-        onClick={handleNextDay}
-        disabled={currentDayIndex === itinerary.days.length - 1}
-        className={`px-4 py-2 rounded-lg flex items-center ${currentDayIndex === itinerary.days.length - 1 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
-      >
-        Next Day
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </div>
-  </div>
+              <div className="space-y-6 md:space-y-8 mb-6 md:mb-8">
+                <motion.div
+                  key={currentDayIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6"
+                >
+                  {/* Day Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <h3 className="font-bold text-[#f8f8f8] text-base md:text-lg flex items-center">
+                      <span className="w-8 h-8 rounded-full bg-[#9cadce]/20 flex items-center justify-center mr-3 text-[#9cadce]">
+                        {itinerary.days[currentDayIndex].day}
+                      </span>
+                      Day {itinerary.days[currentDayIndex].day}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handlePrevDay}
+                        disabled={currentDayIndex === 0}
+                        className={`px-3 md:px-4 py-2 rounded-lg flex items-center text-sm ${currentDayIndex === 0 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </button>
+                      <button
+                        onClick={handleNextDay}
+                        disabled={currentDayIndex === itinerary.days.length - 1}
+                        className={`px-3 md:px-4 py-2 rounded-lg flex items-center text-sm ${currentDayIndex === itinerary.days.length - 1 ? 'bg-[#232323]/50 cursor-not-allowed text-[#a0a0a0]' : 'bg-[#232323] hover:bg-[#9cadce]/20 text-[#9cadce]'}`}
+                      >
+                        Next
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
 
-  {/* Timeline Container */}
-  <div className="relative">
-    {/* Center Timeline Line */}
-    <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-[#9cadce]/30"></div>
-    
-    {/* Activities */}
-    <div className="space-y-8">
-      {itinerary.days[currentDayIndex].activities.map((activity, i) => {
-        const isLeft = i % 2 === 0;
-        const isLast = i === itinerary.days[currentDayIndex].activities.length - 1;
-        
-        return (
-          <div className="relative flex items-center" key={i}>
-            {/* Time indicator in center */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="w-10 h-10 rounded-full bg-[#161616] border-4 border-[#9cadce]/30 flex items-center justify-center">
-                <div className="w-6 h-6 rounded-full bg-[#9cadce] flex items-center justify-center text-black">
-                  {getActivityIcon(activity)}
-                </div>
-              </div>
-            </div>
-            
-            {/* Left side activity */}
-            {isLeft ? (
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * i }}
-                className="w-1/2 pr-8 text-right"
-              >
-                <div className="bg-[#232323] p-4 rounded-xl inline-block relative mr-8">
-                  {/* Right arrow */}
-                  <div className="absolute top-1/2 right-0 transform translate-x-full -translate-y-1/2 w-0 h-0 border-8 border-transparent border-l-[#232323]"></div>
-                  
-                  <p className="text-sm font-medium text-[#9cadce] mb-1">{activity.time}</p>
-                  <p className="text-[#f8f8f8]">{activity.description}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <div className="w-1/2"></div>
-            )}
-            
-            {/* Right side activity */}
-            {!isLeft ? (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * i }}
-                className="w-1/2 pl-8"
-              >
-                <div className="bg-[#232323] p-4 rounded-xl inline-block relative ml-8">
-                  {/* Left arrow */}
-                  <div className="absolute top-1/2 left-0 transform -translate-x-full -translate-y-1/2 w-0 h-0 border-8 border-transparent border-r-[#232323]"></div>
-                  
-                  <p className="text-sm font-medium text-[#9cadce] mb-1">{activity.time}</p>
-                  <p className="text-[#f8f8f8]">{activity.description}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <div className="w-1/2"></div>
-            )}
-            
-            {/* Connecting line to next activity */}
-            {!isLast && (
-              <div className="absolute left-1/2 top-10 w-0.5 h-full -mb-8 bg-gradient-to-b from-[#9cadce]/30 to-transparent"></div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </div>
-</motion.div>
+                  {/* Timeline Container */}
+                  <div className="relative">
+                    {/* Center Timeline Line - Hidden on mobile */}
+                    <div className="hidden md:block absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-[#9cadce]/30"></div>
+                    
+                    {/* Activities */}
+                    <div className="space-y-6 md:space-y-8">
+                      {itinerary.days[currentDayIndex].activities.map((activity, i) => {
+                        const isLeft = i % 2 === 0;
+                        const isLast = i === itinerary.days[currentDayIndex].activities.length - 1;
+                        
+                        return (
+                          <div className="relative flex items-center" key={i}>
+                            {/* Time indicator - Different styling for mobile/desktop */}
+                            <div className="absolute md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 z-10 left-0 -translate-y-1/2">
+                              <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-[#161616] border-4 border-[#9cadce]/30 flex items-center justify-center">
+                                <div className="w-5 md:w-6 h-5 md:h-6 rounded-full bg-[#9cadce] flex items-center justify-center text-black">
+                                  {getActivityIcon(activity)}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Activity Cards - Full width on mobile, half width on desktop */}
+                            <div className={`w-full md:w-1/2 ${isLeft ? 'md:pr-4 md:pr-8 md:text-right' : 'md:pl-4 md:pl-8'} pl-12 md:pl-0`}>
+                              <motion.div 
+                                initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 * i }}
+                                className={`bg-[#232323] p-3 md:p-4 rounded-xl relative ${isLeft ? 'md:mr-4 md:mr-8' : 'md:ml-4 md:ml-8'}`}
+                              >
+                                {/* Arrow - Hidden on mobile */}
+                                <div className={`hidden md:block absolute top-1/2 ${isLeft ? 'right-0 transform translate-x-full' : 'left-0 transform -translate-x-full'} -translate-y-1/2 w-0 h-0 border-8 border-transparent ${isLeft ? 'border-l-[#232323]' : 'border-r-[#232323]'}`}></div>
+                                
+                                <p className="text-xs md:text-sm font-medium text-[#9cadce] mb-1">{activity.time}</p>
+                                <p className="text-sm md:text-base text-[#f8f8f8]">{activity.description}</p>
+                              </motion.div>
+                            </div>
+                            
+                            {/* Empty space for alternating layout - Hidden on mobile */}
+                            <div className="hidden md:block w-1/2"></div>
+                            
+                            {/* Connecting line - Hidden on mobile */}
+                            {!isLast && (
+                              <div className="hidden md:block absolute left-1/2 top-8 md:top-10 w-0.5 h-full -mb-6 md:-mb-8 bg-gradient-to-b from-[#9cadce]/30 to-transparent"></div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
               </div>
 
               {/* Accommodation Suggestions */}
@@ -1758,12 +1731,12 @@ const downloadItinerary = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="bg-[#161616] rounded-2xl p-6 mb-6"
+                className="bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6"
               >
                 <h3 className="font-semibold mb-4 text-[#f8f8f8]">
                   <FaSuitcase className="inline-block mr-2 text-[#9cadce]" /> Accommodation Suggestions
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {itinerary.accommodationSuggestions?.map((accommodation, index) => (
                     <motion.div
                       key={index}
@@ -1785,7 +1758,7 @@ const downloadItinerary = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="bg-[#161616] rounded-2xl p-6 mb-6"
+                className="bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6"
               >
                 <h3 className="font-semibold mb-4 text-[#f8f8f8]">Travel Tips for {destination}</h3>
                 <ul className="space-y-2">
@@ -1813,9 +1786,9 @@ const downloadItinerary = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="mb-8 bg-[#161616] rounded-2xl p-6"
+              className="mb-6 md:mb-8 bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6"
             >
-              <h2 className="text-xl font-semibold mb-4 text-[#f8f8f8]">Weather Information</h2>
+              <h2 className="text-lg md:text-xl font-semibold mb-4 text-[#f8f8f8]">Weather Information</h2>
               <WeatherFind source={source} destination={destination} showAfterGeneration={true} />
             </motion.div>
           )}
@@ -1826,9 +1799,70 @@ const downloadItinerary = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="mb-8 bg-[#161616] rounded-2xl p-6"
+              className="mb-6 md:mb-8 bg-[#161616] rounded-xl md:rounded-2xl p-4 md:p-6"
             >
-              <CurrencyConverter source={source} destination={destination} />
+              <h2 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-[#f8f8f8]">Currency Information</h2>
+              <div className="space-y-4 md:space-y-6">
+                {/* Currency Converter Component */}
+                <div className="bg-[#232323] rounded-xl overflow-hidden">
+                  <CurrencyConverter source={source} destination={destination} />
+                </div>
+
+                {/* Additional Currency Tips */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-[#232323] rounded-xl p-4 md:p-6">
+                    <h3 className="text-base md:text-lg font-medium text-[#f8f8f8] mb-3 flex items-center">
+                      <FaMapMarkerAlt className="mr-2 text-[#9cadce]" /> Local Currency Tips
+                    </h3>
+                    <ul className="space-y-3">
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          Exchange currency at banks or authorized exchange centers for better rates
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          Keep some local currency for immediate expenses upon arrival
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          Notify your bank about international travel to avoid card blocks
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-[#232323] rounded-xl p-4 md:p-6">
+                    <h3 className="text-base md:text-lg font-medium text-[#f8f8f8] mb-3 flex items-center">
+                      <FaInfoCircle className="mr-2 text-[#9cadce]" /> Payment Methods
+                    </h3>
+                    <ul className="space-y-3">
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          Credit cards are widely accepted in major cities
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          Mobile payment apps are popular in urban areas
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-[#9cadce] mr-2">•</span>
+                        <span className="text-sm md:text-base text-[#f8f8f8] leading-relaxed">
+                          ATMs are available in most tourist areas
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </div>

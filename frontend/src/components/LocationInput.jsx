@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaMapMarkerAlt, FaSpinner, FaCheck } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaSpinner, FaCheck, FaSearch, FaInfoCircle } from 'react-icons/fa';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
@@ -117,64 +117,63 @@ const LocationInput = ({ value, onChange }) => {
   };
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-[#f8f8f8]">
-        Starting Location
-      </label>
+    <div className="relative">
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FaMapMarkerAlt className="text-[#9cadce]" />
-        </div>
         <input
           type="text"
-          value={inputValue} // Use the display text here
+          value={inputValue}
           onChange={handleInputChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          className={`w-full pl-10 pr-4 py-2 bg-[#161616] border ${isValid ? 'border-green-500' : 'border-[#232323]'} rounded-lg 
-            focus:ring-2 focus:ring-[#9cadce] transition-all text-[#f8f8f8]`}
-          placeholder="Enter a city or country..."
-          required
-          autoComplete="off"
+          placeholder="Search for a city..."
+          className="w-full bg-[#232323] text-[#f8f8f8] rounded-xl md:rounded-2xl p-3 md:p-4 pl-10 text-sm md:text-base border border-[#9cadce]/20 focus:outline-none focus:ring-2 focus:ring-[#9cadce]/30"
         />
-        
-        {isValid && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <FaCheck className="text-green-500" />
-          </div>
-        )}
-        
-        {!isValid && inputValue && (
-          <p className="mt-1 text-xs text-yellow-400">
-            Please select a valid location from the dropdown
-          </p>
-        )}
-        
-        {/* Dropdown menu */}
-        {isFocused && (
-          <div className="absolute z-10 mt-1 w-full bg-[#161616] rounded-md shadow-lg max-h-60 overflow-auto">
-            {isLoading ? (
-              <div className="px-4 py-2 text-sm text-[#9cadce] flex items-center">
-                <FaSpinner className="animate-spin mr-2" /> Searching...
-              </div>
-            ) : options.length > 0 ? (
-              options.map((option, index) => (
-                <div
-                  key={index}
-                  className="px-4 py-2 text-sm text-[#f8f8f8] cursor-pointer hover:bg-[#2a2a2a]"
-                  onClick={() => handleSelectLocation(option)}
-                >
-                  {option.label}
-                </div>
-              ))
-            ) : inputValue.length >= 2 ? (
-              <div className="px-4 py-2 text-sm text-[#9cadce]">No results found</div>
-            ) : (
-              <div className="px-4 py-2 text-sm text-[#9cadce]">Type at least 2 characters</div>
-            )}
-          </div>
-        )}
+        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#9cadce]" />
       </div>
+
+      {/* Suggestions Dropdown */}
+      {isFocused && options.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="absolute z-10 w-full mt-2 bg-[#232323] rounded-xl md:rounded-2xl shadow-lg border border-[#9cadce]/20 max-h-60 overflow-y-auto"
+        >
+          {options.map((option, index) => (
+            <motion.button
+              key={index}
+              onClick={() => handleSelectLocation(option)}
+              className="w-full px-4 py-3 text-left hover:bg-[#161616] transition-colors duration-200 flex items-center space-x-3"
+              whileHover={{ x: 5 }}
+            >
+              <FaMapMarkerAlt className="text-[#9cadce] flex-shrink-0" />
+              <div>
+                <p className="text-sm md:text-base text-[#f8f8f8]">{option.label}</p>
+              </div>
+            </motion.button>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+          <FaSpinner className="animate-spin text-[#9cadce]" />
+        </div>
+      )}
+
+      {/* Error Message */}
+      {!isValid && inputValue && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 p-3 bg-red-900 bg-opacity-30 text-red-400 rounded-lg text-sm md:text-base"
+        >
+          <p className="flex items-center">
+            <FaInfoCircle className="mr-2" /> Please select a valid location from the dropdown
+          </p>
+        </motion.div>
+      )}
     </div>
   );
 };

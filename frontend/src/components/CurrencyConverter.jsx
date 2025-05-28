@@ -207,49 +207,49 @@ const CurrencyConverter = ({ source, destination }) => {
   const sourceCurrency = currencies[0];
   const destCurrency = currencies[1];
   
-  // Get exchange rate (fallback to 1 if not available)
-  const exchangeRate = window.tripCurrencyData?.exchangeRate || 1.0;
+  // Get exchange rate and ensure it's a number
+  const exchangeRate = parseFloat(window.tripCurrencyData?.exchangeRate) || 1.0;
 
   // Sample amounts to convert
   const amounts = [10, 50, 100, 500, 1000];
 
   return (
-    <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6 border border-[#9cadce] border-opacity-20">
-      <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+    <div className="bg-[#1a1a1a] rounded-lg shadow-md p-4 md:p-6 border border-[#9cadce] border-opacity-20">
+      <h2 className="text-lg md:text-xl font-semibold text-white mb-4 md:mb-6 flex items-center">
         <FaExchangeAlt className="mr-2 text-[#9cadce]" /> Currency Converter
       </h2>
       
       {/* Currency Information */}
-      <div className="mb-6">
-        <h3 className="text-md font-medium text-[#9cadce] mb-2">Currencies on your route</h3>
-        <div className="flex flex-wrap gap-3">
+      <div className="mb-4 md:mb-6">
+        <h3 className="text-sm md:text-base font-medium text-[#9cadce] mb-3">Currencies on your route</h3>
+        <div className="flex flex-col sm:flex-row gap-3">
           {currencies.map((currency, i) => (
-            <div key={i} className="bg-[#252525] px-3 py-2 rounded-lg flex items-center">
-              <span className="font-medium text-white">{currency.country}</span>
-              <span className="mx-2 text-gray-500">|</span>
-              <span className="font-medium text-[#9cadce]">{currency.currencySymbol} {currency.currencyCode}</span>
+            <div key={i} className="bg-[#252525] px-4 py-3 rounded-lg flex items-center justify-between sm:justify-start">
+              <span className="font-medium text-white text-sm md:text-base">{currency.country}</span>
+              <span className="hidden sm:inline mx-2 text-gray-500">|</span>
+              <span className="font-medium text-[#9cadce] text-sm md:text-base">{currency.currencySymbol} {currency.currencyCode}</span>
             </div>
           ))}
         </div>
       </div>
       
       {/* Quick Conversion Table */}
-      <div className="mb-6">
-        <h3 className="text-md font-medium text-[#9cadce] mb-2">Quick Conversion</h3>
+      <div className="mb-4 md:mb-6">
+        <h3 className="text-sm md:text-base font-medium text-[#9cadce] mb-3">Quick Conversion</h3>
         <div className="bg-[#252525] rounded-lg p-4">
-          <div className="flex items-center justify-center mb-3">
-            <div className="text-white">{sourceCurrency.currencyCode}</div>
-            <FaArrowRight className="text-[#9cadce] mx-4" />
-            <div className="text-white">{destCurrency.currencyCode}</div>
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-white text-sm md:text-base">{sourceCurrency.currencyCode}</div>
+            <FaArrowRight className="text-[#9cadce] mx-3 md:mx-4" />
+            <div className="text-white text-sm md:text-base">{destCurrency.currencyCode}</div>
           </div>
           
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {amounts.map((amount) => (
-              <div key={amount} className="bg-[#1a1a1a] p-2 rounded flex justify-between">
-                <span className="text-gray-400">
+              <div key={amount} className="bg-[#1a1a1a] p-3 rounded-lg flex justify-between items-center">
+                <span className="text-gray-400 text-sm md:text-base">
                   {amount} {sourceCurrency.currencySymbol}
                 </span>
-                <span className="text-white font-medium">
+                <span className="text-white font-medium text-sm md:text-base">
                   {(amount * exchangeRate).toFixed(2)} {destCurrency.currencySymbol}
                 </span>
               </div>
@@ -261,17 +261,17 @@ const CurrencyConverter = ({ source, destination }) => {
       {/* Travel Tips */}
       {travelTips.length > 0 && (
         <div className="mb-4">
-          <h3 className="flex items-center text-md font-medium text-[#9cadce] mb-2">
+          <h3 className="flex items-center text-sm md:text-base font-medium text-[#9cadce] mb-3">
             <FaLightbulb className="mr-2 text-yellow-500" /> Currency & Money Tips
           </h3>
           <div className="bg-[#252525] rounded-lg p-4">
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {travelTips.map((tip, i) => (
                 <li key={i} className="flex items-start">
                   <div className="flex-shrink-0 h-5 w-5 rounded-full bg-[#9cadce] bg-opacity-20 flex items-center justify-center mt-0.5 mr-3">
                     <span className="text-xs font-medium text-[#9cadce]">{i + 1}</span>
                   </div>
-                  <span className="text-gray-300 text-sm">{tip}</span>
+                  <span className="text-gray-300 text-sm md:text-base leading-relaxed">{tip}</span>
                 </li>
               ))}
             </ul>
@@ -279,8 +279,8 @@ const CurrencyConverter = ({ source, destination }) => {
         </div>
       )}
       
-      <div className="mt-4 text-xs text-gray-500">
-        Exchange rate: 1 {sourceCurrency.currencySymbol} = {exchangeRate.toFixed(4)} {destCurrency.currencySymbol}
+      <div className="mt-4 text-xs md:text-sm text-gray-500 text-center md:text-left">
+        Exchange rate: 1 {sourceCurrency.currencySymbol} = {Number(exchangeRate).toFixed(4)} {destCurrency.currencySymbol}
       </div>
     </div>
   );
