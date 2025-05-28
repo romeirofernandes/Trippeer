@@ -3,11 +3,11 @@ import React from "react";
 const DeviceMockup = ({ image, alt = "App Preview", type = "phone" }) => {
   if (type === "phone") {
     return (
-      <div className="relative mx-auto w-64 h-[520px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-[3rem] p-2 shadow-2xl">
+      <div className="relative mx-auto w-64 h-[520px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-[2.5rem] p-2 shadow-2xl mb-16">
         {/* Phone frame */}
-        <div className="w-full h-full bg-black rounded-[2.5rem] relative overflow-hidden">
+        <div className="w-full h-full bg-black rounded-[2.2rem] relative overflow-hidden">
           {/* Screen */}
-          <div className="w-full h-full bg-[#080808] rounded-[2.2rem] overflow-hidden relative p-1">
+          <div className="w-full h-full bg-[#080808] rounded-[2rem] overflow-hidden relative p-1">
             {image ? (
               <img
                 src={image}
