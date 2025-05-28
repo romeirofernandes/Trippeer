@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { FaPlus, FaSpinner } from "react-icons/fa";
+import { FaPlus, FaSpinner, FaTrash } from "react-icons/fa";
 import { DraggableCardBody, DraggableCardContainer } from "./DraggableCard";
 import Sidebar, { SidebarProvider, useSidebar } from "../components/Sidebar";
 
@@ -72,24 +72,24 @@ const TripCollectionContent = () => {
           marginLeft: isOpen ? "240px" : "64px",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex-1"
+        className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8"
       >
-        <DraggableCardContainer className="relative flex min-h-screen w-full items-center justify-center overflow-clip p-8">
+        <DraggableCardContainer className="relative flex min-h-screen w-full items-center justify-center overflow-clip">
           {trips.length === 0 && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10">
-              <h2 className="text-4xl font-bold text-[#f8f8f8] mb-4">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 px-4 sm:px-6 md:px-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#f8f8f8] mb-3 sm:mb-4">
                 Your Travel Collection
               </h2>
-              <p className="text-[#a0a0a0] max-w-md mx-auto mb-8">
+              <p className="text-sm sm:text-base text-[#a0a0a0] max-w-md mx-auto mb-6 sm:mb-8">
                 Every journey begins with a single step. Start your collection
                 by uploading photos from your favorite travel memories. Drag
                 them around to create your perfect memory wall.
               </p>
               <label
                 htmlFor="tripImage"
-                className="inline-flex items-center gap-2 cursor-pointer bg-[#9cadce] px-6 py-3 rounded-lg text-white hover:bg-[#8b9dbd] transition-colors"
+                className="inline-flex items-center gap-2 cursor-pointer bg-[#9cadce] px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-white hover:bg-[#8b9dbd] transition-colors text-sm sm:text-base"
               >
-                <FaPlus /> Add Your First Memory
+                <FaPlus className="text-xs sm:text-sm" /> Add Your First Memory
               </label>
             </div>
           )}
@@ -103,46 +103,51 @@ const TripCollectionContent = () => {
             className="hidden"
           />
 
-          <label
-            htmlFor="tripImage"
-            className="fixed bottom-8 right-8 z-50 cursor-pointer rounded-full bg-[#9cadce] p-4 shadow-lg hover:bg-[#8b9dbd] transition-colors"
-          >
-            {uploading ? (
-              <FaSpinner className="animate-spin text-2xl text-white" />
-            ) : (
-              <FaPlus className="text-2xl text-white" />
-            )}
-          </label>
+          {/* Trip cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
+            {trips.map((trip, index) => (
+              <motion.div
+                key={trip.id}
+                className="relative group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                  <img
+                    src={trip.image_url}
+                    alt={`Trip to ${trip.title}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button
+                      onClick={() => {
+                        // Implement delete functionality
+                      }}
+                      className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                    >
+                      <FaTrash className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 sm:mt-3">
+                  <h3 className="text-sm sm:text-base font-medium text-[#f8f8f8]">
+                    {trip.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#a0a0a0]">
+                    {/* Add date formatting */}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
+          {/* Error message */}
           {error && (
-            <div className="fixed top-4 right-4 bg-red-500/20 border border-red-500 text-red-200 p-4 rounded-lg">
+            <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg z-50 text-sm sm:text-base">
               {error}
             </div>
           )}
-
-          {/* Trip cards */}
-          {trips.map((trip) => (
-            <DraggableCardBody key={trip.id} className={trip.className}>
-              <img
-                src={trip.image_url}
-                alt={trip.title}
-                className="pointer-events-none relative z-10 h-80 w-80 object-cover rounded-lg"
-              />
-              <input
-                type="text"
-                value={trip.title}
-                onChange={(e) => {
-                  const newTitle = e.target.value;
-                  setTrips((prev) =>
-                    prev.map((t) =>
-                      t.id === trip.id ? { ...t, title: newTitle } : t
-                    )
-                  );
-                }}
-                className="mt-4 w-full bg-transparent text-center text-2xl font-bold text-neutral-300 focus:outline-none"
-              />
-            </DraggableCardBody>
-          ))}
         </DraggableCardContainer>
       </motion.main>
     </div>
