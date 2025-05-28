@@ -23,14 +23,14 @@ const MoodSelector = ({ value, onChange }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onChange(emoji)}
-            className={`p-3 rounded-lg ${
+            className={`p-2 sm:p-3 rounded-lg ${
               value === emoji
                 ? "bg-[#9cadce]/20 border-[#9cadce]"
                 : "bg-[#161616] border-[#232323]"
             } border transition-all`}
           >
-            <span className="text-2xl">{emoji}</span>
-            <span className="block text-xs mt-1 text-[#f8f8f8]">{label}</span>
+            <span className="text-xl sm:text-2xl">{emoji}</span>
+            <span className="hidden sm:block text-xs mt-1 text-[#f8f8f8]">{label}</span>
           </motion.button>
         ))}
       </div>
