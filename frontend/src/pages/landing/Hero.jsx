@@ -135,8 +135,8 @@ const Hero = () => {
 
       {/* Animated background elements */}
       <div className="absolute w-full h-full">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#9cadce]/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#9cadce]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#9cadce]/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#9cadce]/20 rounded-full blur-[120px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-1/2 bg-gradient-to-r from-[#9cadce]/20 via-[#ffffff]/20 to-[#9cadce]/20 blur-[150px]" />
       </div>
 
@@ -150,9 +150,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-[#ffffff]/80 mb-8 text-center lg:text-left max-w-2xl">
-            Plan your entire trip with AI-powered suggestions, real-time maps,
-            and personalized recommendations. Experience travel like never
-            before.
+            Experience travel like never before.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -171,8 +169,8 @@ const Hero = () => {
             <div className="mt-12">
               <DeviceMockup
                 type="phone"
-                image="/path/to/your/app-screenshot.png"
-                alt="Trippeer Mobile App"
+                image="/device.png"
+                alt="Trippeer Mobile Dashboard"
               />
             </div>
           )}
@@ -187,7 +185,6 @@ const Hero = () => {
           </div>
         )}
       </div>
-
     </section>
   );
 };
