@@ -186,23 +186,23 @@ const MumbaiDriftContent = () => {
           marginLeft: isOpen ? "240px" : "64px",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex-1 p-8"
+        className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-[#f8f8f8]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#f8f8f8]">
               Mumbai Drift - Chaos Mode
             </h1>
 
             {selectedSpot && !isComplete && (
               <motion.button
                 onClick={quitDrift}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#9cadce] border border-dotted border-[#434343] hover:bg-[#1a1a1a] transition-colors"
+                className="flex items-center justify-center sm:justify-start space-x-2 px-3 sm:px-4 py-2 rounded-lg text-[#9cadce] border border-dotted border-[#434343] hover:bg-[#1a1a1a] transition-colors text-sm sm:text-base"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -220,23 +220,23 @@ const MumbaiDriftContent = () => {
           </div>
 
           <motion.div
-            className="space-y-6 bg-[#111111] rounded-xl p-8 border border-dotted border-[#434343] shadow-2xl"
+            className="space-y-4 sm:space-y-6 bg-[#111111] rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 border border-dotted border-[#434343] shadow-2xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             {!selectedSpot ? (
-              <div className="flex flex-col items-center space-y-6 py-12">
+              <div className="flex flex-col items-center space-y-4 sm:space-y-6 py-6 sm:py-8 md:py-12">
                 <motion.div
-                  className="text-center mb-8"
+                  className="text-center mb-4 sm:mb-6 md:mb-8"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <p className="text-gray-400 mb-2">
+                  <p className="text-gray-400 mb-2 text-sm sm:text-base">
                     Ready for a mystery adventure?
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     We'll guide you through hidden gems of Mumbai
                   </p>
                 </motion.div>
@@ -248,26 +248,33 @@ const MumbaiDriftContent = () => {
               </div>
             ) : isComplete ? (
               <FinalReveal
-                destination={selectedSpot}
-                timeTaken={totalTime}
+                spot={selectedSpot}
+                time={totalTime}
                 onRestart={quitDrift}
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-[#1a1a1a] p-6 rounded-lg border border-dotted border-[#434343]">
-                  <CheckpointManager
-                    checkpoints={checkpoints}
-                    currentCheckpoint={currentCheckpoint}
-                    totalCheckpoints={checkpoints.length}
-                  />
-                </div>
-                <div className="bg-[#1a1a1a] p-6 rounded-lg border border-dotted border-[#434343]">
-                  <MapView
-                    userLocation={userLocation}
-                    checkpointLocation={
-                      checkpoints[currentCheckpoint]?.coordinates
-                    }
-                  />
+              <div className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="bg-[#161616] rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[#f8f8f8] mb-3 sm:mb-4">
+                      Current Checkpoint
+                    </h2>
+                    <CheckpointManager
+                      checkpoints={checkpoints}
+                      currentCheckpoint={currentCheckpoint}
+                    />
+                  </div>
+                  <div className="bg-[#161616] rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[#f8f8f8] mb-3 sm:mb-4">
+                      Map View
+                    </h2>
+                    <MapView
+                      userLocation={userLocation}
+                      checkpoints={checkpoints}
+                      currentCheckpoint={currentCheckpoint}
+                      selectedSpot={selectedSpot}
+                    />
+                  </div>
                 </div>
               </div>
             )}
