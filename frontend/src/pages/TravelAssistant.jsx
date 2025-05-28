@@ -100,32 +100,32 @@ const TravelAssistant = () => {
   return (
     <div className="flex min-h-screen bg-[#080808]">
       <Sidebar />
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 ml-16 sm:ml-16 md:ml-64">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-8"
+            className="mb-3 sm:mb-6"
           >
-            <h1 className="text-3xl font-bold text-[#f8f8f8]">Travel Assistant</h1>
-            <p className="mt-2 text-[#9cadce]">Your AI companion for travel planning and advice</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#f8f8f8]">Travel Assistant</h1>
+            <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-base text-[#9cadce]">Your AI companion for travel planning and advice</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-[#111111] rounded-2xl overflow-hidden h-[600px] flex flex-col"
+            className="bg-[#111111] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[600px] flex flex-col"
           >
-            <div className="bg-[#161616] py-4 px-6 border-b border-[#232323]">
-              <h2 className="text-[#f8f8f8] text-lg font-semibold flex items-center">
-                <FaRobot className="text-[#9cadce] mr-2" />
+            <div className="bg-[#161616] py-2.5 sm:py-3 md:py-4 px-3 sm:px-4 md:px-6 border-b border-[#232323]">
+              <h2 className="text-sm sm:text-base md:text-lg font-semibold text-[#f8f8f8] flex items-center">
+                <FaRobot className="text-[#9cadce] mr-2 text-xs sm:text-sm" />
                 Travel Assistant
               </h2>
-              <p className="text-sm text-[#9cadce]">Ask me about destinations, travel tips, and more</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-[#9cadce] mt-0.5">Ask me about destinations, travel tips, and more</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-2.5 sm:p-3 md:p-4 space-y-2.5 sm:space-y-3 md:space-y-4">
               <AnimatePresence>
                 {messages.map((message, index) => (
                   <motion.div
@@ -135,7 +135,7 @@ const TravelAssistant = () => {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                      className={`max-w-[90%] sm:max-w-[85%] md:max-w-[80%] px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl md:rounded-2xl ${
                         message.role === 'user'
                           ? 'bg-[#9cadce] text-black ml-auto'
                           : message.error
@@ -145,19 +145,19 @@ const TravelAssistant = () => {
                     >
                       <div className="flex items-center mb-1">
                         {message.role === 'user' ? (
-                          <FaUser className="text-xs mr-2" />
+                          <FaUser className="text-[10px] sm:text-xs mr-1.5 sm:mr-2" />
                         ) : (
-                          <FaRobot className="text-xs mr-2 text-[#9cadce]" />
+                          <FaRobot className="text-[10px] sm:text-xs mr-1.5 sm:mr-2 text-[#9cadce]" />
                         )}
-                        <span className="text-xs font-medium">
+                        <span className="text-[10px] sm:text-xs font-medium">
                           {message.role === 'user' ? 'You' : 'Travel Assistant'}
                         </span>
                       </div>
-                      <p className="text-sm whitespace-pre-wrap">
+                      <div className="text-xs sm:text-sm md:text-base whitespace-pre-wrap prose prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1">
                         {message.role === 'assistant'
                           ? renderContent(message.content)
                           : message.content}
-                      </p>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -165,14 +165,14 @@ const TravelAssistant = () => {
               <div ref={messagesEndRef} />
               
               {isLoading && (
-                <div className="flex items-center justify-center py-2">
-                  <FaSpinner className="animate-spin text-[#9cadce]" />
-                  <span className="ml-2 text-sm text-[#9cadce]">Thinking...</span>
+                <div className="flex items-center justify-center py-1.5 sm:py-2">
+                  <FaSpinner className="animate-spin text-[#9cadce] text-xs sm:text-sm" />
+                  <span className="ml-2 text-[10px] sm:text-xs md:text-sm text-[#9cadce]">Thinking...</span>
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 border-t border-[#232323] bg-[#161616]">
+            <form onSubmit={handleSubmit} className="p-2.5 sm:p-3 md:p-4 border-t border-[#232323] bg-[#161616]">
               <div className="relative">
                 <input
                   ref={inputRef}
@@ -181,19 +181,22 @@ const TravelAssistant = () => {
                   onChange={e => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask a travel question..."
-                  className="w-full pl-4 pr-12 py-3 bg-[#232323] text-[#f8f8f8] rounded-lg border-none focus:ring-2 focus:ring-[#9cadce] transition-all placeholder-gray-500"
+                  className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2 sm:py-2.5 md:py-3 bg-[#232323] text-[#f8f8f8] rounded-lg border-none focus:ring-2 focus:ring-[#9cadce] transition-all placeholder-gray-500 text-xs sm:text-sm md:text-base"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-[#9cadce] hover:bg-[#8b9dbd] text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-[#9cadce] hover:bg-[#8b9dbd] text-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? <FaSpinner className="animate-spin" /> : <FaPaperPlane className="text-sm" />}
+                  {isLoading ? 
+                    <FaSpinner className="animate-spin text-[10px] sm:text-xs md:text-sm" /> : 
+                    <FaPaperPlane className="text-[10px] sm:text-xs md:text-sm" />
+                  }
                 </button>
               </div>
-              <p className="mt-2 text-xs text-[#9cadce] flex items-center">
-                <FaInfoCircle className="mr-1" /> 
+              <p className="mt-1.5 sm:mt-2 text-[8px] sm:text-[10px] md:text-xs text-[#9cadce] flex items-center">
+                <FaInfoCircle className="mr-1 text-[8px] sm:text-[10px] md:text-xs" /> 
                 Powered by Gemini AI - Ask about destinations, travel tips, or local customs
               </p>
             </form>
